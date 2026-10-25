@@ -1,0 +1,9 @@
+{
+  "name": "QuackQuack.Platform",
+  "rootNamespace": "QuackQuack.Platform",
+  "references": [
+    "QuackQuack.Core",
+    "Unity.InputSystem"
+  ],
+  "autoReferenced": true
+}

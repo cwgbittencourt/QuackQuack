@@ -1,0 +1,6 @@
+{
+  "name": "QuackQuack.Core",
+  "rootNamespace": "QuackQuack.Core",
+  "references": [],
+  "autoReferenced": true
+}

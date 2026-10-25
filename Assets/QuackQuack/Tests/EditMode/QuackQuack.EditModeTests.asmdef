@@ -1,0 +1,16 @@
+{
+  "name": "QuackQuack.EditModeTests",
+  "rootNamespace": "QuackQuack.Tests.EditMode",
+  "references": [
+    "QuackQuack.Core",
+    "QuackQuack.Platform",
+    "QuackQuack.Presentation",
+    "QuackQuack.Runtime"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

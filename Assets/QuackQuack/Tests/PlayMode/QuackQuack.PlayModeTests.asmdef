@@ -1,0 +1,14 @@
+{
+  "name": "QuackQuack.PlayModeTests",
+  "rootNamespace": "QuackQuack.Tests.PlayMode",
+  "references": [
+    "QuackQuack.Core",
+    "QuackQuack.Platform",
+    "QuackQuack.Presentation",
+    "QuackQuack.Runtime",
+    "Unity.InputSystem"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

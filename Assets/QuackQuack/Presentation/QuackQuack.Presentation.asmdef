@@ -1,0 +1,9 @@
+{
+  "name": "QuackQuack.Presentation",
+  "rootNamespace": "QuackQuack.Presentation",
+  "references": [
+    "QuackQuack.Core",
+    "Unity.ugui"
+  ],
+  "autoReferenced": true
+}

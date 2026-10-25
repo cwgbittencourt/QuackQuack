@@ -1,0 +1,5 @@
+{
+  "name": "QuackQuack.Editor",
+  "references": ["QuackQuack.Runtime", "QuackQuack.Core", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Universal.2D.Runtime", "Unity.RenderPipelines.Core.Runtime"],
+  "includePlatforms": ["Editor"]
+}

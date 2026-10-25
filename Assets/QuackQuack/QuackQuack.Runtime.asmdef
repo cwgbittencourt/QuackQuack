@@ -1,0 +1,10 @@
+{
+  "name": "QuackQuack.Runtime",
+  "rootNamespace": "QuackQuack",
+  "references": [
+    "QuackQuack.Core",
+    "QuackQuack.Platform",
+    "QuackQuack.Presentation"
+  ],
+  "autoReferenced": true
+}
