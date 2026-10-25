@@ -71,7 +71,7 @@ empurrao, interrupcao, reflexao e Quack aprimorado sem builds ou chefes.
 - [x] T023 [P] [US1] Implementar `CharacterDefinition` com ID unico, vida/velocidades positivas e Pato como unica selecao em `Assets/QuackQuack/Content/Characters/CharacterDefinition.cs`
 - [x] T024 [P] [US1] Implementar `QuackDefinition` com custo valido, empurrao, interrupcao, reflexao e multiplicador de carga cheia em `Assets/QuackQuack/Content/Characters/QuackDefinition.cs`
 - [x] T025 [US1] Implementar regras deterministicas de consumo, recuperacao e estado cheio do Folego em `Assets/QuackQuack/Core/Combat/BreathSystem.cs`
-- [ ] T026 [US1] Implementar resolucao deterministica do Quack e emissao unica de eventos por alvo em `Assets/QuackQuack/Core/Combat/QuackSystem.cs`
+- [x] T026 [US1] Implementar resolucao deterministica do Quack e emissao unica de eventos por alvo em `Assets/QuackQuack/Core/Combat/QuackSystem.cs`
 - [ ] T027 [P] [US1] Implementar adaptador de teclado para `PlayerCommand` sem regras de gameplay em `Assets/QuackQuack/Platform/Input/KeyboardInputAdapter.cs`
 - [ ] T028 [US1] Implementar movimento, colisao e aplicacao de comandos comuns no Pato em `Assets/QuackQuack/Gameplay/Player/PlayerController.cs`
 - [ ] T029 [US1] Implementar volumes de agua/terra com histerese e `TerrainAffinity` para movimento, Folego e equipamentos aplicaveis em `Assets/QuackQuack/Gameplay/Terrain/TerrainZone.cs`

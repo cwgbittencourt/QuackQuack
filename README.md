@@ -23,17 +23,18 @@ Não há imagens de gameplay disponíveis neste commit inicial.
 | T023: definição e validação do Pato | Concluída |
 | T024: definição e validação do Quack | Concluída |
 | T025: regras de consumo, recuperação e carga do Fôlego | Concluída |
-| T026–T032: implementação e integração do primeiro MVP | Pendente de conclusão e aceite |
+| T026: resolução do Quack e deduplicação de eventos | Concluída |
+| T027–T032: implementação e integração do primeiro MVP | Pendente de conclusão e aceite |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. A próxima tarefa é **T026**.
+da arena. A próxima tarefa é **T027**.
 
-Validação registrada: **69 testes EditMode e 9 PlayMode aprovados**, incluindo regressão da fundação.
-Consulte o [relatório T025](specs/001-prototipo-lago/test-report-t025.md).
+Validação registrada: **75 testes EditMode e 9 PlayMode aprovados**, incluindo regressão da fundação.
+Consulte o [relatório T026](specs/001-prototipo-lago/test-report-t026.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
 
 ## Ambiente necessário
