@@ -257,6 +257,55 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &90802080
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 90802082}
+  - component: {fileID: 90802081}
+  m_Layer: 0
+  m_Name: Quack feedback T032
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &90802081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 90802080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46df88c98be0e8142a6d9087f7d2d1ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Gameplay.Player.QuackFeedbackBridge
+  prefab: {fileID: 2917567976461480621, guid: 09a1fe9b1106b954880611c02ea2e9ea, type: 3}
+  quackClip: {fileID: 8300000, guid: 9ab14522f362e7d40afcdf57951a3d8d, type: 3}
+  impactClip: {fileID: 8300000, guid: 0353ca4829a00d141bc2fe1b9af0ec4e, type: 3}
+  reflectionClip: {fileID: 8300000, guid: 2b28b376c56eed44e8aa4a6891a96f98, type: 3}
+  capacity: 32
+--- !u!4 &90802082
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 90802080}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &94997225
 GameObject:
   m_ObjectHideFlags: 0
@@ -4729,3 +4778,4 @@ SceneRoots:
   - {fileID: 1857223819}
   - {fileID: 924705538}
   - {fileID: 1161900760}
+  - {fileID: 90802082}

@@ -41,7 +41,10 @@ durante a janela estavel; nenhuma instancia ativa simultaneamente no pool.
   e mensagens na parte inferior. Dourado indica Fôlego cheio; a linha do Quack distingue
   pronto/aprimorado, recarregando e indisponível. Tentar Quack durante a recarga ou sem
   Fôlego deve mostrar o motivo. Pausa e fim do teste têm prioridade sobre mensagens temporárias.
-- Ondas visíveis, impacto, contorno crítico e áudio ainda dependem de T032.
+- Quack aceito deve criar onda dourada e tom temporário. Acertos mostram impacto
+  alaranjado; reflexão, pulso ciano; crítico, contorno branco que acompanha o alvo.
+  Na pausa, animações e sons devem parar e depois continuar. Ao terminar o efeito,
+  o objeto retorna ao pool; rejeições não devem gerar onda ou som de ativação.
   Este roteiro não representa aceite completo de US1 nem validação de plataforma.
 
 Os assets e a cena estão versionados. O menu `QuackQuack → Build T030 lake arena`
@@ -49,6 +52,9 @@ Os assets e a cena estão versionados. O menu `QuackQuack → Build T030 lake ar
 temporários pelo Unity; não é necessário executá-lo para abrir um clone normal.
 O menu `QuackQuack → Build T031 gameplay HUD` atualiza somente a composição do HUD
 na cena existente. A ferramenta da arena também reconecta o HUD caso ele já exista.
+O menu `QuackQuack → Build T032 Quack feedback` gera o prefab de efeito, os tons
+temporários e a ligação dos eventos. Os assets estão versionados; não executar esses
+menus em um clone normal para simplesmente jogar.
 
 ### Marco 1 - Fundamentos
 

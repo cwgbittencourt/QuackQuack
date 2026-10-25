@@ -6,7 +6,8 @@ inimigos e projéteis. A progressão planejada inclui armas, passivas, evoluçõ
 partida de 15 minutos.
 
 > Em desenvolvimento. Este repositório contém o projeto Unity e os artefatos do Spec Kit necessários
-> para continuar o trabalho. Ainda não contém uma demonstração jogável completa.
+> para continuar o trabalho. Inclui uma arena de treino jogável; a partida completa de 15 minutos
+> ainda está em desenvolvimento.
 
 ## Imagens do jogo
 
@@ -29,17 +30,17 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T029: volumes de terreno, histerese e afinidades | Concluída |
 | T030: arena curta do Lago | Concluída |
 | T031: HUD de vida, Fôlego, terreno e estado do Quack | Concluída |
-| T032: feedback visual e áudio do primeiro MVP | Pendente de conclusão e aceite |
+| T032: feedback visual e áudio do primeiro MVP | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. A próxima tarefa é **T032**.
+da arena. T022–T032 foram revisadas e concluídas; a próxima tarefa é **T033**.
 
-Validação registrada: **75 testes EditMode e 28 PlayMode aprovados**, incluindo regressão da fundação.
-Consulte o [relatório T031](specs/001-prototipo-lago/test-report-t031.md).
+Validação registrada: **75 testes EditMode e 34 PlayMode aprovados**, incluindo regressão da fundação.
+Consulte o [relatório T032](specs/001-prototipo-lago/test-report-t032.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
 
 ## Ambiente necessário
@@ -93,10 +94,11 @@ lago central com ilha, obstáculos cinza, dois alvos vermelhos e um corredor de 
 O emissor roxo dispara projéteis leves. A recompensa dourada no corredor recupera Fôlego uma vez.
 Use WASD/setas para mover, Espaço para Quack e Esc para pausar/retomar. Ao morrer, saia de Play
 e entre novamente por Bootstrap para reiniciar. O HUD mostra vida, Fôlego, terreno, prontidão,
-rejeições do Quack e tempo da partida. VFX/áudio ainda não estão integrados.
+rejeições do Quack e tempo da partida. O Quack cria uma onda dourada, impactos alaranjados,
+pulso ciano na reflexão e contorno branco no crítico, acompanhados de tons temporários.
 
-A arena e seu HUD permitem testar a integração inicial; T032 integra efeitos e áudio.
-O primeiro MVP com feedback completo depende de T022–T032 concluídas.
+A arena, HUD e feedback permitem testar a mecânica central de US1. O aceite de gameplay,
+as builds de plataforma e as metas de desempenho ainda dependem da validação correspondente.
 
 O menu `QuackQuack → Configure prototype` reaplica configurações básicas quando necessário.
 As configurações e os assets URP já estão versionados; não é preciso executar esse menu para abrir

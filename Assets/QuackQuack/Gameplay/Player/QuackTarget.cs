@@ -1,5 +1,6 @@
 using QuackQuack.Systems.Pooling;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace QuackQuack.Gameplay.Player
 {
@@ -15,6 +16,12 @@ namespace QuackQuack.Gameplay.Player
         public float InterruptedUntil { get; set; }
         public Vector2 Velocity { get; set; }
         private readonly RaycastHit2D[] contacts = new RaycastHit2D[16];
+        private static readonly Dictionary<int, QuackTarget> activeTargets = new Dictionary<int, QuackTarget>(512);
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ClearRegistry() { activeTargets.Clear(); }
+        public static bool TryFind(int id, out QuackTarget target) => activeTargets.TryGetValue(id, out target);
+        private void OnEnable() { activeTargets[GetInstanceID()] = this; }
+        private void OnDisable() { activeTargets.Remove(GetInstanceID()); }
         public bool ApplyKnockback(Vector2 displacement)
         {
             var collider = GetComponent<CircleCollider2D>();
