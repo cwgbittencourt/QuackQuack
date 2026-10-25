@@ -9,6 +9,95 @@ namespace QuackQuack.Tests.PlayMode
     public class TerrainAndKnockbackTests
     {
         [Test]
+        public void OverlappingLandAndWaterResolveOneTerrainIndependentOfOrder()
+        {
+            var lake = new GameObject("lake");
+            var island = new GameObject("island");
+            try
+            {
+                var water = lake.AddComponent<TerrainZone>();
+                var land = island.AddComponent<TerrainZone>();
+                water.Configure(new Vector2(10, 10), 0.2f);
+                land.Configure(new Vector2(2, 2), 0.2f, TerrainType.Land);
+                Assert.That(TerrainZone.Resolve(new[] { water, land }, Vector2.zero, TerrainType.Water), Is.EqualTo(TerrainType.Land));
+                Assert.That(TerrainZone.Resolve(new[] { land, water }, Vector2.zero, TerrainType.Water), Is.EqualTo(TerrainType.Land));
+                water.Configure(new Vector2(10, 10), 0.2f, TerrainType.Water, 1);
+                Assert.That(TerrainZone.Resolve(new[] { land, water }, Vector2.zero, TerrainType.Land), Is.EqualTo(TerrainType.Water));
+                water.enabled = false;
+                land.enabled = false;
+                Assert.That(TerrainZone.Resolve(new[] { water, land, null }, Vector2.zero, TerrainType.Water), Is.EqualTo(TerrainType.Land));
+                Assert.That(TerrainZone.Resolve(null, Vector2.zero, TerrainType.Water), Is.EqualTo(TerrainType.Land));
+            }
+            finally { Object.DestroyImmediate(lake); Object.DestroyImmediate(island); }
+        }
+
+        [Test]
+        public void TransformedVolumeUsesLocalBoundsAndHysteresis()
+        {
+            var obj = new GameObject("transformed water");
+            try
+            {
+                var zone = obj.AddComponent<TerrainZone>();
+                zone.Configure(new Vector2(4, 4), 0.2f);
+                obj.transform.position = new Vector2(10, 5);
+                obj.transform.rotation = Quaternion.Euler(0, 0, 30);
+                obj.transform.localScale = new Vector3(2, 3, 1);
+                Vector2 point = obj.transform.TransformPoint(new Vector2(1.9f, 0));
+                Assert.That(zone.Contains(point, TerrainType.Land), Is.False);
+                Assert.That(zone.Contains(point, TerrainType.Water), Is.True);
+                Assert.That(zone.Contains(new Vector2(float.NaN, 0), TerrainType.Water), Is.False);
+            }
+            finally { Object.DestroyImmediate(obj); }
+        }
+
+        [Test]
+        public void RepeatedTerrainAffinityRecomputesFromBaseWithoutAccumulation()
+        {
+            const float authoredBase = 10;
+            for (int i = 0; i < 100; i++)
+            {
+                Assert.That(TerrainAffinity.Apply(authoredBase, TerrainType.Water, 1, 1.5f), Is.EqualTo(15));
+                Assert.That(TerrainAffinity.Apply(authoredBase, TerrainType.Land, 1, 1.5f), Is.EqualTo(10));
+                Assert.That(TerrainAffinity.Apply(authoredBase, TerrainType.Water), Is.EqualTo(10));
+            }
+        }
+
+        [Test]
+        public void DisabledVolumeDoesNotContainPoints()
+        {
+            var obj = new GameObject("disabled water");
+            try
+            {
+                var zone = obj.AddComponent<TerrainZone>();
+                zone.enabled = false;
+                Assert.That(zone.Contains(Vector2.zero, TerrainType.Land), Is.False);
+            }
+            finally { Object.DestroyImmediate(obj); }
+        }
+
+        [Test]
+        public void InvalidGeometryIsRejectedBeforeReplacingValidVolume()
+        {
+            var obj = new GameObject("water");
+            try
+            {
+                var zone = obj.AddComponent<TerrainZone>();
+                zone.Configure(new Vector2(4, 4), 0.2f);
+                Assert.Throws<System.ArgumentOutOfRangeException>(() => zone.Configure(Vector2.zero, 0));
+                Assert.Throws<System.ArgumentOutOfRangeException>(() => zone.Configure(new Vector2(4, 4), float.NaN));
+                Assert.That(zone.Contains(Vector2.zero, TerrainType.Land), Is.True);
+            }
+            finally { Object.DestroyImmediate(obj); }
+        }
+
+        [Test]
+        public void AffinityRejectsInvalidTerrainAndNonFiniteMultipliers()
+        {
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => TerrainAffinity.Apply(10, (TerrainType)99));
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => TerrainAffinity.Apply(10, TerrainType.Water, 1, float.NaN));
+        }
+
+        [Test]
         public void ShorelineHysteresisPreventsOscillationAndAffinityDoesNotMutateBase()
         {
             var obj = new GameObject("water");

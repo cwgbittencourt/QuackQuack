@@ -7,6 +7,7 @@ using QuackQuack.Core.Combat;
 using QuackQuack.Core.Run;
 using QuackQuack.Core.Shared;
 using QuackQuack.Gameplay.Player;
+using QuackQuack.Gameplay.Terrain;
 using QuackQuack.Platform.Input;
 using QuackQuack.Systems.Combat;
 using UnityEngine;
@@ -146,6 +147,35 @@ namespace QuackQuack.Tests.PlayMode
                 type = type.BaseType;
             }
             field.SetValue(target, value);
+        }
+
+        [Test]
+        public void ResolvedTerrainDrivesSpeedBreathAndSingleTransitionFeedback()
+        {
+            targetObject = new GameObject("water volume");
+            var zone = targetObject.AddComponent<TerrainZone>();
+            zone.Configure(new Vector2(4, 4), 0.2f);
+            SetField(player, "water", new[] { zone });
+            int changes = 0;
+            events.Presentation += value => { if (value.Type == PresentationEventType.TerrainChanged) changes++; };
+            var body = player.GetComponent<Rigidbody2D>();
+            player.State.Breath.TryConsume(definition.Capacity, out _);
+            player.ApplyCommand(new PlayerCommand(Vector2.right));
+            player.SendMessage("FixedUpdate");
+            Assert.That(player.State.Terrain, Is.EqualTo(TerrainType.Water));
+            Assert.That(body.linearVelocity.magnitude, Is.EqualTo(character.WaterSpeed).Within(0.001f));
+            Assert.That(player.State.Breath.Current, Is.EqualTo(definition.WaterRecovery * Time.fixedDeltaTime).Within(0.001f));
+            body.position = new Vector2(2.01f, 0);
+            player.SendMessage("FixedUpdate");
+            Assert.That(player.State.Terrain, Is.EqualTo(TerrainType.Water));
+            Assert.That(changes, Is.EqualTo(1));
+            body.position = new Vector2(2.3f, 0);
+            float before = player.State.Breath.Current;
+            player.SendMessage("FixedUpdate");
+            Assert.That(player.State.Terrain, Is.EqualTo(TerrainType.Land));
+            Assert.That(body.linearVelocity.magnitude, Is.EqualTo(character.LandSpeed).Within(0.001f));
+            Assert.That(player.State.Breath.Current - before, Is.EqualTo(definition.LandRecovery * Time.fixedDeltaTime).Within(0.001f));
+            Assert.That(changes, Is.EqualTo(2));
         }
 
         [UnityTest]

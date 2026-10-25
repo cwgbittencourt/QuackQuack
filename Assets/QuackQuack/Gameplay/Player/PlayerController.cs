@@ -14,6 +14,7 @@ namespace QuackQuack.Gameplay.Player
     public sealed class PlayerController : MonoBehaviour
     {
         [SerializeField] private CharacterDefinition definition;
+        // Keep the serialized name; this list now accepts both land and water volumes.
         [SerializeField] private TerrainZone[] water;
         private IPlayerInput input;
         private KeyboardInputAdapter ownedInput;
@@ -91,15 +92,13 @@ namespace QuackQuack.Gameplay.Player
             if (!CanSimulate) { ClearCommands(); return; }
             simulationSeconds += Time.fixedDeltaTime;
             tick++;
-            var terrain = TerrainType.Land;
-            if (water != null)
-                foreach (var zone in water) if (zone != null && zone.Contains(body.position, State.Terrain)) { terrain = TerrainType.Water; break; }
+            var terrain = TerrainZone.Resolve(water, body.position, State.Terrain);
             if (terrain != State.Terrain)
             {
                 State.Terrain = terrain;
                 events.Publish(new PresentationEvent(tick, wave, PresentationEventType.TerrainChanged, EventPriority.Essential, 1, body.position));
             }
-            body.linearVelocity = move * (terrain == TerrainType.Water ? definition.WaterSpeed : definition.LandSpeed);
+            body.linearVelocity = move * TerrainAffinity.Select(definition.LandSpeed, definition.WaterSpeed, terrain);
             bool wasFull = State.Breath.IsFull;
             State.Breath.Recover(Time.fixedDeltaTime, terrain);
             if (!wasFull && State.Breath.IsFull)
