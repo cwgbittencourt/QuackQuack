@@ -197,7 +197,7 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(received.FindAll(e => e.Type == CombatEventType.DamageApplied).Count, Is.EqualTo(1));
             Assert.That(received.FindAll(e => e.Type == CombatEventType.CriticalHit).Count, Is.EqualTo(1));
             Assert.That(received.FindAll(e => e.Type == CombatEventType.EffectApplied).Count, Is.EqualTo(1));
-            Assert.That(target.InterruptedUntil, Is.GreaterThan(Time.time));
+            Assert.That(target.InterruptedUntil, Is.GreaterThan(run.ElapsedSeconds));
         }
 
         [UnityTest]

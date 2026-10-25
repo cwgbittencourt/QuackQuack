@@ -10,8 +10,8 @@ partida de 15 minutos.
 
 ## Imagens do jogo
 
-As capturas da arena e do gameplay serão adicionadas quando a cena jogável estiver montada.
-Não há imagens de gameplay disponíveis neste commit inicial.
+A arena de treino já está montada com formas e cores temporárias. Abra Bootstrap e entre em Play
+para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MVP.
 
 ## Estado da entrega
 
@@ -27,17 +27,18 @@ Não há imagens de gameplay disponíveis neste commit inicial.
 | T027: adaptador de teclado para comandos comuns | Concluída |
 | T028: controlador do Pato, física e comandos comuns | Concluída |
 | T029: volumes de terreno, histerese e afinidades | Concluída |
-| T030–T032: implementação e integração do primeiro MVP | Pendente de conclusão e aceite |
+| T030: arena curta do Lago | Concluída |
+| T031–T032: HUD e feedback do primeiro MVP | Pendente de conclusão e aceite |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. A próxima tarefa é **T030**.
+da arena. A próxima tarefa é **T031**.
 
-Validação registrada: **75 testes EditMode e 23 PlayMode aprovados**, incluindo regressão da fundação.
-Consulte o [relatório T029](specs/001-prototipo-lago/test-report-t029.md).
+Validação registrada: **75 testes EditMode e 25 PlayMode aprovados**, incluindo regressão da fundação.
+Consulte o [relatório T030](specs/001-prototipo-lago/test-report-t030.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
 
 ## Ambiente necessário
@@ -86,12 +87,14 @@ cd QuackQuack
 3. Abrir `Assets/QuackQuack/Scenes/Bootstrap.unity`.
 4. Clicar em **Play** e selecionar a aba **Game**.
 
-**Resultado atual esperado:** Bootstrap cria os serviços e carrega `Lake`. A cena Lake contém a
-câmera e mostra seu fundo azul-escuro. Pato, terreno, inimigos e HUD ainda não estão montados nela.
-Uma tela com apenas esse fundo é esperada neste commit, não uma falha de instalação.
+**Resultado atual esperado:** Bootstrap cria os serviços e carrega `Lake` com Pato amarelo à esquerda,
+lago central com ilha, obstáculos cinza, dois alvos vermelhos e um corredor de risco à direita.
+O emissor roxo dispara projéteis leves. A recompensa dourada no corredor recupera Fôlego uma vez.
+Use WASD/setas para mover, Espaço para Quack e Esc para pausar/retomar. Ao morrer, saia de Play
+e entre novamente por Bootstrap para reiniciar. Ainda não há HUD nem VFX/áudio integrado.
 
-Após a conclusão e validação de T030 haverá uma arena visual para teste; T031 acrescenta o HUD e
-T032 integra efeitos e áudio. O primeiro MVP com feedback completo depende de T022–T032 concluídas.
+A arena de T030 permite testar a integração inicial; T031 acrescenta o HUD e T032 integra efeitos
+e áudio. O primeiro MVP com feedback completo depende de T022–T032 concluídas.
 
 O menu `QuackQuack → Configure prototype` reaplica configurações básicas quando necessário.
 As configurações e os assets URP já estão versionados; não é preciso executar esse menu para abrir

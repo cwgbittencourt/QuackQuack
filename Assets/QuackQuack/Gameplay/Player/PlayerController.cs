@@ -136,7 +136,7 @@ namespace QuackQuack.Gameplay.Player
                 {
                     target.Health = Mathf.Max(0, target.Health - hit.Damage);
                     if (hit.InterruptSeconds > 0)
-                        target.InterruptedUntil = Mathf.Max(target.InterruptedUntil, Time.time + hit.InterruptSeconds);
+                        target.InterruptedUntil = Mathf.Max(target.InterruptedUntil, (float)run.ElapsedSeconds + hit.InterruptSeconds);
                     var delta = (Vector2)target.transform.position - body.position;
                     if (target.ApplyKnockback(delta.normalized * hit.Knockback) && quack.TryCollision(id))
                         quack.TryEmitCollisionEvent(id, tick, source, target.transform.position);

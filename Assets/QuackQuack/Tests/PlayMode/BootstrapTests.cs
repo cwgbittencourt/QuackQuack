@@ -24,6 +24,10 @@ namespace QuackQuack.Tests.PlayMode
             Object.Destroy(bootstrap.gameObject);
             yield return null;
             Assert.That(GameBootstrap.Instance, Is.Null);
+            var lake = SceneManager.GetActiveScene();
+            var empty = SceneManager.CreateScene("After bootstrap test");
+            SceneManager.SetActiveScene(empty);
+            yield return SceneManager.UnloadSceneAsync(lake);
         }
     }
 }

@@ -28,6 +28,22 @@ durante a janela estavel; nenhuma instancia ativa simultaneamente no pool.
 
 ## Roteiro jogavel por marco
 
+### Arena de treino disponível após T030
+
+- Abrir Bootstrap e entrar em Play; usar WASD/setas, Espaço e Esc.
+- O Pato inicia à esquerda. Aproximar-se do alvo vermelho e usar Quack para empurrá-lo
+  contra a pedra; atravessar o lago central e verificar a diferença de mobilidade.
+- Entrar no corredor à direita, usar Quack contra o alvo e os projéteis roxos, e coletar
+  a recompensa dourada. A recompensa desaparece e concede recuperação de Fôlego uma vez.
+- Pausar e retomar; projéteis, dano, recuperação e prazos de combate devem permanecer
+  congelados na pausa. Após morte, sair de Play e iniciar novamente por Bootstrap.
+- HUD, ondas visíveis, impacto, contorno crítico e áudio ainda dependem de T031–T032.
+  Este roteiro não representa aceite completo de US1 nem validação de plataforma.
+
+Os assets e a cena estão versionados. O menu `QuackQuack → Build T030 lake arena`
+é uma ferramenta de manutenção que reconstrói a raiz gerada da arena e atualiza os assets
+temporários pelo Unity; não é necessário executá-lo para abrir um clone normal.
+
 ### Marco 1 - Fundamentos
 
 - Abrir `Bootstrap`, iniciar `Lake` e mover o Pato com teclado, controle e toque.
