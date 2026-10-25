@@ -1,5 +1,5 @@
 using QuackQuack.Core.Combat;
-using UnityEngine;
+using System;
 
 namespace QuackQuack.Core.Run
 {
@@ -9,19 +9,34 @@ namespace QuackQuack.Core.Run
         public float MaxHealth { get; }
         public float Health { get; private set; }
         public double InvulnerableUntil { get; private set; }
-        public TerrainType Terrain { get; set; }
+        private TerrainType terrain;
+        public TerrainType Terrain
+        {
+            get => terrain;
+            set
+            {
+                if (value != TerrainType.Land && value != TerrainType.Water)
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                terrain = value;
+            }
+        }
         public BreathSystem Breath { get; }
         public PlayerState(float health, float breathCapacity, float landRecovery, float waterRecovery)
         {
-            if (health <= 0) throw new System.ArgumentOutOfRangeException(nameof(health));
+            if (float.IsNaN(health) || float.IsInfinity(health) || health <= 0)
+                throw new ArgumentOutOfRangeException(nameof(health));
             MaxHealth = Health = health;
             Breath = new BreathSystem(breathCapacity, landRecovery, waterRecovery);
         }
         public bool TakeDamage(float amount, double time, float invulnerability)
         {
+            if (float.IsNaN(amount) || float.IsInfinity(amount) ||
+                double.IsNaN(time) || double.IsInfinity(time) || time < 0 ||
+                float.IsNaN(invulnerability) || float.IsInfinity(invulnerability) || invulnerability < 0)
+                return false;
             if (amount <= 0 || Health <= 0 || time < InvulnerableUntil) return false;
-            Health = Mathf.Max(0, Health - amount);
-            InvulnerableUntil = time + Mathf.Max(0, invulnerability);
+            Health = Math.Max(0, Health - amount);
+            InvulnerableUntil = time + invulnerability;
             return true;
         }
     }
