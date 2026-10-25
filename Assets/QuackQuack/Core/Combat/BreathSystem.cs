@@ -17,6 +17,10 @@ namespace QuackQuack.Core.Combat
             Capacity = capacity; Current = capacity;
             this.landRecovery = landRecovery; this.waterRecovery = waterRecovery;
         }
+        /// <summary>
+        /// Accepts a positive reserve even when it cannot cover the full cost.
+        /// Enhanced reflects the charge before consumption; rejected requests do not mutate it.
+        /// </summary>
         public bool TryConsume(float cost, out bool enhanced)
         {
             enhanced = false;
@@ -25,6 +29,10 @@ namespace QuackQuack.Core.Combat
             Current = Math.Max(0, Current - cost);
             return true;
         }
+        /// <summary>
+        /// Advances recovery using simulation seconds supplied by the caller, capped at capacity.
+        /// Invalid time or terrain is rejected before changing the reserve.
+        /// </summary>
         public void Recover(float seconds, TerrainType terrain)
         {
             if (float.IsNaN(seconds) || float.IsInfinity(seconds) || seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds));
