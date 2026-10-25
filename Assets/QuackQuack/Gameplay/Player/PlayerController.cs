@@ -5,6 +5,7 @@ using QuackQuack.Core.Shared;
 using QuackQuack.Gameplay.Terrain;
 using QuackQuack.Platform.Input;
 using QuackQuack.Systems.Run;
+using QuackQuack.Systems.Combat;
 using UnityEngine;
 
 namespace QuackQuack.Gameplay.Player
@@ -14,12 +15,16 @@ namespace QuackQuack.Gameplay.Player
     {
         [SerializeField] private CharacterDefinition definition;
         [SerializeField] private TerrainZone[] water;
-        private KeyboardInputAdapter input;
+        private IPlayerInput input;
+        private KeyboardInputAdapter ownedInput;
+        private RunState run;
+        private GameplayEventBus events;
         private Rigidbody2D body;
         private Vector2 move;
         private bool requestedQuack;
-        private float nextQuack, statusUntil;
-        private long wave;
+        private double nextQuack, simulationSeconds;
+        private float statusUntil;
+        private long wave, tick;
         private readonly Collider2D[] overlaps = new Collider2D[128];
         private readonly QuackSystem quack = new QuackSystem();
         public PlayerState State { get; private set; }
@@ -31,82 +36,113 @@ namespace QuackQuack.Gameplay.Player
             body = GetComponent<Rigidbody2D>();
             body.gravityScale = 0;
             body.freezeRotation = true;
-            var q = definition.Quack;
-            State = new PlayerState(definition.Health, q.Capacity, q.LandRecovery, q.WaterRecovery);
-            input = new KeyboardInputAdapter();
+            body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        }
+
+        private void Start()
+        {
+            if (State != null) return;
+            var bootstrap = GameBootstrap.Instance;
+            if (bootstrap == null) { Debug.LogError("PlayerController requires run services.", this); enabled = false; return; }
+            ownedInput = new KeyboardInputAdapter();
+            Initialize(definition, ownedInput, bootstrap.Run, bootstrap.Events);
+        }
+
+        // Injected input remains owned by the caller; only the default keyboard is disposed here.
+        public void Initialize(CharacterDefinition character, IPlayerInput playerInput, RunState runState, GameplayEventBus eventBus)
+        {
+            if (State != null) throw new System.InvalidOperationException("Player is already initialized.");
+            if (character == null) throw new System.ArgumentNullException(nameof(character));
+            if (!character.IsValid(out var reason) || !character.Quack.IsValid(out reason))
+                throw new System.ArgumentException(reason, nameof(character));
+            input = playerInput ?? throw new System.ArgumentNullException(nameof(playerInput));
+            run = runState ?? throw new System.ArgumentNullException(nameof(runState));
+            events = eventBus ?? throw new System.ArgumentNullException(nameof(eventBus));
+            definition = character;
+            var q = character.Quack;
+            State = new PlayerState(character.Health, q.Capacity, q.LandRecovery, q.WaterRecovery);
+            quack.Resolved += ForwardCombat;
+            run.Changed += OnRunChanged;
         }
 
         private void Update()
         {
-            var command = input.Read();
-            var run = GameBootstrap.Instance?.Run;
-            if (run == null) return;
+            if (State == null) return;
+            ApplyCommand(input.Read());
+        }
+
+        public void ApplyCommand(PlayerCommand command)
+        {
+            if (State == null || !isActiveAndEnabled) return;
             if (command.PausePressed)
             {
                 if (run.Phase == RunPhase.Playing) run.TryTransition(RunPhase.Paused);
                 else if (run.Phase == RunPhase.Paused) run.TryTransition(RunPhase.Playing);
+                ClearCommands();
+                return;
             }
-            if (!run.IsSimulating) { move = Vector2.zero; requestedQuack = false; return; }
+            if (!CanSimulate) { ClearCommands(); return; }
             move = command.Move;
             requestedQuack |= command.QuackPressed;
         }
 
         private void FixedUpdate()
         {
-            var bootstrap = GameBootstrap.Instance;
-            if (bootstrap == null || !bootstrap.Run.IsSimulating) { body.linearVelocity = Vector2.zero; return; }
+            if (!CanSimulate) { ClearCommands(); return; }
+            simulationSeconds += Time.fixedDeltaTime;
+            tick++;
             var terrain = TerrainType.Land;
-            foreach (var zone in water) if (zone.Contains(body.position, State.Terrain)) { terrain = TerrainType.Water; break; }
+            if (water != null)
+                foreach (var zone in water) if (zone != null && zone.Contains(body.position, State.Terrain)) { terrain = TerrainType.Water; break; }
             if (terrain != State.Terrain)
             {
                 State.Terrain = terrain;
-                bootstrap.Events.Publish(new PresentationEvent(wave, wave, PresentationEventType.TerrainChanged, EventPriority.Essential, 1, body.position));
+                events.Publish(new PresentationEvent(tick, wave, PresentationEventType.TerrainChanged, EventPriority.Essential, 1, body.position));
             }
             body.linearVelocity = move * (terrain == TerrainType.Water ? definition.WaterSpeed : definition.LandSpeed);
             bool wasFull = State.Breath.IsFull;
             State.Breath.Recover(Time.fixedDeltaTime, terrain);
             if (!wasFull && State.Breath.IsFull)
-                bootstrap.Events.Publish(new PresentationEvent(wave, wave, PresentationEventType.BreathReady, EventPriority.Essential, 1, body.position));
+                events.Publish(new PresentationEvent(tick, wave, PresentationEventType.BreathReady, EventPriority.Essential, 1, body.position));
             if (requestedQuack) { ActivateQuack(); requestedQuack = false; }
         }
 
         public bool ActivateQuack()
         {
-            var bootstrap = GameBootstrap.Instance;
-            if (bootstrap == null || !bootstrap.Run.IsSimulating) return false;
+            if (!CanSimulate) return false;
             var q = definition.Quack;
-            if (Time.time < nextQuack || !State.Breath.TryConsume(q.Cost, out var full))
+            if (simulationSeconds < nextQuack || !State.Breath.TryConsume(q.Cost, out var full))
             { SetStatus("Sem fôlego ou Quack recarregando."); return false; }
-            nextQuack = Time.time + q.Cooldown;
+            nextQuack = simulationSeconds + q.Cooldown;
             quack.BeginWave(++wave);
             SetStatus(full ? "QUACK APRIMORADO!" : "Quack!");
-            bootstrap.Events.Publish(new CombatEvent(wave, wave, 0, 0, body.position, q.Range, CombatEventType.QuackActivated));
-            bootstrap.Events.Publish(new PresentationEvent(wave, wave, PresentationEventType.BreathConsumed, EventPriority.Essential, 0.5f, body.position));
+            int source = GetInstanceID();
+            events.Publish(new CombatEvent(tick, wave, source, source, body.position, q.Range, CombatEventType.QuackActivated));
+            events.Publish(new PresentationEvent(tick, wave, PresentationEventType.BreathConsumed, EventPriority.Essential, 0.5f, body.position));
             var filter = new ContactFilter2D { useTriggers = true, useLayerMask = true, layerMask = 1 << 9 };
             int count = Physics2D.OverlapCircle(body.position, q.Range, filter, overlaps);
             for (int i = 0; i < count; i++)
             {
-                var target = overlaps[i].GetComponent<QuackTarget>();
-                if (target == null) continue;
+                var target = overlaps[i].GetComponentInParent<QuackTarget>();
+                if (target == null || target.Health <= 0) continue;
+                if (target.IsProjectile && !q.CanReflect(target.Light, target.Reflectable)) continue;
                 int id = target.GetInstanceID();
                 if (!quack.TryHit(id, target.Interruptible, target.IsProjectile, full, q.Damage, q.Push, q.Interruption, q.FullMultiplier, out var hit)) continue;
                 if (target.IsProjectile)
                 {
-                    if (!QuackSystem.CanReflect(target.Light, target.Reflectable)) continue;
-                    target.Velocity = QuackSystem.ReflectedVelocity(target.transform.position, body.position, 7);
+                    target.Velocity = QuackSystem.ReflectedVelocity(target.transform.position, body.position, q.ReflectionSpeed);
                     target.Reflected = true;
-                    bootstrap.Events.Publish(new CombatEvent(wave, wave, 0, id, target.transform.position, 0, CombatEventType.ProjectileReflected));
                 }
                 else
                 {
                     target.Health = Mathf.Max(0, target.Health - hit.Damage);
-                    target.InterruptedUntil = Time.time + hit.InterruptSeconds;
+                    if (hit.InterruptSeconds > 0)
+                        target.InterruptedUntil = Mathf.Max(target.InterruptedUntil, Time.time + hit.InterruptSeconds);
                     var delta = (Vector2)target.transform.position - body.position;
                     if (target.ApplyKnockback(delta.normalized * hit.Knockback) && quack.TryCollision(id))
-                        bootstrap.Events.Publish(new CombatEvent(wave, wave, 0, id, target.transform.position, 0, CombatEventType.CollisionTriggered));
-                    bootstrap.Events.Publish(new CombatEvent(wave, wave, 0, id, target.transform.position, hit.Damage, CombatEventType.DamageApplied));
-                    if (hit.Critical) bootstrap.Events.Publish(new CombatEvent(wave, wave, 0, id, target.transform.position, hit.Damage, CombatEventType.CriticalHit));
+                        quack.TryEmitCollisionEvent(id, tick, source, target.transform.position);
                 }
+                quack.TryEmitHitEvents(id, tick, source, target.transform.position);
             }
             return true;
         }
@@ -114,11 +150,29 @@ namespace QuackQuack.Gameplay.Player
         public void SetStatus(string value) { Status = value; statusUntil = Time.time + 2; }
         public HudSnapshot Snapshot()
         {
-            var run = GameBootstrap.Instance.Run;
             string status = run.Phase == RunPhase.Paused ? "PAUSADO • Esc para continuar" : run.Phase == RunPhase.Lost ? "FIM DO TESTE • Abra Bootstrap para reiniciar" : Time.time < statusUntil ? Status : "WASD / setas: mover    Espaço: Quack    Esc: pausa";
             return new HudSnapshot(State.Health, State.MaxHealth, State.Breath.Current, State.Breath.Capacity,
                 State.Terrain == TerrainType.Water ? "ÁGUA • mais velocidade e recuperação" : "TERRA • use as margens para se posicionar", status, run.ElapsedSeconds);
         }
-        private void OnDestroy() { input?.Dispose(); }
+        private bool CanSimulate => State != null && isActiveAndEnabled && run.IsSimulating && State.Health > 0;
+        private void ForwardCombat(CombatEvent value) => events.Publish(value);
+        private void OnRunChanged(RunPhase phase) { if (!run.IsSimulating) ClearCommands(); }
+        private void ClearCommands()
+        {
+            move = Vector2.zero; requestedQuack = false;
+            if (body != null) body.linearVelocity = Vector2.zero;
+        }
+        private void OnDisable() { ClearCommands(); }
+        private void OnEnable()
+        {
+            // Discard edges accumulated by an adapter while gameplay was disabled.
+            input?.Read();
+        }
+        private void OnDestroy()
+        {
+            if (run != null) run.Changed -= OnRunChanged;
+            quack.Resolved -= ForwardCombat;
+            ownedInput?.Dispose();
+        }
     }
 }
