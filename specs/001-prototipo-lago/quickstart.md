@@ -37,12 +37,18 @@ durante a janela estavel; nenhuma instancia ativa simultaneamente no pool.
   a recompensa dourada. A recompensa desaparece e concede recuperação de Fôlego uma vez.
 - Pausar e retomar; projéteis, dano, recuperação e prazos de combate devem permanecer
   congelados na pausa. Após morte, sair de Play e iniciar novamente por Bootstrap.
-- HUD, ondas visíveis, impacto, contorno crítico e áudio ainda dependem de T031–T032.
+- O HUD mostra vida/Fôlego e terreno no canto superior esquerdo, relógio à direita
+  e mensagens na parte inferior. Dourado indica Fôlego cheio; a linha do Quack distingue
+  pronto/aprimorado, recarregando e indisponível. Tentar Quack durante a recarga ou sem
+  Fôlego deve mostrar o motivo. Pausa e fim do teste têm prioridade sobre mensagens temporárias.
+- Ondas visíveis, impacto, contorno crítico e áudio ainda dependem de T032.
   Este roteiro não representa aceite completo de US1 nem validação de plataforma.
 
 Os assets e a cena estão versionados. O menu `QuackQuack → Build T030 lake arena`
 é uma ferramenta de manutenção que reconstrói a raiz gerada da arena e atualiza os assets
 temporários pelo Unity; não é necessário executá-lo para abrir um clone normal.
+O menu `QuackQuack → Build T031 gameplay HUD` atualiza somente a composição do HUD
+na cena existente. A ferramenta da arena também reconecta o HUD caso ele já exista.
 
 ### Marco 1 - Fundamentos
 

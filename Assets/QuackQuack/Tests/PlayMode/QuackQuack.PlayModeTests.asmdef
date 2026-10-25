@@ -6,7 +6,8 @@
     "QuackQuack.Platform",
     "QuackQuack.Presentation",
     "QuackQuack.Runtime",
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "Unity.ugui"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

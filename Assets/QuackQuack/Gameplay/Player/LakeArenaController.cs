@@ -3,6 +3,7 @@ using QuackQuack.Core.Run;
 using QuackQuack.Systems.Pooling;
 using QuackQuack.Systems.Run;
 using UnityEngine;
+using QuackQuack.Presentation.UI;
 
 namespace QuackQuack.Gameplay.Player
 {
@@ -10,6 +11,7 @@ namespace QuackQuack.Gameplay.Player
     public sealed class LakeArenaController : MonoBehaviour
     {
         [SerializeField] private PlayerController player;
+        [SerializeField] private GameplayHud hud;
         [SerializeField] private QuackTarget enemyPrefab, projectilePrefab, rewardPrefab;
         [SerializeField] private Transform[] enemySpawns;
         [SerializeField] private Transform projectileSpawn, rewardSpawn;
@@ -46,6 +48,7 @@ namespace QuackQuack.Gameplay.Player
             rewardTarget = pools.Acquire<QuackTarget>(rewardKey);
             rewardTarget.transform.position = rewardSpawn.position;
             Ready = true;
+            if (hud != null) hud.Bind(player.Snapshot);
         }
 
         private void Update()
@@ -98,6 +101,7 @@ namespace QuackQuack.Gameplay.Player
 
         private void OnDestroy()
         {
+            if (hud != null) hud.Unbind();
             if (pools == null) return;
             foreach (var enemy in enemies) pools.Release(enemy);
             foreach (var projectile in projectiles) pools.Release(projectile);

@@ -76,7 +76,7 @@ empurrao, interrupcao, reflexao e Quack aprimorado sem builds ou chefes.
 - [x] T028 [US1] Implementar movimento, colisao e aplicacao de comandos comuns no Pato em `Assets/QuackQuack/Gameplay/Player/PlayerController.cs`
 - [x] T029 [US1] Implementar volumes de agua/terra com histerese e `TerrainAffinity` para movimento, Folego e equipamentos aplicaveis em `Assets/QuackQuack/Gameplay/Terrain/TerrainZone.cs`
 - [x] T030 [US1] Montar arena curta com Pato, agua, terra, obstaculos, inimigo-alvo, projetil leve e recompensa em rota de risco em `Assets/QuackQuack/Scenes/Lake.unity`
-- [ ] T031 [US1] Implementar HUD de vida, Folego, terreno atual, estado pronto e rejeicao do Quack em `Assets/QuackQuack/Presentation/UI/GameplayHud.cs`
+- [x] T031 [US1] Implementar HUD de vida, Folego, terreno atual, estado pronto e rejeicao do Quack em `Assets/QuackQuack/Presentation/UI/GameplayHud.cs`
 - [ ] T032 [US1] Integrar via pool ondas visiveis, impacto, reflexao, contorno branco de critico e audio temporario aos eventos do Quack em `Assets/QuackQuack/Presentation/VFX/QuackFeedbackController.cs`
 
 **Checkpoint**: US1 jogavel e testavel como MVP isolado.

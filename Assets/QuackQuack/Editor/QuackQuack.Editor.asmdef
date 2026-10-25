@@ -1,5 +1,5 @@
 {
   "name": "QuackQuack.Editor",
-  "references": ["QuackQuack.Runtime", "QuackQuack.Core", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Universal.2D.Runtime", "Unity.RenderPipelines.Core.Runtime"],
+  "references": ["QuackQuack.Runtime", "QuackQuack.Core", "QuackQuack.Presentation", "Unity.ugui", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Universal.2D.Runtime", "Unity.RenderPipelines.Core.Runtime"],
   "includePlatforms": ["Editor"]
 }

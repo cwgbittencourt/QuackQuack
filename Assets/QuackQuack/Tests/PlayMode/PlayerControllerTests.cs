@@ -150,6 +150,17 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         [Test]
+        public void FullBreathDuringCooldownDoesNotReportQuackReady()
+        {
+            Assert.That(player.ActivateQuack(), Is.True);
+            player.State.Breath.Recover(100, TerrainType.Water);
+            var snapshot = player.Snapshot();
+            Assert.That(snapshot.Breath, Is.EqualTo(snapshot.Capacity));
+            Assert.That(snapshot.QuackReady, Is.False);
+            Assert.That(snapshot.QuackState, Is.EqualTo("RECARREGANDO"));
+        }
+
+        [Test]
         public void ResolvedTerrainDrivesSpeedBreathAndSingleTransitionFeedback()
         {
             targetObject = new GameObject("water volume");

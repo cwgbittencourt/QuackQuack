@@ -31,6 +31,7 @@ namespace QuackQuack.Gameplay.Player
         public PlayerState State { get; private set; }
         public string Status { get; private set; } = "Explore o lago e experimente o Quack.";
         public CharacterDefinition Definition => definition;
+        public bool QuackReady => CanSimulate && simulationSeconds >= nextQuack && State.Breath.Current > 0;
 
         private void Awake()
         {
@@ -110,8 +111,10 @@ namespace QuackQuack.Gameplay.Player
         {
             if (!CanSimulate) return false;
             var q = definition.Quack;
-            if (simulationSeconds < nextQuack || !State.Breath.TryConsume(q.Cost, out var full))
-            { SetStatus("Sem fôlego ou Quack recarregando."); return false; }
+            if (simulationSeconds < nextQuack)
+            { SetStatus("Quack recarregando."); return false; }
+            if (!State.Breath.TryConsume(q.Cost, out var full))
+            { SetStatus("Sem Fôlego para usar o Quack."); return false; }
             nextQuack = simulationSeconds + q.Cooldown;
             quack.BeginWave(++wave);
             SetStatus(full ? "QUACK APRIMORADO!" : "Quack!");
@@ -149,9 +152,12 @@ namespace QuackQuack.Gameplay.Player
         public void SetStatus(string value) { Status = value; statusUntil = Time.time + 2; }
         public HudSnapshot Snapshot()
         {
-            string status = run.Phase == RunPhase.Paused ? "PAUSADO • Esc para continuar" : run.Phase == RunPhase.Lost ? "FIM DO TESTE • Abra Bootstrap para reiniciar" : Time.time < statusUntil ? Status : "WASD / setas: mover    Espaço: Quack    Esc: pausa";
+            string status = run.Phase == RunPhase.Paused ? "PAUSADO • Esc para continuar" : run.Phase == RunPhase.Lost ? "FIM DO TESTE • Saia de Play e inicie Bootstrap para reiniciar" : Time.time < statusUntil ? Status : "Use a água para recuperar Fôlego mais rápido.";
+            string quackState = !CanSimulate ? "QUACK INDISPONÍVEL" : simulationSeconds < nextQuack ? "RECARREGANDO" :
+                State.Breath.Current <= 0 ? "SEM FÔLEGO" : State.Breath.IsFull ? "PRONTO • APRIMORADO" : "PRONTO • QUACK";
             return new HudSnapshot(State.Health, State.MaxHealth, State.Breath.Current, State.Breath.Capacity,
-                State.Terrain == TerrainType.Water ? "ÁGUA • mais velocidade e recuperação" : "TERRA • use as margens para se posicionar", status, run.ElapsedSeconds);
+                State.Terrain == TerrainType.Water ? "ÁGUA • mais velocidade e recuperação" : "TERRA • use as margens para se posicionar", status, run.ElapsedSeconds,
+                QuackReady, quackState);
         }
         private bool CanSimulate => State != null && isActiveAndEnabled && run.IsSimulating && State.Health > 0;
         private void ForwardCombat(CombatEvent value) => events.Publish(value);

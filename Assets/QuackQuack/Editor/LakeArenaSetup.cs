@@ -121,6 +121,7 @@ namespace QuackQuack.Editor
             Label("FOLEGO +", new Vector2(8.5f, 1.8f), 0.07f);
             Label("WASD / SETAS: MOVER     ESPACO: QUACK     ESC: PAUSA", new Vector2(0, -6.2f), 0.08f);
 
+            if (GameObject.Find("Gameplay HUD T031") != null) GameplayHudSetup.Attach();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
