@@ -100,6 +100,40 @@ oferta anterior quando continuam elegíveis; não se exige mudança artificial.
 T034 usa reflexão somente no adaptador dos testes, até existir o tipo real na T040.
 As falhas por ausência são a fase vermelha; substituir por chamadas tipadas na T040.
 
+### Integração de XP e seleção (testes T035)
+
+Para os testes de integração, UpgradeSystem expõe
+`InitializeProgression(RunState run, int[] cumulativeThresholds, string[] eligibleIds)`.
+Os limiares são dados injetados, não constantes de balanceamento; nos testes,
+10/20/30 XP totais permitem observar os primeiros níveis sem uma partida longa.
+`Experience` informa XP total coletado e `Level` começa em um. Cada limiar cruzado
+gera uma escolha pendente. A seleção usa o mesmo CurrentOffer e os comandos da T034.
+
+`QuackQuack.Gameplay.Pickups.ExperiencePickup` é um Component com Collider2D trigger
+e IPoolLifecycle. `Initialize(PoolService pools, UpgradeSystem upgrades, int amount)`
+configura cada aquisição; sobreposição física com o PlayerController concede XP
+uma vez e devolve a instância ao pool. ResetState limpa dados e trava de coleta
+para permitir reutilização sem repetir a recompensa anterior. Nenhum teste cria
+um pickup por coleta: a capacidade de um é pré-aquecida pelo PoolService.
+
+Ao cruzar limiar, a sessão entra em ChoosingUpgrade. O controlador real, os alvos,
+o relógio e a recuperação de Fôlego permanecem congelados; Quack é rejeitado.
+Confirmação válida registra uma escolha e retorna a Playing uma vez; callbacks
+repetidos/obsoletos não repetem histórico ou transição. Escolha inválida mantém
+a seleção aberta; pulo fecha sem conceder escolha ou consumir recursos.
+
+Se uma coleta cruzar vários limiares, cada escolha usa um offerId distinto e o
+combate continua congelado entre elas. A última resolução retoma a partida uma vez.
+Após abandono, callbacks de confirmação/pulo não concedem escolha nem retomam jogo.
+Os testes contam as transições reais de RunState. Integração de cartas visuais e
+feedback é das T044–T045; a fixture da T035 chama a mesma fronteira de comandos.
+
+As classes reais de XP/progressão ficam nas T040–T041. T035 usa reflexão para
+manter a compilação antes dessas classes, com falha explícita no SetUp enquanto
+ausentes; as interações físicas e as asserções seguintes não passam nessa fase.
+Na implementação, trocar o adaptador por chamadas tipadas e ligar a composição
+normal da partida aos mesmos serviços exercitados na fixture.
+
 ## SpawnRequest
 
 Produzido pelo `SpawnDirector` e consumido pelo `PoolService`.

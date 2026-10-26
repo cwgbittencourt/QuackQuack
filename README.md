@@ -33,18 +33,20 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T032: feedback visual e áudio do primeiro MVP | Concluída |
 | T033: testes dos limites da build e dos recursos de escolha | Concluída (fase vermelha; implementação na T039) |
 | T034: testes de ofertas e idempotência por offerId | Concluída (fase vermelha; implementação na T040) |
+| T035: testes de coleta de XP e fluxo de seleção | Concluída (fase vermelha; implementação nas T040–T041) |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T034 foram revisadas e concluídas; a próxima tarefa é **T035**.
+da arena. T022–T035 foram revisadas e concluídas; a próxima tarefa é **T036**.
 
 Validação atual: **75 testes EditMode aprovados e 43 falhas esperadas**: 23 da T033
 pela ausência de `BuildState` (T039) e 20 da T034 pela ausência de `UpgradeSystem` (T040).
-Os **34 PlayMode aprovados** são da execução anterior de T032.
-Consulte o [relatório T034](specs/001-prototipo-lago/test-report-t034.md).
+Validação PlayMode da T035: **34 aprovados e seis falhas esperadas** pela ausência
+do fluxo de XP/seleção (T040–T041). A execução EditMode citada acima é da T034.
+Consulte o [relatório T035](specs/001-prototipo-lago/test-report-t035.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
 
 ## Ambiente necessário
