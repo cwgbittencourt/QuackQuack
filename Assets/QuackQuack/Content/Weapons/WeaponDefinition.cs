@@ -9,6 +9,7 @@ using UnityEngine;
 namespace QuackQuack.Content.Weapons
 {
     public enum WeaponTargetMode { NearestEnemy, Forward, Orbit, Self }
+    public enum WeaponBehavior { Boomerang, Eggs, FrontalQuack, EnergyAura, Rockets, Bubbles }
 
     [Serializable]
     public struct WeaponLevel
@@ -33,12 +34,22 @@ namespace QuackQuack.Content.Weapons
     {
         public const int RequiredLevelCount = 5;
         [SerializeField] private WeaponTargetMode targetMode;
+        [SerializeField] private WeaponBehavior behavior;
+        [SerializeField] private float projectileSpeed = 6, projectileLifetime = 2, hitRadius = 0.2f, turnSpeed = 180, coneAngle = 60;
+        [SerializeField] private Sprite projectileSprite;
         [SerializeField] private WeaponLevel[] levels = new WeaponLevel[RequiredLevelCount];
         [SerializeField] private string compatiblePassiveId, evolutionWeaponId;
         [SerializeField] private bool hasTerrainAffinity;
         [SerializeField] private float landDamageMultiplier = 1, waterDamageMultiplier = 1;
         [SerializeField] private float landCooldownMultiplier = 1, waterCooldownMultiplier = 1;
         public WeaponTargetMode TargetMode => targetMode;
+        public WeaponBehavior Behavior => behavior;
+        public float ProjectileSpeed => projectileSpeed;
+        public float ProjectileLifetime => projectileLifetime;
+        public float HitRadius => hitRadius;
+        public float TurnSpeed => turnSpeed;
+        public float ConeAngle => coneAngle;
+        public Sprite ProjectileSprite => projectileSprite;
         public int LevelCount => levels == null ? 0 : levels.Length;
         public string CompatiblePassiveId => compatiblePassiveId;
         public string EvolutionWeaponId => evolutionWeaponId;
@@ -66,6 +77,10 @@ namespace QuackQuack.Content.Weapons
             if (!base.IsValid(out reason)) return false;
             if (!Enum.IsDefined(typeof(WeaponTargetMode), targetMode))
                 reason = "Weapon target mode is invalid.";
+            else if (!Enum.IsDefined(typeof(WeaponBehavior), behavior)) reason = "Weapon behavior is invalid.";
+            else if (!Positive(projectileSpeed) || !Positive(projectileLifetime) || !Positive(hitRadius) ||
+                !Positive(turnSpeed) || !Positive(coneAngle) || coneAngle > 360 || !Positive(projectileSpeed * projectileLifetime))
+                reason = "Weapon motion and collision parameters must be finite and positive; cone angle must not exceed 360.";
             else if (levels == null || levels.Length != RequiredLevelCount)
                 reason = "A weapon must define exactly five levels.";
             else if ((!string.IsNullOrEmpty(compatiblePassiveId) || !string.IsNullOrEmpty(evolutionWeaponId)) &&
@@ -83,7 +98,8 @@ namespace QuackQuack.Content.Weapons
                 var value = levels[i];
                 if (!Positive(value.Damage) || !Positive(value.Cooldown) || !Positive(value.Range) ||
                     !Finite(value.AreaRadius) || value.AreaRadius < 0 || value.ProjectileCount < 0 ||
-                    (value.ProjectileCount == 0 && value.AreaRadius == 0))
+                    (value.ProjectileCount == 0 && value.AreaRadius == 0) ||
+                    (value.ProjectileCount == 0 && behavior != WeaponBehavior.EnergyAura && behavior != WeaponBehavior.FrontalQuack))
                     reason = "Invalid weapon stats at level " + (i + 1) + ".";
                 else if (hasTerrainAffinity &&
                     (!Positive(value.Damage * landDamageMultiplier) || !Positive(value.Damage * waterDamageMultiplier) ||

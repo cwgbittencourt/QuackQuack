@@ -40,21 +40,23 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T039: estado da build, slots, recursos e evolução | Concluída |
 | T040: ofertas, rerrolagem, banimento, pulo e confirmação | Concluída |
 | T041: coleta pooled de XP e progressão de níveis | Concluída |
+| T042: seis comportamentos de arma e projéteis pooled | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T041 foram revisadas e concluídas; a próxima tarefa é **T042**.
+da arena. T022–T042 foram revisadas e concluídas; a próxima tarefa é **T043**.
 
-Validação T041: **191 testes EditMode e 43 PlayMode aprovados, sem falhas**.
+Validação T042: **197 testes EditMode e 62 PlayMode aprovados, sem falhas**.
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
-Consulte o [relatório T041](specs/001-prototipo-lago/test-report-t041.md).
+Consulte o [relatório T042](specs/001-prototipo-lago/test-report-t042.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
 O serviço de XP e sua composição pelo pool foram validados na fixture da arena;
-o roteiro normal de Bootstrap ainda usa a arena de treino de US1. Catálogo, armas
-e cartas da progressão jogável continuam nas tarefas seguintes.
+o roteiro normal de Bootstrap ainda usa a arena de treino de US1. Os seis comportamentos
+de arma estão implementados e testados; catálogo, composição visual e cartas da
+progressão jogável continuam nas tarefas seguintes.
 
 ## Ambiente necessário
 

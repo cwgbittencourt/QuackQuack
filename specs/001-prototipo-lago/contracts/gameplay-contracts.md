@@ -53,6 +53,41 @@ sem acumular modificadores nem alterar o asset. Sem afinidade, retorna os valore
 base. A validação rejeita NaN, infinitos e produtos que excedam float ou zerem
 por underflow. Os comportamentos de combate dessas armas são de T042.
 
+## WeaponRunner (T042)
+
+As seis armas da página 6 do documento funcional são Bumerangue, Ovos, Quack
+frontal, Aura de energia, Foguetes e Bolhas. WeaponDefinition declara WeaponBehavior,
+velocidade, duração, raio de colisão, velocidade angular, ângulo de cone/dispersão
+e sprite opcional. Números de combate continuam nos cinco níveis e na afinidade
+autoral; padrões com projéteis exigem quantidade positiva em cada nível.
+
+WeaponRunner recebe RunState, BuildState, PoolService, GameplayEventBus, origem,
+consulta de terreno e catálogo. Até seis slots são recompostos quando muda o
+histórico da build. Padrões de ataque são estratégias compostas; o mesmo estado
+pooled de projétil recebe movimento e dados por aquisição. Não há Update por projétil.
+
+- Bumerangue: voo de ida e retorno à origem móvel, com um acerto por alvo/viagem.
+- Ovos: armadilhas estacionárias que explodem em área ao detectar alvo.
+- Quack frontal: cone automático, independente do Quack manual/Fôlego.
+- Aura de energia: pulso radial periódico ao redor da origem.
+- Foguetes: movimento guiado com explosão no contato com alvo.
+- Bolhas: movimento reto com perfuração e um acerto por alvo/bolha.
+
+RegisterProjectilePool cria instâncias somente na fábrica de pré-aquecimento;
+ataques usam Acquire/Release e descartam disparos que excedam a capacidade.
+Raios/cones e projéteis respeitam obstáculos da camada 8 e atingem QuackTarget
+vivo não marcado como projétil na camada 9. Consultas de física usam buffers de
+128 contatos; a memória de acertos por projétil tem limite de 512 alvos. Esses
+orçamentos limitam processamento, sem afirmar aceite de hordas/performance.
+
+Pausa e ChoosingUpgrade congelam movimento, duração e recargas. Estados terminais,
+desativação e destruição do runner devolvem os projéteis. ResetState limpa dados,
+alvo, sprite, idade e memória de acertos. Dano e derrota emitem CombatEvent com
+fonte igual ao ID de instância da definição da arma e correlação por acerto.
+Consumidores não reaplicam dano; os alvos são devolvidos pelo seu próprio ciclo
+de vida, não pelo runner. Afinidade é capturada por disparo sem alterar o asset.
+O catálogo visual e a composição na arena permanecem na T043.
+
 ## PassiveDefinition (T037)
 
 ScriptableObject em Content/Passives com atributo afetado, ModifierPerLevel,

@@ -90,6 +90,7 @@ namespace QuackQuack.Tests.EditMode
         [Test]
         public void AreaWeaponMayHaveNoProjectileButMustHaveAnArea()
         {
+            Set(weapon, "behavior", p => p.enumValueIndex = (int)WeaponBehavior.EnergyAura);
             Set(weapon, "levels", p => p.GetArrayElementAtIndex(0).FindPropertyRelative("projectileCount").intValue = 0);
             Assert.That(weapon.IsValid(out _), Is.False);
             SetLevel(0, "areaRadius", 2);
@@ -187,6 +188,33 @@ namespace QuackQuack.Tests.EditMode
             SetLevel(0, "cooldown", 2);
             Set(weapon, field, p => p.floatValue = float.MaxValue);
             Assert.That(weapon.IsValid(out _), Is.False, "Effective values must not overflow.");
+        }
+
+        [TestCase("projectileSpeed")]
+        [TestCase("projectileLifetime")]
+        [TestCase("hitRadius")]
+        [TestCase("turnSpeed")]
+        [TestCase("coneAngle")]
+        public void MotionParametersMustBeFiniteAndPositive(string field)
+        {
+            foreach (float value in new[] { 0f, -1f, float.NaN, float.PositiveInfinity, float.NegativeInfinity })
+            {
+                Set(weapon, field, p => p.floatValue = value);
+                Assert.That(weapon.IsValid(out _), Is.False);
+            }
+        }
+
+        [Test]
+        public void BehaviorConeAngleAndTravelProductMustBeValid()
+        {
+            Set(weapon, "behavior", p => p.intValue = 99);
+            Assert.That(weapon.IsValid(out _), Is.False);
+            Set(weapon, "behavior", p => p.intValue = (int)WeaponBehavior.Boomerang);
+            Set(weapon, "coneAngle", p => p.floatValue = 361);
+            Assert.That(weapon.IsValid(out _), Is.False);
+            Set(weapon, "coneAngle", p => p.floatValue = 60);
+            Set(weapon, "projectileSpeed", p => p.floatValue = float.MaxValue);
+            Assert.That(weapon.IsValid(out _), Is.False);
         }
 
         private WeaponDefinition CreateWeapon(string id)
