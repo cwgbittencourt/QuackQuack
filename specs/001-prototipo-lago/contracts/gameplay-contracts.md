@@ -66,6 +66,40 @@ de progressão. Na T039, preferir chamadas tipadas ao implementar este contrato.
 Cada opcao declara categoria, efeito atual/proximo, sinergia, requisito de evolucao e motivo de
 elegibilidade. Confirmar, rerrolar, banir e pular sao operacoes idempotentes por `offerId`.
 
+### Fronteira de testes T034 (implementação na T040)
+
+`QuackQuack.Systems.Upgrades.UpgradeSystem(int seed)` representa uma sessão por
+partida. `GenerateOffer(string offerId, string[] eligibleIds)` recebe os IDs já
+filtrados pelas regras de conteúdo/build e retorna um snapshot com `OfferId`,
+`Choices` (`IReadOnlyList<string>`) e `IsClosed`. Remove IDs vazios/em branco e
+duplicados, seleciona até três IDs e usa todos quando restam um ou dois. Nenhum
+elegível retorna null e permite continuar a partida. O filtro de compatibilidade,
+nível e capacidade de slots será integrado com as definições/BuildState na T040;
+estes testes verificam a fronteira posterior a esse filtro e a exclusão de banidos.
+
+`CurrentOffer`, `ConfirmedChoices` (histórico somente de leitura), `RerollsRemaining`
+e `BanishRemaining` permitem observar o resultado sem componentes de cena.
+Os contadores devem compartilhar o estado da partida quando integrados à BuildState,
+sem consumir duas vezes o mesmo recurso. Mesmo seed e requisições produzem as
+mesmas escolhas; o array recebido não é modificado.
+
+`TryConfirm(offerId, choiceId)`, `TryReroll(offerId)`,
+`TryBanish(offerId, choiceId)` e `TrySkip(offerId)` retornam true somente na primeira
+aplicação aceita. Repetição, ID desconhecido/obsoleto, escolha fora da oferta ou
+recurso esgotado retornam false e preservam o estado. Confirmar registra uma única
+escolha e fecha a oferta; pular fecha sem escolher ou gastar recursos. Repetir
+GenerateOffer com o mesmo ID não substitui escolhas nem reabre uma oferta encerrada.
+
+Rerrolar consome uma das duas rerrolagens e publica uma nova oferta com ID diferente,
+invalidando o anterior. Banir consome o único banimento, exclui permanentemente o ID
+da sessão e publica nova oferta com ID diferente; não consome rerrolagem. Se banir
+a última opção, a seleção encerra sem publicar oferta vazia aberta. Repetir uma
+ação usando o ID anterior não afeta a substituta. Rerrolar pode repetir opções da
+oferta anterior quando continuam elegíveis; não se exige mudança artificial.
+
+T034 usa reflexão somente no adaptador dos testes, até existir o tipo real na T040.
+As falhas por ausência são a fase vermelha; substituir por chamadas tipadas na T040.
+
 ## SpawnRequest
 
 Produzido pelo `SpawnDirector` e consumido pelo `PoolService`.
