@@ -28,6 +28,31 @@ Campos comuns: tick, fonte, alvo, posicao, quantidade, tipo e identificador de c
 Invariantes: um evento representa uma mudanca ja aceita; consumidores nao reaplicam regra; efeitos
 visuais/sonoros podem ser descartados sem mudar o estado; identificador impede dupla recompensa.
 
+## WeaponDefinition (T036)
+
+ScriptableObject em Content/Weapons com getters sem setters públicos. Define modo
+de alvo e exatamente cinco WeaponLevel (dano, intervalo entre ataques em segundos,
+alcance, quantidade de projéteis e raio de área). GetLevel recebe nível de um a
+cinco e retorna cópia por valor; nenhum array mutável é exposto. Dano, intervalo
+e alcance são finitos e positivos; área e quantidade não são negativas e existe
+pelo menos um projétil ou uma área positiva em cada nível. Dados iniciais de um
+asset recém-criado exigem autoria antes de serem considerados válidos.
+
+CompatiblePassiveId e EvolutionWeaponId são IDs estáveis opcionais, exigidos em
+par; resultado igual à própria arma é inválido. IsValid valida a definição local.
+IsValidCatalog recebe armas e o catálogo de passivas como ContentDefinition,
+valida suas definições, IDs únicos e a existência de cada referência de evolução.
+O chamador deve fornecer somente passivas nessa coleção; a especialização tipada
+é de T037. A combinação única, reciprocidade e exigência de nível cinco na regra
+de evolução são de T038/T039; seis armas, seis passivas e três combinações autorais
+ficam em T043. Este validador não declara esses próximos requisitos concluídos.
+
+Afinidade habilitada fornece multiplicadores positivos de dano e intervalo por
+terra/água. GetLevel(level, terrain) usa TerrainAffinity a partir do valor autoral,
+sem acumular modificadores nem alterar o asset. Sem afinidade, retorna os valores
+base. A validação rejeita NaN, infinitos e produtos que excedam float ou zerem
+por underflow. Os comportamentos de combate dessas armas são de T042.
+
 ## BuildState (contrato de testes T033)
 
 Estado C# por partida em `QuackQuack.Core.Progression.BuildState`, criado vazio por
