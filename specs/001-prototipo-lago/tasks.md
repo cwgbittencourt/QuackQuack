@@ -102,7 +102,7 @@ cinco niveis por arma e as tres evolucoes sem minibosses ou chefe.
 - [x] T037 [P] [US2] Implementar `PassiveDefinition` com modificadores limitados e referencia de arma compativel em `Assets/QuackQuack/Content/Passives/PassiveDefinition.cs`
 - [x] T038 [P] [US2] Implementar `EvolutionDefinition` com combinacao unica, arma nivel cinco e referencias existentes em `Assets/QuackQuack/Content/Weapons/EvolutionDefinition.cs`
 - [x] T039 [US2] Implementar `BuildState` sem duplicatas invalidas e com limites de slots/recursos em `Assets/QuackQuack/Core/Progression/BuildState.cs`
-- [ ] T040 [US2] Implementar geracao, rerrolagem, banimento, pulo e confirmacao idempotente de ofertas em `Assets/QuackQuack/Systems/Upgrades/UpgradeSystem.cs`
+- [x] T040 [US2] Implementar geracao, rerrolagem, banimento, pulo e confirmacao idempotente de ofertas em `Assets/QuackQuack/Systems/Upgrades/UpgradeSystem.cs`
 - [ ] T041 [P] [US2] Implementar coleta de XP exclusivamente via `PoolService` e progressao de nivel em `Assets/QuackQuack/Gameplay/Pickups/ExperiencePickup.cs`
 - [ ] T042 [US2] Implementar os seis comportamentos de arma por composicao e obter/devolver todo projetil exclusivamente pelo `PoolService` em `Assets/QuackQuack/Gameplay/Weapons/WeaponRunner.cs`
 - [ ] T043 [US2] Criar catalogo de seis armas, seis passivas e tres evolucoes iniciais em `Assets/QuackQuack/Content/Catalogs/PrototypeBuildCatalog.asset`

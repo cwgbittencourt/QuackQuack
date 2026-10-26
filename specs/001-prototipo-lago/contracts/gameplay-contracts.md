@@ -140,21 +140,28 @@ da integração com conteúdo. Cada nova BuildState possui recursos e histórico
 Cada opcao declara categoria, efeito atual/proximo, sinergia, requisito de evolucao e motivo de
 elegibilidade. Confirmar, rerrolar, banir e pular sao operacoes idempotentes por `offerId`.
 
-### Fronteira de testes T034 (implementação na T040)
+### Fronteira de ofertas T034/T040
 
 `QuackQuack.Systems.Upgrades.UpgradeSystem(int seed)` representa uma sessão por
 partida. `GenerateOffer(string offerId, string[] eligibleIds)` recebe os IDs já
 filtrados pelas regras de conteúdo/build e retorna um snapshot com `OfferId`,
 `Choices` (`IReadOnlyList<string>`) e `IsClosed`. Remove IDs vazios/em branco e
 duplicados, seleciona até três IDs e usa todos quando restam um ou dois. Nenhum
-elegível retorna null e permite continuar a partida. O filtro de compatibilidade,
-nível e capacidade de slots será integrado com as definições/BuildState na T040;
-estes testes verificam a fronteira posterior a esse filtro e a exclusão de banidos.
+elegível retorna null e permite continuar a partida. Esse construtor é a fronteira
+de IDs pré-filtrados: resolve ofertas e histórico sem aplicar conteúdo à build.
+Para aplicar aquisições, melhorias e evoluções, usar o construtor com seed,
+BuildState e catálogos tipados de armas/passivas/evoluções. Ele valida os catálogos
+e IDs únicos entre categorias; GenerateOffer(offerId) considera o catálogo inteiro,
+e a sobrecarga com IDs permite restringir os candidatos de uma recompensa.
+
+Com catálogo, a sessão filtra slots cheios, níveis máximos, bases já evoluídas,
+formas evoluídas como aquisições diretas e receitas sem seus requisitos. Confirmar
+revalida a elegibilidade e aplica a operação à BuildState antes de fechar a oferta.
 
 `CurrentOffer`, `ConfirmedChoices` (histórico somente de leitura), `RerollsRemaining`
 e `BanishRemaining` permitem observar o resultado sem componentes de cena.
-Os contadores devem compartilhar o estado da partida quando integrados à BuildState,
-sem consumir duas vezes o mesmo recurso. Mesmo seed e requisições produzem as
+Os contadores compartilham a BuildState da sessão, sem consumir duas vezes o mesmo
+recurso. Mesmo seed e requisições produzem as
 mesmas escolhas; o array recebido não é modificado.
 
 `TryConfirm(offerId, choiceId)`, `TryReroll(offerId)`,
@@ -171,8 +178,13 @@ a última opção, a seleção encerra sem publicar oferta vazia aberta. Repetir
 ação usando o ID anterior não afeta a substituta. Rerrolar pode repetir opções da
 oferta anterior quando continuam elegíveis; não se exige mudança artificial.
 
-T034 usa reflexão somente no adaptador dos testes, até existir o tipo real na T040.
-As falhas por ausência são a fase vermelha; substituir por chamadas tipadas na T040.
+T034 agora usa chamadas tipadas. OfferChanged publica novos snapshots somente de
+leitura; OfferResolved sinaliza o encerramento aceito uma vez. BindRun vincula a
+sessão à RunState antes da primeira oferta: entra em ChoosingUpgrade e retoma
+Playing na resolução, se não houver outra oferta pendente. Partida terminal ou
+pausada rejeita ações; Dispose bloqueia novos comandos e limpa assinaturas.
+O encadeamento de ofertas por XP é da T041; a composição normal com catálogo e
+cartas permanece nas tarefas de conteúdo/UI.
 
 ### Integração de XP e seleção (testes T035)
 
