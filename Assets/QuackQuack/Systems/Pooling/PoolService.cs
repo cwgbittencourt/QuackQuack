@@ -97,6 +97,9 @@ namespace QuackQuack.Systems.Pooling
             return count;
         }
 
+        public bool IsActive(Component item, PoolFamily family) => !disposed && item != null &&
+            active.Contains(item) && owners.TryGetValue(item, out var entry) && entry.Family == family;
+
         public void Dispose()
         {
             if (disposed) return;

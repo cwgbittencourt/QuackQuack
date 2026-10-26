@@ -33,6 +33,13 @@ namespace QuackQuack.Systems.Upgrades
         private long sequence;
         private bool catalogBound, disposed;
         private RunState run;
+        private ExperienceState experience;
+        private string[] levelCandidates;
+        private int pendingLevels;
+        public int Experience => experience == null ? 0 : experience.Experience;
+        public int Level => experience == null ? 1 : experience.Level;
+        public int PendingLevels => pendingLevels;
+        public bool CanCollectExperience => !disposed && experience != null && run != null && run.Phase == RunPhase.Playing;
         public BuildState Build => build;
         public UpgradeOffer CurrentOffer { get; private set; }
         public IReadOnlyList<string> ConfirmedChoices { get; }
@@ -86,6 +93,35 @@ namespace QuackQuack.Systems.Upgrades
         {
             if (disposed || run != null || CurrentOffer != null) throw new InvalidOperationException("Bind the run once before opening offers.");
             run = state ?? throw new ArgumentNullException(nameof(state));
+        }
+
+        public void InitializeProgression(RunState state, int[] cumulativeThresholds, string[] eligibleIds)
+        {
+            if (disposed || experience != null || offers.Count != 0) throw new InvalidOperationException("Initialize XP once before opening offers.");
+            if (state == null) throw new ArgumentNullException(nameof(state));
+            if (eligibleIds == null) throw new ArgumentNullException(nameof(eligibleIds));
+            if (run != null && !ReferenceEquals(run, state)) throw new InvalidOperationException("Progression must share the bound run.");
+            var validated = new ExperienceState(cumulativeThresholds);
+            if (run == null) BindRun(state);
+            levelCandidates = (string[])eligibleIds.Clone();
+            experience = validated;
+        }
+
+        public bool TryCollectExperience(int amount)
+        {
+            if (!CanCollectExperience || !experience.TryAdd(amount, out int gained)) return false;
+            pendingLevels += gained;
+            OpenPendingLevels();
+            return true;
+        }
+
+        private void OpenPendingLevels()
+        {
+            while (!disposed && CanSelect() && pendingLevels > 0 && (CurrentOffer == null || CurrentOffer.IsClosed))
+            {
+                pendingLevels--;
+                if (GenerateOffer(NextId(), levelCandidates) != null) break;
+            }
         }
 
         public UpgradeOffer GenerateOffer(string offerId) => GenerateOffer(offerId, catalogIds.ToArray());
@@ -210,9 +246,11 @@ namespace QuackQuack.Systems.Upgrades
         private void Resolve()
         {
             CloseCurrent();
-            try { OfferResolved?.Invoke(CurrentOffer.OfferId); }
+            string resolvedId = CurrentOffer.OfferId;
+            try { OfferResolved?.Invoke(resolvedId); }
             finally
             {
+                OpenPendingLevels();
                 if (run != null && run.Phase == RunPhase.ChoosingUpgrade && (CurrentOffer == null || CurrentOffer.IsClosed))
                     run.TryTransition(RunPhase.Playing);
             }

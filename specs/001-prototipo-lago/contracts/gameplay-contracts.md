@@ -183,17 +183,22 @@ leitura; OfferResolved sinaliza o encerramento aceito uma vez. BindRun vincula a
 sessão à RunState antes da primeira oferta: entra em ChoosingUpgrade e retoma
 Playing na resolução, se não houver outra oferta pendente. Partida terminal ou
 pausada rejeita ações; Dispose bloqueia novos comandos e limpa assinaturas.
-O encadeamento de ofertas por XP é da T041; a composição normal com catálogo e
+O encadeamento de ofertas por XP é implementado na T041; a composição normal com catálogo e
 cartas permanece nas tarefas de conteúdo/UI.
 
-### Integração de XP e seleção (testes T035)
+### Integração de XP e seleção (T035/T041)
 
-Para os testes de integração, UpgradeSystem expõe
+UpgradeSystem expõe
 `InitializeProgression(RunState run, int[] cumulativeThresholds, string[] eligibleIds)`.
 Os limiares são dados injetados, não constantes de balanceamento; nos testes,
 10/20/30 XP totais permitem observar os primeiros níveis sem uma partida longa.
 `Experience` informa XP total coletado e `Level` começa em um. Cada limiar cruzado
 gera uma escolha pendente. A seleção usa o mesmo CurrentOffer e os comandos da T034.
+ExperienceState, no Core, copia os limiares e exige valores positivos estritamente
+crescentes; XP não positivo ou que exceda int.MaxValue é rejeitado sem mutação.
+Não há constantes de curva de XP no controlador. TryCollectExperience recebe
+somente recompensas durante Playing e preserva o estado na pausa/seleção/fim.
+PendingLevels informa quantas escolhas ainda aguardam abertura.
 
 `QuackQuack.Gameplay.Pickups.ExperiencePickup` é um Component com Collider2D trigger
 e IPoolLifecycle. `Initialize(PoolService pools, UpgradeSystem upgrades, int amount)`
@@ -201,6 +206,11 @@ configura cada aquisição; sobreposição física com o PlayerController conced
 uma vez e devolve a instância ao pool. ResetState limpa dados e trava de coleta
 para permitir reutilização sem repetir a recompensa anterior. Nenhum teste cria
 um pickup por coleta: a capacidade de um é pré-aquecida pelo PoolService.
+Initialize exige que o objeto pertença ao pool ativo da família Pickup, verificado
+por PoolService.IsActive. RegisterPool cria objetos somente na fábrica de aquecimento;
+Spawn adquire/configura/posiciona uma instância e retorna null ao saturar, sem criar
+objetos adicionais. Falha de configuração devolve a instância ao pool. Pausa mantém
+o pickup disponível; OnTriggerStay permite coletá-lo ao retomar ainda sobreposto.
 
 Ao cruzar limiar, a sessão entra em ChoosingUpgrade. O controlador real, os alvos,
 o relógio e a recuperação de Fôlego permanecem congelados; Quack é rejeitado.
@@ -214,11 +224,10 @@ Após abandono, callbacks de confirmação/pulo não concedem escolha nem retoma
 Os testes contam as transições reais de RunState. Integração de cartas visuais e
 feedback é das T044–T045; a fixture da T035 chama a mesma fronteira de comandos.
 
-As classes reais de XP/progressão ficam nas T040–T041. T035 usa reflexão para
-manter a compilação antes dessas classes, com falha explícita no SetUp enquanto
-ausentes; as interações físicas e as asserções seguintes não passam nessa fase.
-Na implementação, trocar o adaptador por chamadas tipadas e ligar a composição
-normal da partida aos mesmos serviços exercitados na fixture.
+Os testes T035 agora usam chamadas tipadas e exercitam a interação física com o
+pickup real, o pool e a arena. Limiares sem opções elegíveis são resolvidos sem
+bloquear o combate. A composição normal da partida com catálogo e cartas ainda
+será ligada aos mesmos serviços nas tarefas de conteúdo/UI.
 
 ## SpawnRequest
 

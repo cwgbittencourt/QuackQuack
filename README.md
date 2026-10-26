@@ -33,25 +33,28 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T032: feedback visual e áudio do primeiro MVP | Concluída |
 | T033: testes dos limites da build e dos recursos de escolha | Concluída (aprovados com T039) |
 | T034: testes de ofertas e idempotência por offerId | Concluída (aprovados com T040) |
-| T035: testes de coleta de XP e fluxo de seleção | Concluída (fase vermelha; implementação nas T040–T041) |
+| T035: testes de coleta de XP e fluxo de seleção | Concluída (aprovados com T041) |
 | T036: definição de arma, cinco níveis e afinidade por terreno | Concluída |
 | T037: definição de passiva, bônus limitados e vínculo com arma | Concluída |
 | T038: definição e validação das combinações evolutivas | Concluída |
 | T039: estado da build, slots, recursos e evolução | Concluída |
 | T040: ofertas, rerrolagem, banimento, pulo e confirmação | Concluída |
+| T041: coleta pooled de XP e progressão de níveis | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T040 foram revisadas e concluídas; a próxima tarefa é **T041**.
+da arena. T022–T041 foram revisadas e concluídas; a próxima tarefa é **T042**.
 
-Validação T040: **183 testes EditMode aprovados, sem falhas**; **34 PlayMode aprovados
-e seis falhas esperadas** da T035 pela ausência de `ExperiencePickup` (T041).
-Os testes de `BuildState` e ofertas das T033/T034 passaram.
-Consulte o [relatório T040](specs/001-prototipo-lago/test-report-t040.md).
+Validação T041: **191 testes EditMode e 43 PlayMode aprovados, sem falhas**.
+Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
+Consulte o [relatório T041](specs/001-prototipo-lago/test-report-t041.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
+O serviço de XP e sua composição pelo pool foram validados na fixture da arena;
+o roteiro normal de Bootstrap ainda usa a arena de treino de US1. Catálogo, armas
+e cartas da progressão jogável continuam nas tarefas seguintes.
 
 ## Ambiente necessário
 
