@@ -42,22 +42,23 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T041: coleta pooled de XP e progressão de níveis | Concluída |
 | T042: seis comportamentos de arma e projéteis pooled | Concluída |
 | T043: catálogo de seis armas, seis passivas e três evoluções | Concluída |
+| T044: seleção de cartas e progressão integrada à arena | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T043 foram revisadas e concluídas; a próxima tarefa é **T044**.
+da arena. T022–T044 foram revisadas e concluídas; a próxima tarefa é **T045**.
 
-Validação T043: **208 testes EditMode e 64 PlayMode aprovados, sem falhas**.
+Validação T044: **208 testes EditMode e 70 PlayMode aprovados, sem falhas**.
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
-Consulte o [relatório T043](specs/001-prototipo-lago/test-report-t043.md).
+Consulte o [relatório T044](specs/001-prototipo-lago/test-report-t044.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
-O serviço de XP e sua composição pelo pool foram validados na fixture da arena;
-o roteiro normal de Bootstrap ainda usa a arena de treino de US1. Os seis comportamentos
-de arma e o catálogo autoral estão implementados e testados. A composição normal
-da progressão com cartas e feedback continua nas tarefas seguintes.
+Bootstrap abre a arena de treino com Bumerangue e três pickups cianos de XP.
+A coleta abre cartas e pausa o combate; é possível escolher, rerrolar, banir ou
+pular. O feedback exclusivo de evolução/recompensa continua na T045. A partida
+completa e os demais aceites continuam pendentes.
 
 ## Ambiente necessário
 

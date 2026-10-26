@@ -106,7 +106,7 @@ cinco niveis por arma e as tres evolucoes sem minibosses ou chefe.
 - [x] T041 [P] [US2] Implementar coleta de XP exclusivamente via `PoolService` e progressao de nivel em `Assets/QuackQuack/Gameplay/Pickups/ExperiencePickup.cs`
 - [x] T042 [US2] Implementar os seis comportamentos de arma por composicao e obter/devolver todo projetil exclusivamente pelo `PoolService` em `Assets/QuackQuack/Gameplay/Weapons/WeaponRunner.cs`
 - [x] T043 [US2] Criar catalogo de seis armas, seis passivas e tres evolucoes iniciais em `Assets/QuackQuack/Content/Catalogs/PrototypeBuildCatalog.asset`
-- [ ] T044 [US2] Implementar tela de cartas com tipo, efeito atual/proximo, sinergia, requisito e recursos restantes em `Assets/QuackQuack/Presentation/UI/UpgradeSelectionView.cs`
+- [x] T044 [US2] Implementar tela de cartas com tipo, efeito atual/proximo, sinergia, requisito e recursos restantes em `Assets/QuackQuack/Presentation/UI/UpgradeSelectionView.cs`
 - [ ] T045 [US2] Integrar via `PoolService` o feedback de evolucao, VFX e recompensa rara em `Assets/QuackQuack/Presentation/VFX/UpgradeFeedbackController.cs`
 
 **Checkpoint**: US2 funciona em uma arena acelerada sem depender do ciclo completo da partida.

@@ -3,7 +3,8 @@
   "rootNamespace": "QuackQuack.Platform",
   "references": [
     "QuackQuack.Core",
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "Unity.ugui"
   ],
   "autoReferenced": true
 }

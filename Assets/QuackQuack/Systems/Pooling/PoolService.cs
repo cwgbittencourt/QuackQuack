@@ -27,6 +27,7 @@ namespace QuackQuack.Systems.Pooling
         private readonly Dictionary<Component, Entry> owners = new Dictionary<Component, Entry>();
         private readonly HashSet<Component> active = new HashSet<Component>();
         private bool disposed;
+        public bool IsDisposed => disposed;
         public int ActiveCount => active.Count;
 
         public void Register<T>(string key, PoolFamily family, Func<T> factory, int capacity) where T : Component, IPoolLifecycle

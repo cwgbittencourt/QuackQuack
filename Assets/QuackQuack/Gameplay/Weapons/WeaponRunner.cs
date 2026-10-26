@@ -102,6 +102,7 @@ namespace QuackQuack.Gameplay.Weapons
         {
             if (float.IsNaN(seconds) || float.IsInfinity(seconds) || seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds));
             if (!initialized || !isActiveAndEnabled) return;
+            if (pools.IsDisposed) { ReleaseAll(); return; }
             if (owner == null || run.Outcome.HasValue || run.Phase == RunPhase.Results) { ReleaseAll(); return; }
             if (!run.IsSimulating) return;
             clock += seconds; tick++;

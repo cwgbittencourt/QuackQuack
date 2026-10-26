@@ -285,6 +285,28 @@ pickup real, o pool e a arena. Limiares sem opções elegíveis são resolvidos 
 bloquear o combate. A composição normal da partida com catálogo e cartas ainda
 será ligada aos mesmos serviços nas tarefas de conteúdo/UI.
 
+## UpgradeSelectionView (T044)
+
+Core.Shared fornece UpgradeSelectionSnapshot e UpgradeCardSnapshot imutáveis,
+com tipo, nome, efeito do nível atual/próximo, sinergia, requisito, offerId e
+recursos. UpgradeSelectionBridge traduz catálogo/build/oferta em apresentação
+e reutiliza o snapshot enquanto não muda o estado. Números vêm das definições
+autorais; a view não calcula elegibilidade nem reaplica efeitos de gameplay.
+
+UpgradeSelectionView recebe fonte de snapshot e comandos de confirmar, banir,
+rerrolar e pular. Encaminha o ID da oferta exibida; callbacks obsoletos são
+rejeitados pelo sistema. Protege contra dois comandos no mesmo frame, oculta
+slots sem carta, desabilita recursos esgotados e remove o modal fora da seleção.
+Reativar o bridge não multiplica listeners. O modal captura raycasts e recebe
+foco inicial no primeiro botão; entrada de UI usa InputSystemUIInputModule.
+
+LakeBuildProgression compõe catálogo, build inicial com Bumerangue, armas, XP
+e view em Lake. A cena serializa limiares de demonstração 10/20/30 e três pickups
+de dez XP; criação/aquisição usa os pools compartilhados. PlayerController
+descarta bordas de entrada ao sair da seleção. WeaponRunner ignora pools já
+descartados, permitindo destruir Bootstrap antes da cena sem novas aquisições.
+Safe Area e a matriz de proporções continuam nas tarefas de responsividade.
+
 ## SpawnRequest
 
 Produzido pelo `SpawnDirector` e consumido pelo `PoolService`.

@@ -24,6 +24,7 @@ namespace QuackQuack.Gameplay.Player
         private Vector2 move;
         private bool requestedQuack;
         private double nextQuack, simulationSeconds;
+        private RunPhase previousPhase;
         private float statusUntil;
         private long wave, tick;
         private readonly Collider2D[] overlaps = new Collider2D[128];
@@ -59,6 +60,7 @@ namespace QuackQuack.Gameplay.Player
                 throw new System.ArgumentException(reason, nameof(character));
             input = playerInput ?? throw new System.ArgumentNullException(nameof(playerInput));
             run = runState ?? throw new System.ArgumentNullException(nameof(runState));
+            previousPhase = run.Phase;
             events = eventBus ?? throw new System.ArgumentNullException(nameof(eventBus));
             definition = character;
             var q = character.Quack;
@@ -161,7 +163,13 @@ namespace QuackQuack.Gameplay.Player
         }
         private bool CanSimulate => State != null && isActiveAndEnabled && run.IsSimulating && State.Health > 0;
         private void ForwardCombat(CombatEvent value) => events.Publish(value);
-        private void OnRunChanged(RunPhase phase) { if (!run.IsSimulating) ClearCommands(); }
+        private void OnRunChanged(RunPhase phase)
+        {
+            if (!run.IsSimulating) ClearCommands();
+            if (previousPhase == RunPhase.ChoosingUpgrade && phase == RunPhase.Playing)
+            { input?.Read(); ClearCommands(); }
+            previousPhase = phase;
+        }
         private void ClearCommands()
         {
             move = Vector2.zero; requestedQuack = false;

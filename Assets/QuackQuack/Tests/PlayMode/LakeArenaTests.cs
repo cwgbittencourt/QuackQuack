@@ -38,7 +38,7 @@ namespace QuackQuack.Tests.PlayMode
             var body = player.GetComponent<Rigidbody2D>();
             var bootstrap = GameBootstrap.Instance;
             Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Enemy), Is.EqualTo(2));
-            Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Pickup), Is.EqualTo(1));
+            Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Pickup), Is.EqualTo(4));
             var targets = Object.FindObjectsByType<QuackTarget>(FindObjectsSortMode.None);
             QuackTarget enemy = null;
             foreach (var target in targets)
@@ -48,7 +48,7 @@ namespace QuackQuack.Tests.PlayMode
             Physics2D.SyncTransforms();
             Assert.That(player.ActivateQuack(), Is.True);
             Assert.That(enemy.Health, Is.LessThan(20));
-            body.position = new Vector2(0, -2);
+            body.position = new Vector2(0, -3.5f); // Keep this US1 test away from the new XP pickup.
             yield return new WaitForFixedUpdate();
             Assert.That(player.State.Terrain, Is.EqualTo(TerrainType.Water));
             bootstrap.Run.TryTransition(RunPhase.Paused);
@@ -61,7 +61,7 @@ namespace QuackQuack.Tests.PlayMode
             yield return new WaitForFixedUpdate();
             yield return null;
             Assert.That(arena.RewardClaimed, Is.True);
-            Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Pickup), Is.Zero);
+            Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Pickup), Is.EqualTo(3));
             Assert.That(player.State.Breath.Current, Is.GreaterThan(40));
             player.State.Breath.TryConsume(player.State.Breath.Capacity, out _);
             yield return null;

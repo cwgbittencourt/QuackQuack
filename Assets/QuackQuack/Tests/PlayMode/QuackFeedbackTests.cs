@@ -6,6 +6,7 @@ using QuackQuack.Systems.Run;
 using QuackQuack.Core.Run;
 using QuackQuack.Core.Combat;
 using QuackQuack.Systems.Pooling;
+using QuackQuack.Gameplay.Weapons;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -37,9 +38,7 @@ namespace QuackQuack.Tests.PlayMode
         [UnityTest]
         public IEnumerator AcceptedQuackCreatesPooledVisualAndTemporaryAudio()
         {
-            yield return SceneManager.LoadSceneAsync("Bootstrap");
-            for (int i = 0; i < 120 && SceneManager.GetActiveScene().name != "Lake"; i++) yield return null;
-            yield return null;
+            yield return LoadArena();
             var player = Object.FindAnyObjectByType<PlayerController>();
             Assert.That(player.ActivateQuack(), Is.True);
             var view = Object.FindAnyObjectByType<QuackFeedbackController>();
@@ -66,6 +65,10 @@ namespace QuackQuack.Tests.PlayMode
             yield return SceneManager.LoadSceneAsync("Bootstrap");
             for (int i = 0; i < 120 && SceneManager.GetActiveScene().name != "Lake"; i++) yield return null;
             yield return null; yield return null;
+            // Isolate manual Quack feedback from autonomous weapon impact effects.
+            foreach (var weapon in Object.FindObjectsByType<WeaponRunner>(FindObjectsSortMode.None)) weapon.enabled = false;
+            var feedback = Object.FindAnyObjectByType<QuackFeedbackBridge>();
+            feedback.enabled = false; feedback.enabled = true;
         }
 
         [UnityTest]

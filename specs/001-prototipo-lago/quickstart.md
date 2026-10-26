@@ -56,13 +56,35 @@ O menu `QuackQuack → Build T032 Quack feedback` gera o prefab de efeito, os to
 temporários e a ligação dos eventos. Os assets estão versionados; não executar esses
 menus em um clone normal para simplesmente jogar.
 
+### Cartas e demonstração de progressão disponíveis após T044
+
+- O Pato inicia com Bumerangue automático. Três pickups cianos de XP ficam em
+  (-6, -4), (0, -2) e (5, -5). Cada um concede dez XP uma vez, usando o pool.
+- Coletar um pickup abre até três cartas e congela o combate. Comparar tipo,
+  efeito atual/próximo, sinergia e requisito de evolução antes de escolher.
+- Clicar em Escolher confirma; Banir remove aquela opção da sessão. O rodapé
+  informa as duas rerrolagens e o único banimento disponíveis. Pular não gasta
+  esses recursos. O foco inicial permite confirmar com Enter; os botões também
+  usam a navegação padrão do Input System UI.
+- A resolução fecha o modal e retoma o combate; se houver níveis acumulados,
+  apresenta a próxima oferta antes de retomar. Encerrar a partida oculta as cartas.
+- O trecho de demonstração concede três níveis. A carta de evolução é validada
+  nos testes com uma build preparada; este trecho não substitui a partida completa
+  nem o aceite de efeitos/balanceamento de todas as passivas.
+
+Os prefabs UpgradeSelection e ExperiencePickup e a ligação na cena estão
+versionados. O menu `QuackQuack → Build T044 upgrade selection` reconstrói essa
+composição pelo Editor, preservando a cena existente e suas demais raízes. Não
+precisa ser executado para usar um clone normal. A prévia de manutenção usa
+UpgradeSelectionSetup.Preview e não grava alterações de visualização na cena.
+
 O catálogo de build está em `Assets/QuackQuack/Content/Catalogs/PrototypeBuildCatalog.asset`.
 Contém seis armas básicas, seis passivas e três receitas; as três armas resultantes
 ficam referenciadas pelas receitas e são excluídas das aquisições comuns. Os assets
 já estão versionados; não é necessário executar geração para usar um clone.
 O menu `QuackQuack → Build T043 prototype build catalog` é uma ferramenta de
 manutenção que regrava o balanceamento inicial e reutiliza os assets existentes,
-preservando GUIDs. Ele não modifica cenas nem monta cartas na arena US1.
+preservando GUIDs. Ele não modifica cenas nem altera a seleção de cartas.
 
 ### Marco 1 - Fundamentos
 
