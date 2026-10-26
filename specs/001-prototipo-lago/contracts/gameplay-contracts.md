@@ -75,6 +75,26 @@ existem e vínculos contraditórios entre os dois lados. Uma arma sem evolução
 ser referenciada por uma passiva; esta definição sozinha não cria uma evolução.
 As seis passivas autorais e as três combinações ficam em T043/T038.
 
+## EvolutionDefinition (T038)
+
+ScriptableObject com referências tipadas BaseWeapon, RequiredPassive e ResultWeapon,
+sem setters públicos. IsValid exige todas as definições válidas, resultado com ID
+diferente da base e concordância dos IDs de compatibilidade e resultado declarados
+na arma/passiva. RequiredWeaponLevel é fixo em cinco, sem configuração divergente.
+
+CanEvolve(ownedWeaponId, weaponLevel, ownedPassiveIds) é consulta pura: só aceita
+a arma base no nível exatamente cinco, com a passiva exigida presente por ID ordinal
+e uma receita válida. Dados ausentes, nível fora da faixa ou outra arma/passiva
+retornam false. Não substitui inventário nem emite eventos; aplicação pertence à
+BuildState/UpgradeSystem nas T039/T040.
+
+IsValidCatalog valida primeiro o catálogo tipado de armas/passivas e depois as
+receitas, exigindo IDs de evolução e pares (arma base, passiva) únicos. Referências
+devem apontar para os próprios assets registrados, não cópias com o mesmo ID.
+Catálogos ausentes/vazios e definições nulas/inválidas são rejeitados. O validador
+aceita subconjuntos não vazios para autoria/testes; o catálogo final com exatamente
+três combinações e seu feedback são entregas de T043/T045.
+
 ## BuildState (contrato de testes T033)
 
 Estado C# por partida em `QuackQuack.Core.Progression.BuildState`, criado vazio por
