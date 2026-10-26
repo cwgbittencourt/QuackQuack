@@ -99,7 +99,7 @@ cinco niveis por arma e as tres evolucoes sem minibosses ou chefe.
 ### Implementation for User Story 2
 
 - [x] T036 [P] [US2] Implementar `WeaponDefinition` com exatamente cinco niveis, passiva compativel, evolucao valida e modificadores opcionais de afinidade por terreno em `Assets/QuackQuack/Content/Weapons/WeaponDefinition.cs`
-- [ ] T037 [P] [US2] Implementar `PassiveDefinition` com modificadores limitados e referencia de arma compativel em `Assets/QuackQuack/Content/Passives/PassiveDefinition.cs`
+- [x] T037 [P] [US2] Implementar `PassiveDefinition` com modificadores limitados e referencia de arma compativel em `Assets/QuackQuack/Content/Passives/PassiveDefinition.cs`
 - [ ] T038 [P] [US2] Implementar `EvolutionDefinition` com combinacao unica, arma nivel cinco e referencias existentes em `Assets/QuackQuack/Content/Weapons/EvolutionDefinition.cs`
 - [ ] T039 [US2] Implementar `BuildState` sem duplicatas invalidas e com limites de slots/recursos em `Assets/QuackQuack/Core/Progression/BuildState.cs`
 - [ ] T040 [US2] Implementar geracao, rerrolagem, banimento, pulo e confirmacao idempotente de ofertas em `Assets/QuackQuack/Systems/Upgrades/UpgradeSystem.cs`

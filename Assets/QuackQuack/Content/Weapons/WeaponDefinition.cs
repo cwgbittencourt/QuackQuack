@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using QuackQuack.Content.Shared;
+using QuackQuack.Content.Passives;
 using QuackQuack.Core.Run;
 using QuackQuack.Gameplay.Terrain;
 using UnityEngine;
@@ -93,20 +94,20 @@ namespace QuackQuack.Content.Weapons
             return true;
         }
 
-        // Pass only the passive catalog here; typed passive/evolution definitions arrive in T037/T038.
         public static bool IsValidCatalog(IEnumerable<WeaponDefinition> weapons,
-            IEnumerable<ContentDefinition> passives, out string reason)
+            IEnumerable<PassiveDefinition> passives, out string reason)
         {
             reason = null;
             if (weapons == null || passives == null)
             { reason = "Weapon and passive catalogs are required."; return false; }
             var weaponIds = new Dictionary<string, WeaponDefinition>(StringComparer.Ordinal);
-            var passiveIds = new HashSet<string>(StringComparer.Ordinal);
+            var passiveIds = new Dictionary<string, PassiveDefinition>(StringComparer.Ordinal);
             foreach (var passive in passives)
             {
                 if (passive == null) { reason = "Missing passive definition."; return false; }
                 if (!passive.IsValid(out reason)) return false;
-                if (!passiveIds.Add(passive.Id)) { reason = "Duplicate passive ID: " + passive.Id; return false; }
+                if (passiveIds.ContainsKey(passive.Id)) { reason = "Duplicate passive ID: " + passive.Id; return false; }
+                passiveIds.Add(passive.Id, passive);
             }
             foreach (var weapon in weapons)
             {
@@ -116,11 +117,21 @@ namespace QuackQuack.Content.Weapons
                 weaponIds.Add(weapon.Id, weapon);
             }
             if (weaponIds.Count == 0) { reason = "Weapon catalog must not be empty."; return false; }
+            foreach (var passive in passiveIds.Values)
+            {
+                if (!weaponIds.ContainsKey(passive.CompatibleWeaponId))
+                { reason = "Unknown compatible weapon: " + passive.CompatibleWeaponId; return false; }
+                var compatible = weaponIds[passive.CompatibleWeaponId];
+                if (!string.IsNullOrEmpty(compatible.CompatiblePassiveId) && compatible.CompatiblePassiveId != passive.Id)
+                { reason = "Inconsistent compatible passive for weapon: " + compatible.Id; return false; }
+            }
             foreach (var weapon in weaponIds.Values)
             {
                 if (string.IsNullOrEmpty(weapon.EvolutionWeaponId)) continue;
-                if (!passiveIds.Contains(weapon.CompatiblePassiveId))
+                if (!passiveIds.ContainsKey(weapon.CompatiblePassiveId))
                 { reason = "Unknown compatible passive: " + weapon.CompatiblePassiveId; return false; }
+                if (passiveIds[weapon.CompatiblePassiveId].CompatibleWeaponId != weapon.Id)
+                { reason = "Compatible weapon/passive references must be reciprocal: " + weapon.Id; return false; }
                 if (!weaponIds.ContainsKey(weapon.EvolutionWeaponId))
                 { reason = "Unknown evolution weapon: " + weapon.EvolutionWeaponId; return false; }
             }

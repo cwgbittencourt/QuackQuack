@@ -40,11 +40,11 @@ asset recém-criado exigem autoria antes de serem considerados válidos.
 
 CompatiblePassiveId e EvolutionWeaponId são IDs estáveis opcionais, exigidos em
 par; resultado igual à própria arma é inválido. IsValid valida a definição local.
-IsValidCatalog recebe armas e o catálogo de passivas como ContentDefinition,
+IsValidCatalog recebe armas e o catálogo tipado de PassiveDefinition (T037),
 valida suas definições, IDs únicos e a existência de cada referência de evolução.
-O chamador deve fornecer somente passivas nessa coleção; a especialização tipada
-é de T037. A combinação única, reciprocidade e exigência de nível cinco na regra
-de evolução são de T038/T039; seis armas, seis passivas e três combinações autorais
+Toda passiva referencia uma arma existente; vínculos de evolução arma/passiva
+devem ser recíprocos. A combinação evolutiva única e exigência de nível cinco na
+regra de evolução são de T038/T039; seis armas, seis passivas e três combinações autorais
 ficam em T043. Este validador não declara esses próximos requisitos concluídos.
 
 Afinidade habilitada fornece multiplicadores positivos de dano e intervalo por
@@ -52,6 +52,28 @@ terra/água. GetLevel(level, terrain) usa TerrainAffinity a partir do valor auto
 sem acumular modificadores nem alterar o asset. Sem afinidade, retorna os valores
 base. A validação rejeita NaN, infinitos e produtos que excedam float ou zerem
 por underflow. Os comportamentos de combate dessas armas são de T042.
+
+## PassiveDefinition (T037)
+
+ScriptableObject em Content/Passives com atributo afetado, ModifierPerLevel,
+ModifierLimit, MaxLevel e CompatibleWeaponId editáveis no Inspector e somente
+getters públicos. Atributos iniciais: dano, velocidade de ataque/movimento,
+capacidade/recuperação de Fôlego e raio de área. São identificadores de dados;
+a composição dos efeitos no combate pertence às tarefas de integração.
+
+Os modificadores são bônus percentuais normalizados: incremento e teto finitos
+no intervalo (0, 1], incremento não superior ao teto e nível máximo positivo.
+O limite é autoral por passiva; o valor um representa 100% de bônus. GetModifier
+aceita zero (não adquirida) até MaxLevel e retorna min(nível * incremento, teto),
+sem acumular chamadas ou modificar o asset. Índices inválidos geram exceção;
+definições inválidas não podem produzir modificadores. O nível máximo não está
+fixado em cinco para passivas: esse requisito da especificação se aplica às armas.
+
+CompatibleWeaponId é obrigatório e resolvido em WeaponDefinition.IsValidCatalog.
+Esse catálogo rejeita passivas/armas ausentes, IDs duplicados, referências que não
+existem e vínculos contraditórios entre os dois lados. Uma arma sem evolução pode
+ser referenciada por uma passiva; esta definição sozinha não cria uma evolução.
+As seis passivas autorais e as três combinações ficam em T043/T038.
 
 ## BuildState (contrato de testes T033)
 

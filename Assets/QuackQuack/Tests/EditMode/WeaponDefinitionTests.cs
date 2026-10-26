@@ -1,7 +1,6 @@
 using System;
 using NUnit.Framework;
-using QuackQuack.Content.Shared;
-using QuackQuack.Content.Characters;
+using QuackQuack.Content.Passives;
 using QuackQuack.Content.Weapons;
 using QuackQuack.Core.Run;
 using UnityEditor;
@@ -13,16 +12,16 @@ namespace QuackQuack.Tests.EditMode
     public class WeaponDefinitionTests
     {
         private WeaponDefinition weapon, evolved;
-        private QuackDefinition passiveFixture;
+        private PassiveDefinition passiveFixture;
 
         [SetUp]
         public void SetUp()
         {
             weapon = CreateWeapon("weapon");
             evolved = CreateWeapon("evolved");
-            // Only a ContentDefinition ID is needed at this boundary; not a production passive.
-            passiveFixture = ScriptableObject.CreateInstance<QuackDefinition>();
+            passiveFixture = ScriptableObject.CreateInstance<PassiveDefinition>();
             Set(passiveFixture, "id", p => p.stringValue = "passive");
+            Set(passiveFixture, "compatibleWeaponId", p => p.stringValue = "weapon");
         }
 
         [TearDown]
@@ -127,15 +126,29 @@ namespace QuackQuack.Tests.EditMode
         {
             Set(weapon, "compatiblePassiveId", p => p.stringValue = "passive");
             Set(weapon, "evolutionWeaponId", p => p.stringValue = "evolved");
-            var passives = new ContentDefinition[] { passiveFixture };
+            var passives = new[] { passiveFixture };
             Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, passives, out var reason), Is.True, reason);
             Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon }, passives, out _), Is.False);
-            Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, Array.Empty<ContentDefinition>(), out _), Is.False);
+            Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, Array.Empty<PassiveDefinition>(), out _), Is.False);
             Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, weapon, evolved }, passives, out _), Is.False);
-            Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, new ContentDefinition[] { passiveFixture, passiveFixture }, out _), Is.False);
+            Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, new[] { passiveFixture, passiveFixture }, out _), Is.False);
             Assert.That(WeaponDefinition.IsValidCatalog(new WeaponDefinition[] { null }, passives, out _), Is.False);
             Assert.That(WeaponDefinition.IsValidCatalog(null, passives, out _), Is.False);
             Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, null, out _), Is.False);
+        }
+
+        [Test]
+        public void PassiveCatalogRequiresExistingAndReciprocalWeaponReference()
+        {
+            Set(weapon, "compatiblePassiveId", p => p.stringValue = "passive");
+            Set(weapon, "evolutionWeaponId", p => p.stringValue = "evolved");
+            Set(passiveFixture, "compatibleWeaponId", p => p.stringValue = "missing");
+            Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, new[] { passiveFixture }, out _), Is.False);
+            Set(passiveFixture, "compatibleWeaponId", p => p.stringValue = "evolved");
+            Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, new[] { passiveFixture }, out _), Is.False);
+            Set(passiveFixture, "compatibleWeaponId", p => p.stringValue = "weapon");
+            Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, new[] { passiveFixture }, out var reason), Is.True, reason);
+            Assert.That(WeaponDefinition.IsValidCatalog(new[] { weapon, evolved }, new PassiveDefinition[] { null }, out _), Is.False);
         }
 
         [Test]
