@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a69e5b8d15416284e8f0f25f33c9e04e, type: 3}
+  m_Name: pulmao-poderoso
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Passives.PassiveDefinition
+  id: pulmao-poderoso
+  displayName: "Pulm\xE3o poderoso"
+  attribute: 3
+  modifierPerLevel: 0.08
+  modifierLimit: 0.4
+  maxLevel: 5
+  compatibleWeaponId: quack-frontal

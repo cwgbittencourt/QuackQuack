@@ -53,6 +53,27 @@ sem acumular modificadores nem alterar o asset. Sem afinidade, retorna os valore
 base. A validação rejeita NaN, infinitos e produtos que excedam float ou zerem
 por underflow. Os comportamentos de combate dessas armas são de T042.
 
+## PrototypeBuildCatalog (T043)
+
+Asset em Content/Catalogs/PrototypeBuildCatalog.asset com seis armas básicas,
+seis passivas e exatamente três receitas. GetAllWeapons inclui também as três
+formas resultantes, totalizando nove definições de arma para o runner e o sistema
+de ofertas. Weapons contém somente as seis básicas; getters expõem coleções de
+leitura e consultas de composição são feitas na inicialização.
+
+IsValid exige contagens exatas, os seis comportamentos distintos, IDs únicos,
+passivas ligadas às armas básicas, resultados distintos e receitas com referências
+canônicas consistentes. CreateUpgradeSystem recebe seed/BuildState e compõe a
+sessão usando o catálogo validado. O sistema exclui resultados de aquisições comuns.
+
+Combinações autorais: Bumerangue + Pena aerodinâmica → Tornado de penas;
+Ovos + Ninho reforçado → Incubadora de combate; Quack frontal + Pulmão poderoso →
+Quack supersônico. Aura de energia, Foguetes e Bolhas têm Amuleto do lago, Óculos
+de aviador e Sabão mágico como passivas compatíveis, sem receitas extras no protótipo.
+Ovos recebem bônus de dano em terra e Bolhas na água. Cinco níveis de cada arma
+e modificadores de cada passiva residem nos assets editáveis, sem mudar durante a
+partida. Valores são iniciais e não representam balanceamento aceito por playtest.
+
 ## WeaponRunner (T042)
 
 As seis armas da página 6 do documento funcional são Bumerangue, Ovos, Quack

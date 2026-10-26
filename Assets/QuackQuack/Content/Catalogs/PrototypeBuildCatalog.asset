@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 275c5d277957c89418d0bbd4a8be7efa, type: 3}
+  m_Name: PrototypeBuildCatalog
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Catalogs.PrototypeBuildCatalog
+  id: prototype-build
+  displayName: Build inicial do Lago
+  weapons:
+  - {fileID: 11400000, guid: cba5493d5d6c495488461fff66b15e85, type: 2}
+  - {fileID: 11400000, guid: 8385818ae726e214cac06db87c66fc8c, type: 2}
+  - {fileID: 11400000, guid: ae8317d11c239504db7cc8ad38ec156e, type: 2}
+  - {fileID: 11400000, guid: b8ba4cbd066e7b245a4cf860631644c0, type: 2}
+  - {fileID: 11400000, guid: 6bc94810ad3b3404fb4e059d0b0c438a, type: 2}
+  - {fileID: 11400000, guid: 13b4555e8f5a09e459f88a06decfe1bb, type: 2}
+  passives:
+  - {fileID: 11400000, guid: 3e8ae368b15d9804fb8d2bdb013c57f1, type: 2}
+  - {fileID: 11400000, guid: 30583063ff5db304080f7dbf5bfd2bfe, type: 2}
+  - {fileID: 11400000, guid: a83e706653ed9c04fad328e572c58fca, type: 2}
+  - {fileID: 11400000, guid: 3edb05a2277454c478463096cbcee0b9, type: 2}
+  - {fileID: 11400000, guid: 213a7e63309be5549b2ce0233b4aa131, type: 2}
+  - {fileID: 11400000, guid: a3580980ff2d70a429afdc04fbc14a14, type: 2}
+  evolutions:
+  - {fileID: 11400000, guid: 6bc168ab1c261f04fad64abf40b8e47a, type: 2}
+  - {fileID: 11400000, guid: c05775f4e4ad6854a90a001d2e49ebf9, type: 2}
+  - {fileID: 11400000, guid: b5d29c53f581d7f4792ca7b2b2e7cd85, type: 2}

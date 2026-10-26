@@ -56,6 +56,14 @@ O menu `QuackQuack → Build T032 Quack feedback` gera o prefab de efeito, os to
 temporários e a ligação dos eventos. Os assets estão versionados; não executar esses
 menus em um clone normal para simplesmente jogar.
 
+O catálogo de build está em `Assets/QuackQuack/Content/Catalogs/PrototypeBuildCatalog.asset`.
+Contém seis armas básicas, seis passivas e três receitas; as três armas resultantes
+ficam referenciadas pelas receitas e são excluídas das aquisições comuns. Os assets
+já estão versionados; não é necessário executar geração para usar um clone.
+O menu `QuackQuack → Build T043 prototype build catalog` é uma ferramenta de
+manutenção que regrava o balanceamento inicial e reutiliza os assets existentes,
+preservando GUIDs. Ele não modifica cenas nem monta cartas na arena US1.
+
 ### Marco 1 - Fundamentos
 
 - Abrir `Bootstrap`, iniciar `Lake` e mover o Pato com teclado, controle e toque.

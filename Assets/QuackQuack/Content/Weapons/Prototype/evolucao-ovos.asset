@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ca2e603d8fcf5741b91836e3a0dbbf8, type: 3}
+  m_Name: evolucao-ovos
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Weapons.EvolutionDefinition
+  id: evolucao-ovos
+  displayName: Incubadora de combate
+  baseWeapon: {fileID: 11400000, guid: 8385818ae726e214cac06db87c66fc8c, type: 2}
+  resultWeapon: {fileID: 11400000, guid: 5d1b8f3f17042b24eb5c65a547e63bc8, type: 2}
+  requiredPassive: {fileID: 11400000, guid: 30583063ff5db304080f7dbf5bfd2bfe, type: 2}
