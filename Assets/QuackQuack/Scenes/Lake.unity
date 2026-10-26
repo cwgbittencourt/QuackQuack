@@ -3158,9 +3158,12 @@ MonoBehaviour:
   - {fileID: 289618264}
   - {fileID: 1019603777}
   - {fileID: 1968928777}
-  experienceThresholds: 0a000000140000001e000000
+  experienceThresholds: 0a000000140000001e00000028000000320000003c00000046000000
   experiencePerPickup: 10
   projectileCapacity: 32
+  rareRewardPrefab: {fileID: 7136467452485654054, guid: 42f3a7e61436f3241952caedeb96679f, type: 3}
+  rareRewardSpawn: {fileID: 1682512341}
+  rareRewardExperience: 40
 --- !u!4 &1430572155
 Transform:
   m_ObjectHideFlags: 0
@@ -3672,6 +3675,91 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 924705538}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1682512340
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1682512341}
+  m_Layer: 0
+  m_Name: Rare reward spawn T045
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1682512341
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682512340}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -9, y: 2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1730179132}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1730179130
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1730179132}
+  - component: {fileID: 1730179131}
+  m_Layer: 0
+  m_Name: Upgrade feedback T045
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1730179131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1730179130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 812955bec561f86448450f1e9105e3ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Gameplay.Upgrades.UpgradeFeedbackBridge
+  prefab: {fileID: 5753638840002915096, guid: 158d84050c144e545aa7034f1f550049, type: 3}
+  evolutionClip: {fileID: 8300000, guid: d2fbf227a5290db43b1ba27fafaa17d7, type: 3}
+  rareClip: {fileID: 8300000, guid: cbd2ff6de2012ae428e14929dcdf52d7, type: 3}
+  capacity: 4
+  evolutionRadius: 2
+  rareRadius: 1.2
+  evolutionDuration: 1.2
+  rareDuration: 1
+  volume: 0.3
+--- !u!4 &1730179132
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1730179130}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1682512341}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1812012347
 GameObject:
@@ -5045,3 +5133,4 @@ SceneRoots:
   - {fileID: 1161900760}
   - {fileID: 90802082}
   - {fileID: 1430572155}
+  - {fileID: 1730179132}

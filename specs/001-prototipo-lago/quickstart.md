@@ -68,9 +68,26 @@ menus em um clone normal para simplesmente jogar.
   usam a navegação padrão do Input System UI.
 - A resolução fecha o modal e retoma o combate; se houver níveis acumulados,
   apresenta a próxima oferta antes de retomar. Encerrar a partida oculta as cartas.
-- O trecho de demonstração concede três níveis. A carta de evolução é validada
-  nos testes com uma build preparada; este trecho não substitui a partida completa
-  nem o aceite de efeitos/balanceamento de todas as passivas.
+- Os três pickups comuns permitem três escolhas. Com a recompensa rara da T045,
+  a demonstração totaliza até sete subidas de nível. Evoluções ainda exigem arma
+  N5 e passiva compatível, e dependem das ofertas elegíveis. Este trecho não substitui
+  a partida completa nem o aceite de efeitos/balanceamento de todas as passivas.
+
+### Feedback de evolução e recompensa rara disponível após T045
+
+- O pickup roxo em (-9, 2) concede 40 XP uma única vez e retorna ao pool.
+- Após resolver as cartas, deve aparecer um losango roxo com RECOMPENSA RARA e
+  um tom temporário. Uma evolução aceita mostra estrela dourada, EVOLUÇÃO! e outro
+  tom. Melhorias comuns, pulo e comandos rejeitados não geram o sinal de evolução.
+- Se várias notificações se acumularem durante as cartas, a evolução tem prioridade
+  e os efeitos são reproduzidos um por vez. Pausar congela animação e áudio; encerrar
+  a partida limpa efeitos ativos e pendentes.
+- Repetir a coleta ou callbacks da mesma oferta não pode conceder XP/evolução de novo.
+  Os testes também preparam uma build elegível para verificar as evoluções diretamente.
+
+O menu `QuackQuack → Build T045 upgrade feedback` gera os prefabs, tons temporários
+e ligação na cena existente. Assets já estão versionados; não executar para apenas
+jogar um clone normal. A ferramenta T044 reconecta o feedback T045 quando ele já existe.
 
 Os prefabs UpgradeSelection e ExperiencePickup e a ligação na cena estão
 versionados. O menu `QuackQuack → Build T044 upgrade selection` reconstrói essa

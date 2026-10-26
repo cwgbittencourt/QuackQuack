@@ -307,6 +307,33 @@ descarta bordas de entrada ao sair da seleção. WeaponRunner ignora pools já
 descartados, permitindo destruir Bootstrap antes da cena sem novas aquisições.
 Safe Area e a matriz de proporções continuam nas tarefas de responsividade.
 
+## UpgradeFeedback (T045)
+
+UpgradeSystem.ChoiceConfirmed publica UpgradeConfirmation somente após aplicar
+e fechar uma confirmação aceita, com IDs da oferta/escolha e IsEvolution obtido
+do catálogo validado. Reentrada, confirmação repetida, pulo e rejeições não
+repetem a notificação. O bridge traduz evolução em PresentationEvent.EvolutionObtained.
+
+ExperiencePickup.InitializeRare/SpawnRare configura uma recompensa pooled com
+correlação própria por aquisição. XP é concedido pelas regras existentes, o objeto
+retorna ao pool e somente depois é emitido RareReward com a posição aceita.
+ResetState limpa a classificação rara; reutilização comum não herda o evento.
+Notificações de apresentação nunca concedem XP ou alteram a build.
+
+UpgradeFeedbackController compõe anel, estrela/losango, legenda e áudio temporário.
+PooledUpgradeFeedback liga seu término ao PoolService. UpgradeFeedbackBridge
+pré-aquece quatro efeitos, deduplica correlações por tipo e limita a memória a
+1024 notificações na sessão. Saturação descarta o cosmético sem afetar regras.
+Notificações recebidas durante ChoosingUpgrade ficam numa fila limitada a quatro;
+ao retomar, evolução tem prioridade e a fila toca um efeito por vez. Pausa congela
+tempo/áudio; estados terminais e desativação devolvem efeitos e limpam a fila.
+
+A demonstração de Lake tem um pickup raro roxo de 40 XP em (-9, 2), além dos três
+comuns. Limiares cumulativos 10–70 permitem até sete escolhas. O efeito dourado
+EVOLUÇÃO! é distinto do losango roxo RECOMPENSA RARA e dos sinais do Quack manual.
+Clipes, perfis e prefabs são assets gerados pelo Unity; não há criação recorrente
+de objetos ou AudioClip durante as ativações.
+
 ## SpawnRequest
 
 Produzido pelo `SpawnDirector` e consumido pelo `PoolService`.

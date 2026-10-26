@@ -47,6 +47,7 @@ namespace QuackQuack.Systems.Upgrades
         public int BanishRemaining => build.BanishRemaining;
         public event Action<UpgradeOffer> OfferChanged;
         public event Action<string> OfferResolved;
+        public event Action<UpgradeConfirmation> ChoiceConfirmed;
 
         // Prefiltered-ID boundary, also usable before authored catalogs exist.
         public UpgradeSystem(int seed) : this(seed, new BuildState()) { }
@@ -144,7 +145,7 @@ namespace QuackQuack.Systems.Upgrades
             if (!IsOpen(offerId) || !IsOffered(choiceId) || !Eligible(choiceId)) return false;
             if (catalogBound && !Apply(choiceId)) return false;
             confirmed.Add(choiceId);
-            Resolve();
+            Resolve(new UpgradeConfirmation(offerId, choiceId, evolutions.ContainsKey(choiceId)));
             return true;
         }
 
@@ -243,11 +244,15 @@ namespace QuackQuack.Systems.Upgrades
             CurrentOffer = CurrentOffer.Close();
             offers[CurrentOffer.OfferId] = CurrentOffer;
         }
-        private void Resolve()
+        private void Resolve(UpgradeConfirmation? confirmation = null)
         {
             CloseCurrent();
             string resolvedId = CurrentOffer.OfferId;
-            try { OfferResolved?.Invoke(resolvedId); }
+            try
+            {
+                if (confirmation.HasValue) ChoiceConfirmed?.Invoke(confirmation.Value);
+                OfferResolved?.Invoke(resolvedId);
+            }
             finally
             {
                 OpenPendingLevels();
@@ -255,6 +260,6 @@ namespace QuackQuack.Systems.Upgrades
                     run.TryTransition(RunPhase.Playing);
             }
         }
-        public void Dispose() { disposed = true; OfferChanged = null; OfferResolved = null; }
+        public void Dispose() { disposed = true; OfferChanged = null; OfferResolved = null; ChoiceConfirmed = null; }
     }
 }

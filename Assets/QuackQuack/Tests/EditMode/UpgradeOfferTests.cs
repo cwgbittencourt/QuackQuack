@@ -206,6 +206,25 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(Snapshot(), Is.EqualTo(before));
         }
 
+        [Test]
+        public void ConfirmationNotificationIsPublishedAfterClosingAndCannotBeReentered()
+        {
+            system.GenerateOffer("once", new[] { "a" });
+            int notifications = 0;
+            system.ChoiceConfirmed += value =>
+            {
+                notifications++;
+                Assert.That(system.CurrentOffer.IsClosed, Is.True);
+                Assert.That(value.OfferId, Is.EqualTo("once"));
+                Assert.That(value.ChoiceId, Is.EqualTo("a"));
+                Assert.That(value.IsEvolution, Is.False);
+                Assert.That(system.TryConfirm(value.OfferId, value.ChoiceId), Is.False);
+            };
+            Assert.That(system.TryConfirm("once", "a"), Is.True);
+            Assert.That(notifications, Is.EqualTo(1));
+            Assert.That(system.ConfirmedChoices.Count, Is.EqualTo(1));
+        }
+
         private void AssertResources(int rerolls, int banish)
         {
             Assert.That(system.RerollsRemaining, Is.EqualTo(rerolls));

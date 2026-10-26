@@ -1,4 +1,7 @@
 using System;
+using System.Threading;
+using QuackQuack.Core.Combat;
+using QuackQuack.Systems.Combat;
 using QuackQuack.Gameplay.Player;
 using QuackQuack.Systems.Pooling;
 using QuackQuack.Systems.Upgrades;
@@ -13,6 +16,11 @@ namespace QuackQuack.Gameplay.Pickups
         private UpgradeSystem upgrades;
         private int amount;
         private bool acquired, claimed;
+        private GameplayEventBus rareEvents;
+        private long rareId;
+        private static long nextRareId;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetIds() { nextRareId = 0; }
 
         private void Awake() => GetComponent<CircleCollider2D>().isTrigger = true;
 
@@ -27,6 +35,13 @@ namespace QuackQuack.Gameplay.Pickups
             pools = owner; upgrades = progression; amount = experienceAmount;
         }
 
+        public void InitializeRare(PoolService owner, UpgradeSystem progression, int experienceAmount, GameplayEventBus events)
+        {
+            if (events == null) throw new ArgumentNullException(nameof(events));
+            Initialize(owner, progression, experienceAmount);
+            rareEvents = events; rareId = Interlocked.Increment(ref nextRareId);
+        }
+
         private void OnTriggerEnter2D(Collider2D other) => TryCollect(other);
         private void OnTriggerStay2D(Collider2D other) => TryCollect(other);
 
@@ -37,13 +52,16 @@ namespace QuackQuack.Gameplay.Pickups
             var player = other.GetComponentInParent<PlayerController>();
             if (player == null || !player.isActiveAndEnabled || player.State == null || player.State.Health <= 0) return;
             claimed = true;
+            var acceptedEvents = rareEvents; long acceptedId = rareId; Vector2 acceptedPosition = transform.position;
             if (!upgrades.TryCollectExperience(amount)) { claimed = false; return; }
             pools.Release(this);
+            acceptedEvents?.Publish(new PresentationEvent(acceptedId, acceptedId, PresentationEventType.RareReward,
+                EventPriority.Feedback, 2, acceptedPosition));
         }
 
         public void OnAcquire() { acquired = true; claimed = false; }
         public void OnRelease() { acquired = false; }
-        public void ResetState() { pools = null; upgrades = null; amount = 0; acquired = claimed = false; }
+        public void ResetState() { pools = null; upgrades = null; rareEvents = null; rareId = 0; amount = 0; acquired = claimed = false; }
 
         // Composition helpers: creation happens only inside the pool's initial warmup.
         public static void RegisterPool(PoolService owner, string key, int capacity, Transform parent = null)
@@ -64,6 +82,16 @@ namespace QuackQuack.Gameplay.Pickups
             var pickup = owner.Acquire<ExperiencePickup>(key);
             if (pickup == null) return null;
             try { pickup.Initialize(owner, progression, amount); pickup.transform.position = position; }
+            catch { owner.Release(pickup); throw; }
+            return pickup;
+        }
+
+        public static ExperiencePickup SpawnRare(PoolService owner, string key, UpgradeSystem progression, int amount, Vector3 position, GameplayEventBus events)
+        {
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            var pickup = owner.Acquire<ExperiencePickup>(key);
+            if (pickup == null) return null;
+            try { pickup.InitializeRare(owner, progression, amount, events); pickup.transform.position = position; }
             catch { owner.Release(pickup); throw; }
             return pickup;
         }

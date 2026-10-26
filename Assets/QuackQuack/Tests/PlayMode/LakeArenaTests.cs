@@ -38,7 +38,7 @@ namespace QuackQuack.Tests.PlayMode
             var body = player.GetComponent<Rigidbody2D>();
             var bootstrap = GameBootstrap.Instance;
             Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Enemy), Is.EqualTo(2));
-            Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Pickup), Is.EqualTo(4));
+            Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Pickup), Is.EqualTo(5));
             var targets = Object.FindObjectsByType<QuackTarget>(FindObjectsSortMode.None);
             QuackTarget enemy = null;
             foreach (var target in targets)
@@ -61,7 +61,7 @@ namespace QuackQuack.Tests.PlayMode
             yield return new WaitForFixedUpdate();
             yield return null;
             Assert.That(arena.RewardClaimed, Is.True);
-            Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Pickup), Is.EqualTo(3));
+            Assert.That(bootstrap.Pools.GetActiveCount(PoolFamily.Pickup), Is.EqualTo(4));
             Assert.That(player.State.Breath.Current, Is.GreaterThan(40));
             player.State.Breath.TryConsume(player.State.Breath.Capacity, out _);
             yield return null;

@@ -23,6 +23,10 @@ namespace QuackQuack.Gameplay.Upgrades
         [SerializeField] private Transform[] experienceSpawns;
         [SerializeField] private int[] experienceThresholds;
         [SerializeField] private int experiencePerPickup, projectileCapacity;
+        [SerializeField] private ExperiencePickup rareRewardPrefab;
+        [SerializeField] private Transform rareRewardSpawn;
+        [SerializeField] private int rareRewardExperience;
+        private ExperiencePickup rarePickup;
         private ExperiencePickup[] pickups;
         private WeaponRunner runner;
         private GameBootstrap bootstrap;
@@ -55,6 +59,13 @@ namespace QuackQuack.Gameplay.Upgrades
             pickups = new ExperiencePickup[experienceSpawns.Length];
             for (int i = 0; i < pickups.Length; i++)
                 pickups[i] = ExperiencePickup.Spawn(bootstrap.Pools, xpKey, Upgrades, experiencePerPickup, experienceSpawns[i].position);
+            if (rareRewardPrefab != null && rareRewardSpawn != null)
+            {
+                string rareKey = key + "-rare";
+                bootstrap.Pools.Register(rareKey, PoolFamily.Pickup, () => Instantiate(rareRewardPrefab, transform), 1);
+                rarePickup = ExperiencePickup.SpawnRare(bootstrap.Pools, rareKey, Upgrades, rareRewardExperience,
+                    rareRewardSpawn.position, bootstrap.Events);
+            }
             Ready = true;
         }
         private void Update()
@@ -70,6 +81,7 @@ namespace QuackQuack.Gameplay.Upgrades
             Upgrades?.Dispose();
             if (runner != null) runner.enabled = false;
             if (bootstrap != null && pickups != null) foreach (var pickup in pickups) bootstrap.Pools.Release(pickup);
+            if (bootstrap != null) bootstrap.Pools.Release(rarePickup);
         }
     }
 }

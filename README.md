@@ -43,22 +43,23 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T042: seis comportamentos de arma e projéteis pooled | Concluída |
 | T043: catálogo de seis armas, seis passivas e três evoluções | Concluída |
 | T044: seleção de cartas e progressão integrada à arena | Concluída |
+| T045: feedback pooled de evolução e recompensa rara | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T044 foram revisadas e concluídas; a próxima tarefa é **T045**.
+da arena. T022–T045 foram revisadas e concluídas; a próxima tarefa é **T046**.
 
-Validação T044: **208 testes EditMode e 70 PlayMode aprovados, sem falhas**.
+Validação T045: **209 testes EditMode e 77 PlayMode aprovados, sem falhas**.
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
-Consulte o [relatório T044](specs/001-prototipo-lago/test-report-t044.md).
+Consulte o [relatório T045](specs/001-prototipo-lago/test-report-t045.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
-Bootstrap abre a arena de treino com Bumerangue e três pickups cianos de XP.
+Bootstrap abre a arena de treino com Bumerangue, três pickups cianos de XP e um raro roxo.
 A coleta abre cartas e pausa o combate; é possível escolher, rerrolar, banir ou
-pular. O feedback exclusivo de evolução/recompensa continua na T045. A partida
-completa e os demais aceites continuam pendentes.
+pular. Evolução exibe estrela dourada e recompensa rara, losango roxo, com legendas
+e tons temporários. A partida completa e os demais aceites continuam pendentes.
 
 ## Ambiente necessário
 

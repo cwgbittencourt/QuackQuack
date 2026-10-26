@@ -56,6 +56,7 @@ namespace QuackQuack.Editor
                 marker.transform.position = positions[i]; spawns.GetArrayElementAtIndex(i).objectReferenceValue = marker.transform;
             }
             data.ApplyModifiedPropertiesWithoutUndo();
+            if (GameObject.Find("Upgrade feedback T045") != null) UpgradeFeedbackSetup.Attach();
             EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
         }
 
