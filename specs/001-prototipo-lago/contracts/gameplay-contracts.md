@@ -95,7 +95,7 @@ Catálogos ausentes/vazios e definições nulas/inválidas são rejeitados. O va
 aceita subconjuntos não vazios para autoria/testes; o catálogo final com exatamente
 três combinações e seu feedback são entregas de T043/T045.
 
-## BuildState (contrato de testes T033)
+## BuildState (T033/T039)
 
 Estado C# por partida em `QuackQuack.Core.Progression.BuildState`, criado vazio por
 construtor sem argumentos. `Weapons` e `Passives` expõem mapas somente de leitura
@@ -115,10 +115,17 @@ e todas as passivas. Rejeita base ausente, passiva ausente, nível insuficiente,
 resultado vazio/em branco ou já possuído, sem mutação parcial. Compatibilidade
 autoral das combinações pertence a T038/T043, não é criada por estes testes.
 
-As operações retornam booleano de aceitação. T033 usa um adaptador de reflexão
-somente nos testes para manter a compilação enquanto a classe da T039 não existe.
-A suíte deve falhar explicitamente nessa ausência; não há stub, Ignore ou aceite
-de progressão. Na T039, preferir chamadas tipadas ao implementar este contrato.
+As operações retornam booleano de aceitação. Os testes da T033 agora usam chamadas
+tipadas à implementação da T039. Inventários, Evolutions (base para resultado) e
+History (BuildChange somente de leitura) usam wrappers que impedem mutação externa.
+O histórico registra somente aquisições, melhorias e evoluções aceitas, na ordem.
+
+A forma evoluída mantém o nível cinco no mesmo slot e é final: não recebe melhorias
+nem nova evolução. A base já evoluída não pode ser adquirida novamente na partida.
+TryUpgradePassive(id, maxLevel) recebe o máximo da definição validada pelo chamador,
+sem fixar cinco para passivas, e funciona mesmo com slots cheios. O Core não resolve
+assets ou catálogos; IDs conhecidos, limites autorais e receitas são responsabilidade
+da integração com conteúdo. Cada nova BuildState possui recursos e histórico próprios.
 
 ## UpgradeOffer
 

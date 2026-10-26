@@ -31,25 +31,26 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T030: arena curta do Lago | Concluída |
 | T031: HUD de vida, Fôlego, terreno e estado do Quack | Concluída |
 | T032: feedback visual e áudio do primeiro MVP | Concluída |
-| T033: testes dos limites da build e dos recursos de escolha | Concluída (fase vermelha; implementação na T039) |
+| T033: testes dos limites da build e dos recursos de escolha | Concluída (aprovados com T039) |
 | T034: testes de ofertas e idempotência por offerId | Concluída (fase vermelha; implementação na T040) |
 | T035: testes de coleta de XP e fluxo de seleção | Concluída (fase vermelha; implementação nas T040–T041) |
 | T036: definição de arma, cinco níveis e afinidade por terreno | Concluída |
 | T037: definição de passiva, bônus limitados e vínculo com arma | Concluída |
 | T038: definição e validação das combinações evolutivas | Concluída |
+| T039: estado da build, slots, recursos e evolução | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T038 foram revisadas e concluídas; a próxima tarefa é **T039**.
+da arena. T022–T039 foram revisadas e concluídas; a próxima tarefa é **T040**.
 
-Validação atual: **130 testes EditMode aprovados e 43 falhas esperadas**: 23 da T033
-pela ausência de `BuildState` (T039) e 20 da T034 pela ausência de `UpgradeSystem` (T040).
+Validação atual: **157 testes EditMode aprovados e 20 falhas esperadas** da T034
+pela ausência de `UpgradeSystem` (T040). Os testes de `BuildState` da T033 passaram.
 Validação PlayMode da T035: **34 aprovados e seis falhas esperadas** pela ausência
-do fluxo de XP/seleção (T040–T041). A execução EditMode citada acima é da T038.
-Consulte o [relatório T038](specs/001-prototipo-lago/test-report-t038.md).
+do fluxo de XP/seleção (T040–T041). A execução EditMode citada acima é da T039.
+Consulte o [relatório T039](specs/001-prototipo-lago/test-report-t039.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
 
 ## Ambiente necessário
