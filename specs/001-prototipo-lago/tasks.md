@@ -92,7 +92,7 @@ cinco niveis por arma e as tres evolucoes sem minibosses ou chefe.
 
 ### Tests for User Story 2
 
-- [ ] T033 [P] [US2] Criar testes EditMode para seis slots de arma/passiva, duas rerrolagens, um banimento e evolucao sem exceder slots em `Assets/QuackQuack/Tests/EditMode/BuildStateTests.cs`
+- [x] T033 [P] [US2] Criar testes EditMode para seis slots de arma/passiva, duas rerrolagens, um banimento e evolucao sem exceder slots em `Assets/QuackQuack/Tests/EditMode/BuildStateTests.cs`
 - [ ] T034 [P] [US2] Criar testes EditMode para ofertas de uma a tres escolhas elegiveis, sem duplicatas e idempotentes por `offerId` em `Assets/QuackQuack/Tests/EditMode/UpgradeOfferTests.cs`
 - [ ] T035 [P] [US2] Criar testes PlayMode para coleta de XP, pausa de combate, selecao e retorno sem duplicar eventos em `Assets/QuackQuack/Tests/PlayMode/UpgradeFlowTests.cs`
 

@@ -28,6 +28,31 @@ Campos comuns: tick, fonte, alvo, posicao, quantidade, tipo e identificador de c
 Invariantes: um evento representa uma mudanca ja aceita; consumidores nao reaplicam regra; efeitos
 visuais/sonoros podem ser descartados sem mudar o estado; identificador impede dupla recompensa.
 
+## BuildState (contrato de testes T033)
+
+Estado C# por partida em `QuackQuack.Core.Progression.BuildState`, criado vazio por
+construtor sem argumentos. `Weapons` e `Passives` expõem mapas somente de leitura
+de ID para nível, com até seis entradas independentes por família. Aquisição começa
+no nível um. `TryAddWeapon(id)` e `TryAddPassive(id)` retornam falso para IDs vazios,
+em branco, duplicados ou sem slot, preservando o estado. `TryUpgradeWeapon(id)`
+melhora uma arma existente até cinco, inclusive com os slots cheios.
+
+`RerollsRemaining` começa em dois; `BanishRemaining`, em um. `TryUseReroll()` e
+`TryUseBanish()` consomem somente o próprio recurso e retornam falso ao esgotar.
+A idempotência por oferta pertence ao UpgradeSystem (T034/T040).
+
+`TryEvolveWeapon(baseId, requiredPassiveId, resultId)` recebe uma combinação já
+validada pelo catálogo: exige a arma base no nível cinco e a passiva indicada
+presente. Substitui a base pelo resultado no mesmo slot, preserva as outras armas
+e todas as passivas. Rejeita base ausente, passiva ausente, nível insuficiente,
+resultado vazio/em branco ou já possuído, sem mutação parcial. Compatibilidade
+autoral das combinações pertence a T038/T043, não é criada por estes testes.
+
+As operações retornam booleano de aceitação. T033 usa um adaptador de reflexão
+somente nos testes para manter a compilação enquanto a classe da T039 não existe.
+A suíte deve falhar explicitamente nessa ausência; não há stub, Ignore ou aceite
+de progressão. Na T039, preferir chamadas tipadas ao implementar este contrato.
+
 ## UpgradeOffer
 
 | Campo | Regra |
