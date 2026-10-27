@@ -150,3 +150,17 @@ e ultima migracao.
 
 Regras: tres reliquias equipadas no maximo; IDs desconhecidos sao ignorados com diagnostico; arquivo
 invalido usa backup ou valores padrao sem impedir o jogo.
+
+### RunProgressProfile e RunProgressReceipt (T061)
+
+O schema 2 implementado armazena relíquias e Progress: moedas, partidas, vitórias,
+recordes por ID, desafios por ID e IDs de partidas aplicadas. Configurações e última
+migração da proposta acima continuam fora desta implementação. Perfil é imutável;
+recibo contém perfil, deltas de recordes/desafios, moedas adicionadas e AlreadyApplied.
+RunResult continua sendo snapshot terminal separado do perfil acumulado.
+
+Uma ID única por partida garante aplicação única, mesmo com seed repetida. Carteira,
+recordes, desafios e recibo são gravados atomicamente. Contagem de recibos coincide
+com partidas; vitórias não excedem partidas. Recordes só aumentam; desafios não
+regredem e respeitam suas metas. Regras usam derrotas, sobrevivência, vitórias ou
+evoluções, cumulativas ou por melhor partida. Versões 0/1 migram com perfil vazio.

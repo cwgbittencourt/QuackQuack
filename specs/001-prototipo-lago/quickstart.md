@@ -38,9 +38,9 @@ durante a janela estavel; nenhuma instancia ativa simultaneamente no pool.
    O encontro final limpa a horda anterior. Os círculos verdes são refúgios contra
    ondas, destruídos na fase posterior. Marca e áudio antecedem os padrões do chefe.
 5. Derrotar o chefe produz Won; vida zero produz Lost; ABANDONAR produz Abandoned.
-   O HUD identifica o final. O snapshot já existe em RunDirector.Result; a tela
-   completa, crédito de carteira e progresso de recordes/desafios ficam na T061.
-6. Sair de Play e abrir RunBootstrap novamente para uma nova partida nesta entrega.
+   A tela T061 apresenta combate, build e recompensas/progresso em três colunas
+   roláveis. Confira o estado do save; se falhar, use TENTAR NOVAMENTE antes de sair.
+6. JOGAR NOVAMENTE inicia outra partida preservando o progresso salvo.
    Unlocks/equipamento carregam de `lake-relics.json` em Application.persistentDataPath.
    Alterações são salvas fora do combate; falha de save não bloqueia o encerramento.
 
@@ -242,7 +242,7 @@ o resumo continua igual mesmo se a build/loadout original mudar depois.
 Consulte o [relatório T058](test-report-t058.md) e o contrato de resultado para a API.
 
 A T058 entrega o modelo e acumulador em Core. A T060 coleta os eventos reais
-em RunBootstrap; a apresentação completa permanece na T061. O serviço T059
+em RunBootstrap; a apresentação completa está disponível desde T061. O serviço T059
 também está ligado ao ciclo da partida para relíquias.
 O produtor deve atribuir o último dano/derrota/recompensa antes da transição terminal,
 pois fatos posteriores são rejeitados. Consultar o resultado não credita carteira
@@ -261,15 +261,14 @@ Reaplicar os IDs usa Unlock/Equip, respeitando os três slots e a idempotência 
 loadout. `Save(loadout)` grava um snapshot, preservando a ordem equipada.
 `RestoreBackup()` promove explicitamente o backup validado; Load apenas o consulta.
 
-O schema atual é 1; versão 0 migra as mesmas listas e usa equipamento vazio se
-ausente. Versão futura no principal impede gravação/restauração por esta versão.
+O schema atual é 2; versões 0/1 migram relíquias com perfil de progresso vazio.
+Versão 0 usa equipamento vazio se ausente. Versão futura no principal impede gravação/restauração por esta versão.
 Sem principal/backup utilizável, Load retorna padrões vazios para o jogo continuar.
 Falhas de escrita retornam Failed com diagnóstico, sem expor caminho ou conteúdo.
 O serviço não faz I/O por frame nem determina sozinho o caminho pessoal.
 
 O treino Bootstrap mantém relíquias por sessão. RunBootstrap define o caminho local
-e os momentos de carregar/salvar desde T060; carteira, recordes e desafios exigirão
-ampliação versionada do schema. Ver [relatório T059](test-report-t059.md).
+e os momentos de carregar/salvar desde T060; carteira, recordes e desafios estão no schema 2 desde T061. Ver [relatório T059](test-report-t059.md).
 
 ## Evidencias a conservar
 
@@ -278,3 +277,16 @@ ampliação versionada do schema. Ver [relatório T059](test-report-t059.md).
 - Perfis de CPU, GPU, memoria e GC nos picos de 200 e 400 inimigos.
 - Identificador da build, aparelho, configuracao, seed e resultado de cada playtest.
 - Planilha ou formulario consolidando compreensao, justica percebida e repeticao espontanea.
+
+## Tela final e progresso (T061)
+
+O menu **QuackQuack > Build T061 results screen** gera os assets pelo Unity;
+o gerador T060 reconecta a tela quando seu asset de progressão existe. Os assets
+estão versionados; não é necessário regenerar para jogar um clone normal.
+ResultsProgression.asset contém metas provisórias editáveis: 100 inimigos acumulados,
+15 minutos em uma partida e uma vitória contra o Sapo-Rei. Não concedem moedas extras.
+
+Execute ResultsContractTests, RunProgressionTests e ProgressSaveTests em EditMode;
+ResultsViewTests e ResultsSceneFlowTests em PlayMode. Cobrem três finais, retry e
+reinício preservando saldo. Capturas Logs/t061-*.png são fixtures de UI a 1280×720,
+não aceite de gameplay, Safe Area ou plataformas. Ver [relatório T061](test-report-t061.md).

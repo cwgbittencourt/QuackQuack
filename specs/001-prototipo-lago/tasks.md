@@ -140,7 +140,7 @@ todos os campos da tela de resultado.
 - [x] T058 [US3] Implementar `RunResult` com tempo, chefe, derrotas, dano por arma, sequencia, build, sinergias, moedas, itens e desafios em `Assets/QuackQuack/Core/Run/RunResult.cs`
 - [x] T059 [US3] Implementar JSON versionado para desbloqueios/loadout de reliquias, escrita atomica, backup e valores padrao em `Assets/QuackQuack/Systems/Save/JsonSaveService.cs`
 - [x] T060 [US3] Implementar orquestracao de 15 minutos e encerramento por vitoria, morte ou abandono em `Assets/QuackQuack/Systems/Run/RunDirector.cs`
-- [ ] T061 [US3] Implementar tela final completa e progresso de recordes/desafios em `Assets/QuackQuack/Presentation/UI/ResultsView.cs`
+- [x] T061 [US3] Implementar tela final completa e progresso de recordes/desafios em `Assets/QuackQuack/Presentation/UI/ResultsView.cs`
 
 **Checkpoint**: US3 fecha o loop completo e preserva resultado/progresso local.
 

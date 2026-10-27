@@ -36,6 +36,9 @@ namespace QuackQuack.Systems.Run
         public EnemyUpdateScheduler Scheduler { get; private set; }
         public FrogKingController Boss { get; private set; }
         public RunResult Result { get; private set; }
+        public string RunId { get; } = Guid.NewGuid().ToString("N");
+        public PrototypeBuildCatalog BuildCatalog => buildCatalog;
+        public LakeRunSettings RunSettings => settings;
         public SaveOperationResult LastSave { get; private set; }
         public int BossRequests { get; private set; }
         public int SuppressedPickups { get; private set; }
@@ -309,6 +312,14 @@ namespace QuackQuack.Systems.Run
         {
             if (!Ready) return null;
             LastSave = save.Save(relics); savedVersion = relics.Version; dirty = false; return LastSave;
+        }
+        public RunProgressCommitResult CommitProgress(IEnumerable<ResultChallengeRule> rules)
+        {
+            if (Result == null) throw new InvalidOperationException("A terminal result is required.");
+            var committed = save.CommitResult(RunId, Result, rules, relics);
+            LastSave = committed.Save;
+            if (LastSave.Status != SaveStatus.Failed) { savedVersion = relics.Version; dirty = false; }
+            return committed;
         }
         private void OnApplicationPause(bool paused) { if (Ready && paused) { if (run.IsSimulating) TogglePause(); Persist(); } }
         private void OnDestroy()

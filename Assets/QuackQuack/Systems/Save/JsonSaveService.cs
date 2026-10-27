@@ -8,13 +8,14 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using QuackQuack.Core.Progression;
+using QuackQuack.Core.Run;
 using UnityEngine;
 
 namespace QuackQuack.Systems.Save
 {
     public sealed class JsonSaveService
     {
-        public static int CurrentSchemaVersion => 1;
+        public static int CurrentSchemaVersion => 2;
         private const long MaximumBytes = 1024 * 1024;
         private readonly string path;
         private readonly HashSet<string> known;
@@ -26,6 +27,16 @@ namespace QuackQuack.Systems.Save
             public int schemaVersion;
             public string[] unlockedRelicIds;
             public string[] equippedRelicIds;
+            public ProgressDocument progress;
+        }
+        [Serializable] private sealed class NumberEntry { public string id; public double value; }
+        [Serializable] private sealed class CountEntry { public string id; public int value; }
+        [Serializable] private sealed class ProgressDocument
+        {
+            public int coins, runs, victories;
+            public NumberEntry[] records;
+            public CountEntry[] challenges;
+            public string[] appliedRunIds;
         }
 
         public JsonSaveService(string path, string[] knownRelicIds)
@@ -61,7 +72,7 @@ namespace QuackQuack.Systems.Save
             bool changed = data.SchemaVersion != CurrentSchemaVersion;
             var unlocked = Filter(data.UnlockedRelicIds, known, int.MaxValue, ref changed);
             var equipped = Filter(data.EquippedRelicIds, new HashSet<string>(unlocked, StringComparer.Ordinal), RelicLoadout.SlotLimit, ref changed);
-            return Result(new SaveData(CurrentSchemaVersion, unlocked, equipped), changed ? SaveStatus.Recovered : SaveStatus.Success,
+            return Result(new SaveData(CurrentSchemaVersion, unlocked, equipped, data.SchemaVersion >= 2 ? data.Progress : null), changed ? SaveStatus.Recovered : SaveStatus.Success,
                 changed ? "Save migrated or relic IDs normalized." : "Save data validated.");
         }
 
@@ -74,9 +85,27 @@ namespace QuackQuack.Systems.Save
             }
         }
 
-        public SaveOperationResult Save(RelicLoadout loadout) => loadout == null
-            ? Result(CreateDefault(), SaveStatus.Failed, "A loadout is required.")
-            : Save(new SaveData(CurrentSchemaVersion, loadout.UnlockedIds, loadout.EquippedIds));
+        public SaveOperationResult Save(RelicLoadout loadout)
+        {
+            lock (gate)
+            {
+                if (loadout == null) return Result(CreateDefault(), SaveStatus.Failed, "A loadout is required.");
+                var previous = Load();
+                return Save(new SaveData(CurrentSchemaVersion, loadout.UnlockedIds, loadout.EquippedIds, previous.Data.Progress));
+            }
+        }
+
+        public RunProgressCommitResult CommitResult(string runId, RunResult result, IEnumerable<ResultChallengeRule> rules, RelicLoadout loadout)
+        {
+            if (loadout == null) throw new ArgumentNullException(nameof(loadout));
+            lock (gate)
+            {
+                var loaded = Load(); var receipt = RunProgression.Apply(loaded.Data.Progress, runId, result, rules);
+                if (receipt.AlreadyApplied) return new RunProgressCommitResult(receipt, loaded);
+                var data = new SaveData(CurrentSchemaVersion, loadout.UnlockedIds, loadout.EquippedIds, receipt.Profile);
+                return new RunProgressCommitResult(receipt, Save(data));
+            }
+        }
 
         public SaveOperationResult RestoreBackup()
         {
@@ -103,8 +132,9 @@ namespace QuackQuack.Systems.Save
                 temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
                 var document = new Document { schemaVersion = CurrentSchemaVersion,
                     unlockedRelicIds = new List<string>(data.Data.UnlockedRelicIds).ToArray(),
-                    equippedRelicIds = new List<string>(data.Data.EquippedRelicIds).ToArray() };
+                    equippedRelicIds = new List<string>(data.Data.EquippedRelicIds).ToArray(), progress = EncodeProgress(data.Data.Progress) };
                 byte[] bytes = new UTF8Encoding(false, true).GetBytes(JsonUtility.ToJson(document, true));
+                if (bytes.LongLength > MaximumBytes) throw new IOException("Save size limit reached.");
                 using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 { stream.Write(bytes, 0, bytes.Length); stream.Flush(true); }
                 // Both paths are on the same volume. Never delete the main file before replacing it.
@@ -146,7 +176,8 @@ namespace QuackQuack.Systems.Save
                 if (version > CurrentSchemaVersion) return FileState.Future;
                 if (!ReadIds(root, "unlockedRelicIds", out var unlocked, out bool repairedUnlocks)
                     || !ReadIds(root, "equippedRelicIds", out var equipped, out bool repairedEquipment)) return FileState.Invalid;
-                var migrated = Migrate(new SaveData(version, unlocked, equipped));
+                if (!ReadProgress(root, version, out var profile)) return FileState.Invalid;
+                var migrated = Migrate(new SaveData(version, unlocked, equipped, profile));
                 result = repairedUnlocks || repairedEquipment ? Result(migrated.Data, SaveStatus.Recovered, "Missing or null relic lists recovered.") : migrated;
                 return FileState.Valid;
             }
@@ -156,6 +187,55 @@ namespace QuackQuack.Systems.Save
                     : error is IOException || error is UnauthorizedAccessException || error is System.Security.SecurityException
                         ? FileState.Unavailable : FileState.Invalid;
             }
+        }
+
+        private static ProgressDocument EncodeProgress(RunProgressProfile profile)
+        {
+            var records = new List<NumberEntry>(); foreach (var pair in profile.Records) records.Add(new NumberEntry { id = pair.Key, value = pair.Value });
+            var challenges = new List<CountEntry>(); foreach (var pair in profile.Challenges) challenges.Add(new CountEntry { id = pair.Key, value = pair.Value });
+            return new ProgressDocument { coins = profile.Coins, runs = profile.Runs, victories = profile.Victories,
+                records = records.ToArray(), challenges = challenges.ToArray(), appliedRunIds = new List<string>(profile.AppliedRunIds).ToArray() };
+        }
+        private static XElement Field(XElement root, string name)
+        {
+            var fields = new List<XElement>(root.Elements(name));
+            if (fields.Count > 1) throw new FormatException("Duplicate progress field.");
+            return fields.Count == 0 ? null : fields[0];
+        }
+        private static int Count(XElement root, string name)
+        {
+            var field = Field(root, name); if (field == null) return 0;
+            if ((string)field.Attribute("type") != "number" || !int.TryParse(field.Value, NumberStyles.None, CultureInfo.InvariantCulture, out int value)) throw new FormatException("Invalid progress count.");
+            return value;
+        }
+        private static bool ReadProgress(XElement root, int version, out RunProgressProfile profile)
+        {
+            profile = new RunProgressProfile();
+            if (version < 2) return true;
+            var progress = Field(root, "progress"); if (progress == null) return true;
+            if ((string)progress.Attribute("type") != "object") return false;
+            var records = new Dictionary<string, double>(StringComparer.Ordinal); var challenges = new Dictionary<string, int>(StringComparer.Ordinal);
+            foreach (string name in new[] { "records", "challenges" })
+            {
+                var array = Field(progress, name); if (array == null) continue;
+                if ((string)array.Attribute("type") != "array") return false;
+                foreach (var entry in array.Elements())
+                {
+                    if ((string)entry.Attribute("type") != "object") return false;
+                    var id = Field(entry, "id"); var value = Field(entry, "value");
+                    if (id == null || (string)id.Attribute("type") != "string" || string.IsNullOrWhiteSpace(id.Value)
+                        || value == null || (string)value.Attribute("type") != "number") return false;
+                    if (name == "records")
+                    {
+                        if (!double.TryParse(value.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out double number) || double.IsNaN(number) || double.IsInfinity(number) || number < 0) return false;
+                        records.Add(id.Value, number);
+                    }
+                    else challenges.Add(id.Value, Count(entry, "value"));
+                }
+            }
+            if (!ReadIds(progress, "appliedRunIds", out var receipts, out _)) return false;
+            profile = new RunProgressProfile(Count(progress, "coins"), Count(progress, "runs"), Count(progress, "victories"), records, challenges, receipts);
+            return true;
         }
 
         // The framework JSON reader accepts EOF with an unclosed object. Check framing first;

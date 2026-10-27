@@ -7,7 +7,7 @@ partida de 15 minutos.
 
 > Em desenvolvimento. Este repositório contém o projeto Unity e os artefatos do Spec Kit necessários
 > para continuar o trabalho. Inclui a orquestração jogável da partida e uma arena de treino;
-> tela final completa, aceite de gameplay, plataformas e desempenho continuam pendentes.
+> tela final e progresso persistido; aceite de gameplay, plataformas e desempenho continuam pendentes.
 
 ## Imagens do jogo
 
@@ -59,19 +59,19 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T058: resultado imutável, estatísticas e recompensa parcial | Concluída |
 | T059: save de relíquias versionado, gravação atômica e recuperação | Concluída |
 | T060: ondas, encontros 5/10/15, combate, três finais e save integrado | Concluída |
-| Tela final, multiplataforma e desempenho | Planejados |
+| T061: tela final, carteira, recordes/desafios e nova partida | Concluída |
+| Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T060 foram revisadas e concluídas; a próxima tarefa é **T061**.
+da arena. T022–T061 foram revisadas e concluídas; a próxima tarefa é **T062**.
 
-Validação T060: **441/441 EditMode e 164/164 PlayMode aprovados, sem falhas**.
-Os testes integrados cobrem cronograma, combate por arma/Quack, pausa/seleção no
-chefe, vitória, morte, abandono e persistência de relíquias sem bloquear o final.
-O resultado captura o último golpe e a build; a tela final completa fica na T061.
-Consulte o [relatório T060](specs/001-prototipo-lago/test-report-t060.md).
+Validação T061: **456/456 EditMode e 174/174 PlayMode aprovados, sem falhas**.
+A tela final apresenta combate, build, recompensas e progresso em três colunas
+roláveis. O schema 2 persiste carteira, recordes e desafios sem repetir crédito.
+Consulte o [relatório T061](specs/001-prototipo-lago/test-report-t061.md).
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
 Consulte o [relatório T045](specs/001-prototipo-lago/test-report-t045.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
@@ -86,8 +86,8 @@ e Sapo-Rei aos 15. A câmera acompanha o Pato. PAUSAR/Esc permite continuar na m
 fase; ABANDONAR encerra sem vitória. Relíquias são carregadas antes do combate e
 salvas na pausa/seleção, ao encerrar ou sair, em `lake-relics.json` sob
 `Application.persistentDataPath`. O treino Bootstrap mantém estado por sessão.
-O schema atual persiste relíquias; carteira, recordes/desafios e tela final aguardam T061.
-Para reiniciar esta entrega no Editor, saia de Play e abra RunBootstrap novamente.
+O schema 2 persiste também carteira e progresso. Confira o estado do save na tela
+final; se falhar, use TENTAR NOVAMENTE antes de sair. JOGAR NOVAMENTE reinicia a partida.
 
 ## Ambiente necessário
 

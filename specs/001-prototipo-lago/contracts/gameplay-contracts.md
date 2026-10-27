@@ -758,11 +758,12 @@ JsonSaveService recebe caminho de arquivo e exatamente dez IDs conhecidos único
 copiados na construção. Não escolhe um caminho pessoal nem faz I/O automaticamente
 no ciclo de gameplay. SaveData é um snapshot somente leitura da versão e das listas
 de IDs. O schema 1 desta tarefa contém schemaVersion, unlockedRelicIds e
-equippedRelicIds; carteira, recordes, desafios e configurações exigirão extensão
-versionada posterior. Não há crédito automático de RunResult nesta API.
+equippedRelicIds. T061 amplia para schema 2 com progress. Configurações continuam
+fora deste serviço. Save(loadout) preserva o perfil, sem creditar RunResult.
 
 CreateDefault retorna versão atual, desbloqueios e equipamento vazios, sem I/O.
-Migrate aceita schema 0 (mesmas listas; equipamento pode estar ausente) e schema 1.
+Migrate aceita schema 0 (mesmas listas; equipamento pode estar ausente), 1 e 2.
+Versões 0/1 recebem perfil vazio; versão 2 preserva o perfil validado.
 A versão 0 é a política de compatibilidade definida para esta implementação, não
 evidência de um save anteriormente publicado. O método filtra desconhecidos,
 duplicatas e equipamento bloqueado, preservando os primeiros três IDs distintos
@@ -922,7 +923,7 @@ testes substituem esse provider por um diretório exclusivo. O save carrega ante
 de iniciar o combate. Unlocks/equipamento são gravados quando sujos em pausa,
 seleção ou terminal, ao suspender o app e ao descarregar a sessão. Falhas ficam
 em LastSave com diagnóstico e não impedem resultado/encerramento. Persist não
-credita moedas/recordes/desafios, ausentes do schema 1.
+credita moedas/recordes/desafios; o crédito pertence a CommitProgress na T061.
 
 RunDirectorFlowTests usa serviços/assets reais com clock manual para verificar
 limites e finais. RunSceneFlowTests abre as cenas, verifica relógio único, HUD,
@@ -936,3 +937,35 @@ evolucao obtida, recompensa rara e resultado disponivel.
 
 Cada evento declara prioridade e duracao maxima. Alertas de perigo e estado de Folego tem precedencia
 sobre efeitos cosmeticos; Safe Area e proporcao nao podem ocultar informacao essencial.
+
+## ResultsView e progresso persistido (T061)
+
+ResultsBridge recebe ResultAvailable e mantém RunResult imutável. CommitProgress
+usa regras copiadas de ResultsProgressionDefinition. RunState passa a Results
+preservando Outcome. Três colunas roláveis apresentam tempo/chefe, derrotas/dano
+por origem, sequência, armas/passivas/níveis, evoluções, sinergias, relíquias,
+recursos/histórico de escolhas, moedas/bônus/desconto/saldo, desbloqueios,
+recordes anteriores/atuais e progresso de desafios com nomes autorais.
+
+RunId é único por partida, independente da seed. RunProgression.Apply devolve perfil
+e recibo imutáveis; repetir uma ID não credita novamente. Recordes usam máximos de
+tempo (segundos inteiros), derrotas, sequência e dano. Desafios acumulam ou usam a
+melhor partida, limitados à meta; somente vitória aumenta Victories. Moedas usam
+o valor final já calculado no resultado, com saturação em int.MaxValue.
+
+Schema 2 acrescenta progress: coins, runs, victories, records [{id,value}],
+challenges [{id,value}] e appliedRunIds. Contadores não negativos, recordes finitos,
+IDs únicos e quantidade de recibos igual a runs são invariantes. JSON mínimo sem
+progress representa perfil vazio. Perfil inválido recupera o backup inteiro.
+Limites de leitura permanecem; escrita também recusa arquivos acima de 1 MiB.
+
+CommitResult recarrega o perfil e grava resultado aplicado, recibo e relíquias na
+mesma substituição atômica. ID já aplicada retorna sem escrita/rotação de backup.
+Save(loadout) preserva o perfil. IDs aplicadas não são descartadas. Falha permite
+retry sobre o estado autoritativo sem crédito duplo. A tela distingue Progresso salvo
+de falha; saldo projetado aparece como Saldo após salvar enquanto pendente.
+
+JOGAR NOVAMENTE remove o bootstrap anterior, espera um frame e carrega RunBootstrap
+com nova ID e progresso salvo. Se o jogador sair com falha de armazenamento não
+resolvida, o resultado pendente não tem persistência garantida. Não há histórico
+integral de partidas em disco. Configurações não foram acrescentadas ao save.
