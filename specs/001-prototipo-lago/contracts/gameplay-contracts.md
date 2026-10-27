@@ -728,10 +728,52 @@ nem duplica aviso. Won/Lost/Abandoned ou desativação cancelam o pendente e par
 renderer/áudio; reativar não executa ataque antigo.
 
 FrogKingTelegraphTests cria componentes Unity reais em uma fixture isolada;
-reflexão temporária exige o controlador de produção no SetUp, sem implementação
-substituta. Migrar para chamadas tipadas na T057. Verificações de componente e
+chamadas tipadas usam o controlador de produção desde a T057, sem implementação
+substituta. Verificações de componente e
 ordenação não aprovam legibilidade em tela, percepção sonora, dano real, fases,
 pooling ou justiça de gameplay; esses aceites exigem integração e playtest.
+
+## Controlador do Sapo-Rei (T057)
+
+FrogKingSettings contém vida, limiares de fase, antecedência, recuperação, dano,
+raios, velocidades, durações, quantidade de girinos e capacidade. O asset inicial
+usa 1000 de vida; Summoning começa em 70% e Destruction em 35%. Os valores são
+balanceamento provisório, editável no Inspector. A fase não regride.
+
+InitializeEncounter recebe RunState, eventos, PoolService, PlayerController,
+settings, LineRenderer, AudioSource e os FrogKingSafeArea da arena. Somente Boss
+permite ataques/dano. O seletor alterna jump/wave; adiciona tadpoles na segunda
+fase e destroy-safe-area na terceira. A entrada explícita também respeita essa
+elegibilidade na composição completa. A sobrecarga de sinais da T049 continua
+isolada, sem efeitos de gameplay ou seleção automática.
+
+O salto fixa a posição no início do aviso, desloca o chefe para essa posição e
+aplica dano de aterrissagem no raio configurado. A onda expande um anel, com
+interseção varrida entre o raio anterior e o próximo. Girinos perseguem o Pato,
+aplicam contato uma vez e retornam ao pool, ou expiram pela duração. As áreas
+seguras protegem de ondas: a destruição fixa um refúgio no aviso, depois desativa
+seu collider e visual. Não representa a Safe Area da interface ou troca de terreno.
+Refúgios já destruídos não podem ser escolhidos novamente.
+
+Ondas pertencem à família Projectile e girinos à Enemy, com pools separados
+pré-aquecidos e um limite ativo compartilhado. Saturação suprime excedentes;
+nenhuma instanciação ocorre no tick. FrogKingHazard não tem Update: o controlador
+avança os efeitos em conjunto. O próprio chefe implementa IPoolLifecycle; reset
+remove assinaturas, referências, ataques e efeitos. Reutilização com os mesmos
+pools reaproveita a capacidade registrada. Advance não avança o relógio de RunState;
+o proprietário da partida o avança uma vez por passo.
+
+Dano do Pato respeita a invulnerabilidade de PlayerState. Vida zero encerra como
+Lost; vida zero do chefe encerra como Won, cancela sinais/efeitos e emite derrota
+uma vez. Estado terminal, desativação ou pool descartado cancelam trabalho pendente.
+Não há recuperação de ataque antigo ao reativar. A integração de armas/Quack,
+entrada aos 900 segundos e composição da partida continuam na T060.
+
+FrogKingPractice.unity é uma fixture jogável apenas no Editor, fora das cenas da
+build. WASD/setas movem o Pato; um botão aplica 10% de dano ao chefe para explorar
+as fases. Esse botão é um instrumento de treino, não combate por arma. O teste
+carrega a cena, verifica a composição e captura uma imagem; não constitui aceite
+humano de percepção, justiça ou desempenho.
 
 ## PresentationEvent
 

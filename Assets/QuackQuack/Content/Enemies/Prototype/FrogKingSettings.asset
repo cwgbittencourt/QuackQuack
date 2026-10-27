@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 629d11be8af2d8a4d9d4531c3a9f7b47, type: 3}
+  m_Name: FrogKingSettings
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Enemies.FrogKingSettings
+  Health: 1000
+  SummonPhaseHealth: 0.7
+  DestructionPhaseHealth: 0.35
+  TelegraphSeconds: 1
+  RecoverySeconds: 1.5
+  JumpRadius: 2
+  JumpDamage: 18
+  WaveSpeed: 4
+  WaveWidth: 0.4
+  WaveLifetime: 3
+  WaveDamage: 12
+  TadpoleCount: 4
+  TadpoleSpeed: 2
+  TadpoleRadius: 0.3
+  TadpoleLifetime: 10
+  TadpoleDamage: 6
+  HazardCapacity: 24
+  HazardPrefab: {fileID: 6559440210722334385, guid: cb8d1af53467b4447a92378a183d3684, type: 3}
+  WarningAudio: {fileID: 8300000, guid: c582074e7ef7b2e42aec7542b2891e94, type: 3}
+  MarkerMaterial: {fileID: 2100000, guid: c507f384cb097584ea804c76091f5ef7, type: 2}

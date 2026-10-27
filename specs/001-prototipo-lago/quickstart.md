@@ -181,6 +181,30 @@ preservando GUIDs. Ele não modifica cenas nem altera a seleção de cartas.
 - Aprovar somente se os criterios tecnicos e de experiencia forem atendidos ou se desvios estiverem
   documentados com tarefa corretiva.
 
+## Treino isolado do Sapo-Rei (T057)
+
+Abra `Assets/QuackQuack/Scenes/FrogKingPractice.unity` no Unity 6000.4.3f1 e entre
+em Play. Mova o Pato amarelo com WASD/setas. O círculo verde maior é o chefe;
+os três círculos verdes escuros protegem das ondas. O salto marca a posição do
+Pato antes de aterrissar, portanto sair da marca evita o dano.
+
+Use **Aplicar 10% de dano ao chefe** para explorar as fases: saltos/ondas no
+início, girinos a partir de 70% da vida e destruição de refúgios a partir de 35%.
+Observe o círculo de aviso e o áudio antes de cada execução. Girinos perseguem
+o Pato e somem ao contato ou por duração; ondas expandem a partir do ponto marcado.
+Um refúgio destruído deixa de proteger. Vida zero do chefe mostra Won; vida zero
+do Pato mostra Lost; o botão de abandono mostra Abandoned. Saia de Play para reiniciar.
+
+Essa fixture é exclusiva do Editor e fica fora da lista de cenas da build.
+O botão de dano serve para testar fases; armas/Quack e o pedido aos 900 segundos
+ainda dependem da composição da T060. A arena Bootstrap/Lake continua sendo treino.
+Para regenerar os assets e a fixture, use **QuackQuack > Build T057 Frog King**.
+O gerador preserva os GUIDs existentes; a cena de treino é reconstruída.
+
+Evidência automatizada: [relatório T057](test-report-t057.md). A captura em
+`Logs/t057-practice.png` mostra a geometria do salto na arena; não inclui o
+overlay OnGUI. Realizar playtest humano antes de aprovar percepção e justiça.
+
 ## Evidencias a conservar
 
 - Relatorio do Test Runner para EditMode e PlayMode.

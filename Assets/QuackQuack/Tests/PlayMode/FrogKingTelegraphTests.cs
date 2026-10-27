@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
+using QuackQuack.Gameplay.Bosses;
 using NUnit.Framework;
 using QuackQuack.Core.Combat;
 using QuackQuack.Core.Run;
@@ -16,7 +16,7 @@ namespace QuackQuack.Tests.PlayMode
     public class FrogKingTelegraphTests
     {
         private const float LeadSeconds = 0.5f;
-        private Component boss;
+        private FrogKingController boss;
         private GameObject root;
         private LineRenderer marker;
         private AudioSource audio;
@@ -33,16 +33,9 @@ namespace QuackQuack.Tests.PlayMode
         public void CreateEncounter()
         {
             warnings.Clear(); attacks.Clear(); attackCorrelations.Clear(); combat.Clear();
-            // Temporary reflection adapter: T057 must supply the real MonoBehaviour.
-            Type type = typeof(GameBootstrap).Assembly.GetType("QuackQuack.Gameplay.Bosses.FrogKingController");
-            Assert.That(type, Is.Not.Null,
-                "T057 pending: production FrogKingController is missing (T049 red phase).");
-            Assert.That(typeof(MonoBehaviour).IsAssignableFrom(type), Is.True);
             root = new GameObject("T049 isolated encounter");
-            boss = root.AddComponent(type);
-            PropertyInfo automatic = type.GetProperty("AutomaticTick");
-            Assert.That(automatic, Is.Not.Null, "Expected AutomaticTick property.");
-            automatic.SetValue(boss, false);
+            boss = root.AddComponent<FrogKingController>();
+            boss.AutomaticTick = false;
             var visual = new GameObject("T049 danger marker");
             visual.transform.SetParent(root.transform);
             marker = visual.AddComponent<LineRenderer>();
@@ -64,16 +57,13 @@ namespace QuackQuack.Tests.PlayMode
             events = new GameplayEventBus();
             events.Presentation += value => { if (value.Type == PresentationEventType.DangerTelegraphed) warnings.Add(value); };
             events.Combat += value => combat.Add(value);
-            EventInfo committed = type.GetEvent("AttackCommitted");
-            Assert.That(committed, Is.Not.Null, "Expected Action<string, long> AttackCommitted.");
-            committed.AddEventHandler(boss, (Action<string, long>)((id, correlation) =>
+            boss.AttackCommitted += (id, correlation) =>
             {
                 // Observer sees a warning already published, never a same-frame unannounced attack.
                 Assert.That(warnings.Count, Is.GreaterThan(0));
                 attacks.Add(id); attackCorrelations.Add(correlation);
-            }));
-            Call("Initialize", new[] { typeof(RunState), typeof(GameplayEventBus), typeof(LineRenderer), typeof(AudioSource), typeof(AudioClip), typeof(float) },
-                run, events, marker, audio, clip, LeadSeconds);
+            };
+            boss.Initialize(run, events, marker, audio, clip, LeadSeconds);
         }
 
         [TearDown]
@@ -173,14 +163,7 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(audio.isPlaying, Is.True);
         }
 
-        private bool Begin(string id, Vector2 target) =>
-            (bool)Call("TryBeginAttack", new[] { typeof(string), typeof(Vector2) }, id, target);
-        private void Advance(float seconds) => Call("Advance", new[] { typeof(float) }, seconds);
-        private object Call(string name, Type[] signature, params object[] args)
-        {
-            MethodInfo method = boss.GetType().GetMethod(name, signature);
-            Assert.That(method, Is.Not.Null, "Expected FrogKingController." + name);
-            return method.Invoke(boss, args);
-        }
+        private bool Begin(string id, Vector2 target) => boss.TryBeginAttack(id, target);
+        private void Advance(float seconds) => boss.Advance(seconds);
     }
 }
