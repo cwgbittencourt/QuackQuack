@@ -44,24 +44,24 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T043: catálogo de seis armas, seis passivas e três evoluções | Concluída |
 | T044: seleção de cartas e progressão integrada à arena | Concluída |
 | T045: feedback pooled de evolução e recompensa rara | Concluída |
-| T046: testes do cronograma e pedido único do chefe | Concluída (fase vermelha; implementação T051/T060) |
+| T046: testes do cronograma e pedido único do chefe | Concluída (aprovados com T051) |
 | T047: testes de resultado único e abandono parcial | Concluída (fase vermelha; implementação T058/T060) |
 | T048: testes de relíquias e recuperação de save | Concluída (fase vermelha; implementação T052/T059) |
 | T049: testes dos sinais visuais/sonoros do Sapo-Rei | Concluída (fase vermelha; implementação T057) |
 | T050: definição de inimigos, papéis táticos, pool e identidade de telemetria | Concluída |
+| T051: definição e cronograma dos encontros sem lacunas | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T050 foram revisadas e concluídas; a próxima tarefa é **T051**.
+da arena. T022–T051 foram revisadas e concluídas; a próxima tarefa é **T052**.
 
-Validação T050: **240 testes EditMode aprovados e 52 falhas esperadas**: 12 do
-cronograma (T046), 18 de resultado (T047) e 22 de relíquias/save (T048), cujas
-implementações continuam pendentes.
-Os 31 testes novos da definição de inimigos passaram. Consulte o
-[relatório T050](specs/001-prototipo-lago/test-report-t050.md).
+Validação T051: **272 testes EditMode aprovados e 40 falhas esperadas**: 18 de
+resultado (T047) e 22 de relíquias/save (T048), cujas implementações continuam pendentes.
+Os 12 testes do cronograma T046 e os 20 novos de encontros passaram. Consulte o
+[relatório T051](specs/001-prototipo-lago/test-report-t051.md).
 Validação PlayMode T049: **77 aprovados e 9 falhas esperadas** pela ausência do
 controlador do Sapo-Rei. Consulte o [relatório T049](specs/001-prototipo-lago/test-report-t049.md).
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.

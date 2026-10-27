@@ -368,14 +368,14 @@ EVOLUÇÃO! é distinto do losango roxo RECOMPENSA RARA e dos sinais do Quack ma
 Clipes, perfis e prefabs são assets gerados pelo Unity; não há criação recorrente
 de objetos ou AudioClip durante as ativações.
 
-## Cronograma de encontros (T046; implementação T051/T060)
+## Cronograma de encontros (T046/T051)
 
-Fronteira proposta no Core: `QuackQuack.Core.Run.EncounterSchedule`, com construtor
+Fronteira implementada no Core: `QuackQuack.Core.Run.EncounterSchedule`, com construtor
 `EncounterSchedule(RunState run, string[] encounterIds, double[] scheduledSeconds)`.
 Recebe e copia IDs e tempos autorais correspondentes, em ordem cronológica. O
 catálogo do Lago deverá fornecer Libélula Alfa aos 300 segundos, Sapo-Cururu aos
 600 e Sapo-Rei aos 900; esses valores nos testes são fixtures, não balanceamento
-embutido em um controlador. Catálogo e validação autoral pertencem às T051/T056.
+embutido em um controlador. Validação da timeline pertence à T051; assets do catálogo à T056.
 
 `CollectDue()` retorna `IReadOnlyList<string>` com os pedidos ainda não emitidos
 cujo tempo seja menor ou igual a RunState.ElapsedSeconds, na ordem do cronograma.
@@ -387,8 +387,35 @@ Preparing, Paused, ChoosingUpgrade e estados terminais não emitem pedidos.
 Pausa/seleção preservam pedidos vencidos até retomar Playing; tempo suspenso não
 conta. O cronograma não cria inimigos, não transiciona fases nem concede vitória:
 essas responsabilidades ficam nos consumidores das T054/T060. Os testes T046
-usam reflexão temporária para compilar sem a classe real, exigida no SetUp; não
-há implementação substituta. Migrar para chamadas tipadas na implementação.
+agora usam chamadas tipadas. O construtor copia IDs/tempos e rejeita dados nulos,
+vazios, tamanhos divergentes, IDs vazios/duplicados e tempos não finitos, negativos
+ou fora de ordem. Tempos iguais são permitidos, preservando a ordem recebida.
+Consultas sem pedidos retornam coleção vazia compartilhada; pedidos retornam
+snapshot somente de leitura e não podem ser reemitidos pela mutação do consumidor.
+
+## EncounterDefinition (T051)
+
+ScriptableObject com EncounterKind Wave/AlphaDragonfly/CururuToad/FrogKing,
+StartSeconds/EndSeconds, composição por IDs/quantidades, SpawnInterval/MaxActive,
+ArenaId e multiplicadores positivos de vida/dano. Getters de composição retornam
+cópias somente de leitura; nenhuma consulta altera assets. A arena aceita é lake.
+Waves têm janela [início,fim) positiva entre zero e 900 e conclusão por tempo;
+marcos têm instante único e conclusão por derrota do alvo. Libélula Alfa exige
+300 segundos e libelula-alfa; Sapo-Cururu, 600 e sapo-cururu; Sapo-Rei, 900 e
+sapo-rei. Cada marco pede um único alvo com quantidade um.
+
+IsValid rejeita números não finitos/fora da faixa, composição vazia, tamanhos
+divergentes, IDs duplicados/vazios, quantidades não positivas ou lote maior que
+MaxActive. IsValidTimeline recebe definições e IDs de inimigos conhecidos; exige
+IDs de encontro únicos, referências conhecidas, os três marcos sem duplicação e
+união das janelas de ondas cobrindo [0,900) sem lacunas. Sobreposição é permitida.
+Os IDs conhecidos devem vir do catálogo validado na composição futura.
+
+CreateSchedule valida a timeline e cria EncounterSchedule com cópias, ordenando
+pedidos por início, Wave antes de marco no mesmo instante e ID ordinal para
+desempate de ondas. O pedido inicia o encontro; não repete cada spawn da janela.
+SpawnDirector/RunDirector deverão resolver os IDs e executar composição/conclusão
+nas T054/T060. A T051 não cria assets do catálogo ou integra encontros na cena.
 
 ## SpawnRequest
 

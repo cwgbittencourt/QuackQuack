@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using NUnit.Framework;
 using QuackQuack.Core.Run;
 
@@ -10,16 +9,11 @@ namespace QuackQuack.Tests.EditMode
     {
         private static readonly string[] LakeIds = { "libelula-alfa", "sapo-cururu", "sapo-rei" };
         private RunState run;
-        private object schedule;
-        private Type scheduleType;
+        private EncounterSchedule schedule;
 
         [SetUp]
         public void CreateSchedule()
         {
-            // Reflection is temporary: keep the test assembly runnable during the red phase.
-            scheduleType = typeof(RunState).Assembly.GetType("QuackQuack.Core.Run.EncounterSchedule");
-            Assert.That(scheduleType, Is.Not.Null,
-                "T051/T060 pending: production EncounterSchedule is missing (T046 red phase).");
             run = new RunState(46);
             schedule = Create(run);
         }
@@ -137,20 +131,11 @@ namespace QuackQuack.Tests.EditMode
 
         private void Start() => Assert.That(run.TryTransition(RunPhase.Playing), Is.True);
 
-        private object Create(RunState state, string[] ids = null, double[] times = null)
+        private EncounterSchedule Create(RunState state, string[] ids = null, double[] times = null)
         {
-            var constructor = scheduleType.GetConstructor(new[] { typeof(RunState), typeof(string[]), typeof(double[]) });
-            Assert.That(constructor, Is.Not.Null, "Expected EncounterSchedule(RunState, string[], double[]).");
-            return constructor.Invoke(new object[] { state, ids ?? (string[])LakeIds.Clone(), times ?? new[] { 300d, 600d, 900d } });
+            return new EncounterSchedule(state, ids ?? (string[])LakeIds.Clone(), times ?? new[] { 300d, 600d, 900d });
         }
 
-        private IReadOnlyList<string> Collect(object source = null)
-        {
-            MethodInfo method = scheduleType.GetMethod("CollectDue", Type.EmptyTypes);
-            Assert.That(method, Is.Not.Null, "Expected CollectDue() returning IReadOnlyList<string>.");
-            object result = method.Invoke(source ?? schedule, null);
-            Assert.That(result, Is.InstanceOf<IReadOnlyList<string>>());
-            return (IReadOnlyList<string>)result;
-        }
+        private IReadOnlyList<string> Collect(EncounterSchedule source = null) => (source ?? schedule).CollectDue();
     }
 }
