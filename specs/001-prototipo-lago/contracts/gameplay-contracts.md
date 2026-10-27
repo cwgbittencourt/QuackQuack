@@ -384,6 +384,40 @@ Operacoes: `Unlock`, `Equip`, `Unequip` e `ApplyEffects`. Somente IDs conhecidos
 ser equipados; o limite e tres; repetir uma operacao nao duplica efeitos; falhas retornam motivo
 testavel e nao alteram o loadout.
 
+## Fronteiras de teste T048 (implementação T052/T059)
+
+`Core.Progression.RelicLoadout(string[] knownIds, float[] damageBonuses)` recebe
+cópias de dez IDs e bônus percentuais correspondentes de uma fixture. É uma
+fronteira inicial para testar composição de dano; a autoria e demais tipos de
+efeito continuam em RelicDefinition/T052. Unlock, Equip e Unequip recebem ID e
+retornam bool de aceitação; repetição retorna false, sem mutação. UnlockedIds e
+EquippedIds expõem coleções somente de leitura. Equip exige conhecido/desbloqueado
+e no máximo três. ApplyEffects(float baseDamage) recompõe o valor da base com a
+soma dos bônus equipados, sem acumular chamadas. Remover equipamento retira somente
+seu efeito e libera slot; remover todos restaura a base. Bônus de 10% são fixtures.
+
+`Systems.Save.JsonSaveService(string path, string[] knownRelicIds)` usa caminho
+injetado e backup `path + ".bak"`. CurrentSchemaVersion é propriedade estática;
+Load() retorna Data, Status e Diagnostic. Data expõe SchemaVersion,
+UnlockedRelicIds e EquippedRelicIds. JSON usa schemaVersion, unlockedRelicIds e
+equippedRelicIds. Um save válido principal tem precedência; principal inválido
+recupera backup válido (Recovered); ambos inválidos ou ausentes usam padrões
+utilizáveis (Defaulted). Dados estruturais inválidos incluem JSON malformado,
+null, objeto sem schema e schema negativo. Padrões têm versão atual e loadout vazio.
+
+IDs desconhecidos e duplicados são filtrados com diagnóstico (Recovered);
+equipamento é filtrado por desbloqueados/conhecidos, preservando os primeiros
+três distintos na ordem salva. Coleções null tornam-se vazias por recuperação ou
+padrões. Repetir Load não multiplica entradas. O JSON mínimo da fixture testa
+somente os campos de relíquias; os demais campos de SaveData usam seus padrões.
+Escrita atômica, migração e integração da carteira continuam na T059.
+
+SaveServiceTests.cs contém fixtures separadas RelicLoadoutTests/SaveServiceTests.
+Reflexão temporária exige os tipos reais no SetUp, mantendo a fase vermelha
+compilável, sem substitutos. Arquivos são criados em diretório temporário exclusivo
+com GUID, removido somente após validar seu caminho. Migrar para chamadas tipadas
+nas respectivas implementações. Nenhum save pessoal é usado.
+
 ## RunLifecycle
 
 Comandos: `StartRun`, `PauseRun`, `ResumeRun`, `RequestUpgrade`, `StartBoss`, `WinRun`, `LoseRun`,
