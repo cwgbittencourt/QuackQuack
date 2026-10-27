@@ -55,7 +55,7 @@ namespace QuackQuack.Tests.PlayMode
             run.TryTransition(RunPhase.Playing);
             run.TryTransition(RunPhase.Lost);
             yield return null; yield return null;
-            Assert.That(Field<Text>(hud, "statusLabel").text, Does.Contain("FIM DO TESTE"));
+            Assert.That(Field<Text>(hud, "statusLabel").text, Does.Contain("DERROTA"));
         }
 
         private static IEnumerator LoadArena()

@@ -12,7 +12,17 @@ namespace QuackQuack.Gameplay.Player
         public bool Reflectable { get; set; } = true;
         public bool Reflected { get; set; }
         public bool Interruptible { get; set; } = true;
-        public float Health { get; set; } = 20;
+        private float health = 20;
+        private System.Func<float> readHealth;
+        private System.Func<float, int, long, Vector2, bool> damage;
+        private System.Action<Vector2, float> control;
+        public bool HasCombatBinding => damage != null;
+        public float Health { get => readHealth == null ? health : readHealth(); set => health = value; }
+        public void BindCombat(System.Func<float> read, System.Func<float, int, long, Vector2, bool> apply,
+            System.Action<Vector2, float> applyControl)
+        { readHealth = read; damage = apply; control = applyControl; }
+        public bool ApplyBoundDamage(float amount, int source, long tick, Vector2 attacker) => damage != null && damage(amount, source, tick, attacker);
+        public void ApplyBoundControl(Vector2 push, float interruption) => control?.Invoke(push, interruption);
         public float InterruptedUntil { get; set; }
         public Vector2 Velocity { get; set; }
         private readonly RaycastHit2D[] contacts = new RaycastHit2D[16];

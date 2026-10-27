@@ -26,6 +26,35 @@ contratos de [contracts/gameplay-contracts.md](contracts/gameplay-contracts.md).
 Resultado esperado: zero falhas; zero alocacao recorrente atribuida a spawn, projetil, pickup ou VFX
 durante a janela estavel; nenhuma instancia ativa simultaneamente no pool.
 
+## Partida integrada disponível após T060
+
+1. Abrir `Assets/QuackQuack/Scenes/RunBootstrap.unity` e entrar em Play. A cena abre
+   LakeRun após inicializar os serviços. A lista de build já usa RunBootstrap como entrada.
+2. Mover com WASD/setas, usar Quack com Espaço e pausar com Esc ou PAUSAR. A câmera
+   acompanha o Pato. Inimigos entram fora da área visível, respeitando limites da onda.
+3. Derrotar inimigos com armas/Quack e coletar XP ciano. Cartas congelam a simulação;
+   confirmar/pular retoma a fase anterior. RELÍQUIAS abre o loadout e pausa.
+4. Observar Libélula Alfa aos 5 minutos, Sapo-Cururu aos 10 e Sapo-Rei aos 15.
+   O encontro final limpa a horda anterior. Os círculos verdes são refúgios contra
+   ondas, destruídos na fase posterior. Marca e áudio antecedem os padrões do chefe.
+5. Derrotar o chefe produz Won; vida zero produz Lost; ABANDONAR produz Abandoned.
+   O HUD identifica o final. O snapshot já existe em RunDirector.Result; a tela
+   completa, crédito de carteira e progresso de recordes/desafios ficam na T061.
+6. Sair de Play e abrir RunBootstrap novamente para uma nova partida nesta entrega.
+   Unlocks/equipamento carregam de `lake-relics.json` em Application.persistentDataPath.
+   Alterações são salvas fora do combate; falha de save não bloqueia o encerramento.
+
+O menu **QuackQuack > Build T060 complete lake run** é manutenção: atualiza bindings
+nos prefabs existentes, gera settings e reconstrói LakeRun a partir do treino Lake,
+preservando os GUIDs dos prefabs e mantendo Bootstrap/Lake. Usar após reconstruir
+prefabs com os geradores T056/T057, que não possuem a composição T060. Os assets
+estão versionados; não é necessário gerar nada para jogar um clone normal.
+
+Testes: RunOrchestrationContractsTests (EditMode), RunDirectorFlowTests e
+RunSceneFlowTests (PlayMode). Estes usam caminhos de save temporários próprios.
+Capturas locais ignoradas: `Logs/t060-scene.png` e `Logs/t060-loadout.png`.
+Ver [relatório T060](test-report-t060.md) para resultados e limites do aceite.
+
 ## Roteiro jogavel por marco
 
 ### Arena de treino disponível após T030
@@ -135,9 +164,8 @@ preservando GUIDs. Ele não modifica cenas nem altera a seleção de cartas.
 - A prévia de manutenção `LakeEncounterCatalogSetup.Preview` rende uma galeria
   sem salvar cena. Os testes usam os assets reais para criar pools/diretor e
   verificar os dois minibosses com o scheduler compartilhado.
-- Este catálogo prepara a composição da partida; o acionamento de ondas na arena
-  e a integração com chefe/finalização permanecem nas T057/T060. O Bootstrap
-  continua abrindo a arena de treino existente.
+- A composição com ondas, chefe e encerramento está disponível em RunBootstrap
+  desde T060. Bootstrap continua abrindo a arena de treino existente.
 
 ### Marco 1 - Fundamentos
 
@@ -196,8 +224,8 @@ Um refúgio destruído deixa de proteger. Vida zero do chefe mostra Won; vida ze
 do Pato mostra Lost; o botão de abandono mostra Abandoned. Saia de Play para reiniciar.
 
 Essa fixture é exclusiva do Editor e fica fora da lista de cenas da build.
-O botão de dano serve para testar fases; armas/Quack e o pedido aos 900 segundos
-ainda dependem da composição da T060. A arena Bootstrap/Lake continua sendo treino.
+O botão de dano serve para testar fases. A partida RunBootstrap integra armas/Quack
+e o pedido aos 900 segundos desde T060. Bootstrap/Lake continua sendo treino.
 Para regenerar os assets e a fixture, use **QuackQuack > Build T057 Frog King**.
 O gerador preserva os GUIDs existentes; a cena de treino é reconstruída.
 
@@ -213,9 +241,9 @@ campos completos. A sessão recebe fatos aceitos e captura a build no encerramen
 o resumo continua igual mesmo se a build/loadout original mudar depois.
 Consulte o [relatório T058](test-report-t058.md) e o contrato de resultado para a API.
 
-A T058 entrega o modelo e acumulador em Core. Ainda não há tela de resultado
-na arena; coleta dos eventos reais fica na T060 e apresentação na T061.
-O serviço de save da T059 também aguarda sua ligação ao ciclo da partida.
+A T058 entrega o modelo e acumulador em Core. A T060 coleta os eventos reais
+em RunBootstrap; a apresentação completa permanece na T061. O serviço T059
+também está ligado ao ciclo da partida para relíquias.
 O produtor deve atribuir o último dano/derrota/recompensa antes da transição terminal,
 pois fatos posteriores são rejeitados. Consultar o resultado não credita carteira
 nem grava progresso.
@@ -239,9 +267,9 @@ Sem principal/backup utilizável, Load retorna padrões vazios para o jogo conti
 Falhas de escrita retornam Failed com diagnóstico, sem expor caminho ou conteúdo.
 O serviço não faz I/O por frame nem determina sozinho o caminho pessoal.
 
-O menu de relíquias da arena ainda mantém estado por sessão. A T060 deve definir
-o caminho local e os momentos de carregar/salvar; carteira, recordes e desafios
-exigirão ampliação versionada do schema. Ver [relatório T059](test-report-t059.md).
+O treino Bootstrap mantém relíquias por sessão. RunBootstrap define o caminho local
+e os momentos de carregar/salvar desde T060; carteira, recordes e desafios exigirão
+ampliação versionada do schema. Ver [relatório T059](test-report-t059.md).
 
 ## Evidencias a conservar
 

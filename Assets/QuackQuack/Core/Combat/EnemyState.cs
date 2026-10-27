@@ -19,6 +19,14 @@ namespace QuackQuack.Core.Combat
     {
         private long lastLease;
         private int experience, coins;
+        private bool encounterScaled;
+        public bool TryScaleEncounter(long leaseId, float healthMultiplier)
+        {
+            double scaled = (double)MaxHealth * healthMultiplier;
+            if (!IsActive || leaseId != LeaseId || encounterScaled || Health != MaxHealth ||
+                float.IsNaN(healthMultiplier) || healthMultiplier <= 0 || scaled < float.Epsilon || scaled > float.MaxValue) return false;
+            Health = MaxHealth = (float)scaled; encounterScaled = true; return true;
+        }
         public long LeaseId { get; private set; }
         public string DefinitionId { get; private set; }
         public bool IsActive { get; private set; }
@@ -68,7 +76,7 @@ namespace QuackQuack.Core.Combat
             if (!IsActive || LeaseId != leaseId) return false;
             IsActive = false; LeaseId = 0; DefinitionId = null; MaxHealth = Health = 0;
             experience = coins = TargetId = 0; Position = Knockback = Vector2.zero;
-            InterruptionRemaining = 0; RewardClaimed = false; return true;
+            InterruptionRemaining = 0; RewardClaimed = false; encounterScaled = false; return true;
         }
         private bool Alive(long leaseId) => IsActive && LeaseId == leaseId && Health > 0;
         private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);

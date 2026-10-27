@@ -43,6 +43,7 @@ namespace QuackQuack.Core.Run
         }
 
         private bool CanRecord => !disposed && result == null && run.IsSimulating;
+        private bool CanRecordSummary => !disposed && result == null && !run.Outcome.HasValue && run.Phase != RunPhase.Preparing;
 
         public bool RecordBossReached(string id)
         {
@@ -83,13 +84,13 @@ namespace QuackQuack.Core.Run
 
         public bool RecordItem(string itemId, int amount)
         {
-            if (!CanRecord || !ValidId(itemId) || amount <= 0) return false;
+            if (!CanRecordSummary || !ValidId(itemId) || amount <= 0) return false;
             items.TryGetValue(itemId, out int previous);
             if (previous > int.MaxValue - amount) return false;
             items[itemId] = previous + amount; return true;
         }
 
-        public bool RecordSynergy(string synergyId) => CanRecord && ValidId(synergyId) && synergies.Add(synergyId);
+        public bool RecordSynergy(string synergyId) => CanRecordSummary && ValidId(synergyId) && synergies.Add(synergyId);
 
         // These carry an evaluated result; challenge definitions and record evaluation are not duplicated here.
         public bool SetRecord(string recordId, double previous, double current)

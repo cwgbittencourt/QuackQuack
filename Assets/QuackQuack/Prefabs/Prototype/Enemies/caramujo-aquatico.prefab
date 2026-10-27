@@ -255,6 +255,8 @@ GameObject:
   - component: {fileID: 2327948080287932361}
   - component: {fileID: 7333096669530492131}
   - component: {fileID: 6822408957517823943}
+  - component: {fileID: 3416117734399618127}
+  - component: {fileID: 1941447910808921074}
   m_Layer: 9
   m_Name: caramujo-aquatico
   m_TagString: Untagged
@@ -295,7 +297,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -355,6 +357,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 392bcc5581282064a83970f1e1d344fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Gameplay.Enemies.PooledEnemy
+--- !u!114 &3416117734399618127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6930702986212650492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16b6f89c5bb83fe4e8cc1df5ae3dcd23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Gameplay.Player.QuackTarget
+--- !u!114 &1941447910808921074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6930702986212650492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e50ccb18538c91488e6bcbc792b1e6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Gameplay.Enemies.CombatTargetBinding
 --- !u!1 &7624620580883562915
 GameObject:
   m_ObjectHideFlags: 0

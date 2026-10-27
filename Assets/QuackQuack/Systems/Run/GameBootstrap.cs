@@ -11,6 +11,8 @@ namespace QuackQuack.Systems.Run
     {
         [SerializeField] private int seed = 42;
         [SerializeField] private bool loadLake = true;
+        [SerializeField] private string lakeScene = "Lake";
+        public bool ExternalClock { get; set; }
         public static GameBootstrap Instance { get; private set; }
         public RunState Run { get; private set; }
         public System.Random Random { get; private set; }
@@ -31,11 +33,11 @@ namespace QuackQuack.Systems.Run
         private void Start()
         {
             if (Instance != this) return;
-            if (loadLake && SceneManager.GetActiveScene().name != "Lake") SceneManager.LoadScene("Lake");
-            Run.TryTransition(RunPhase.Playing);
+            if (loadLake && SceneManager.GetActiveScene().name != lakeScene) SceneManager.LoadScene(lakeScene);
+            if (lakeScene != "LakeRun") Run.TryTransition(RunPhase.Playing);
         }
 
-        private void Update() { if (Instance == this) Run.Advance(Time.deltaTime); }
+        private void Update() { if (Instance == this && !ExternalClock) Run.Advance(Time.deltaTime); }
 
         private void OnDestroy()
         {

@@ -280,6 +280,8 @@ namespace QuackQuack.Gameplay.Weapons
         private void Hit(WeaponDefinition definition, float damage, QuackTarget target)
         {
             if (!ValidTarget(target)) return;
+            if (target.HasCombatBinding)
+            { target.ApplyBoundDamage(damage, definition.GetInstanceID(), tick, owner.position); return; }
             float applied = Mathf.Min(damage, target.Health);
             target.Health -= applied;
             bool defeated = target.Health <= 0;

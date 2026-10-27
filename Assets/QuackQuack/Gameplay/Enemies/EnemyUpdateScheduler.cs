@@ -160,7 +160,11 @@ namespace QuackQuack.Gameplay.Enemies
                 else for(int i=0;i<found;i++)distance=Mathf.Min(distance,Mathf.Max(0,contacts[i].distance-settings.CollisionSkin));
                 enemy.Body.position+=displacement.normalized*distance;
             }
-            enemy.Body.linearVelocity=Vector2.zero;enemy.State.TrySetPosition(enemy.LeaseId,enemy.Body.position);
+            enemy.Body.linearVelocity=Vector2.zero;
+            // The director performs physics queries again in this same frame. Rigidbody2D.position
+            // is immediate for physics but its Transform otherwise waits for the next physics step.
+            enemy.transform.SetPositionAndRotation(enemy.Body.position,Quaternion.Euler(0,0,enemy.Body.rotation));
+            enemy.State.TrySetPosition(enemy.LeaseId,enemy.Body.position);
         }
         public bool ApplyHit(PooledEnemy enemy,long lease,float damage,Vector2 attacker,int source,long combatTick)
         {
@@ -183,6 +187,7 @@ namespace QuackQuack.Gameplay.Enemies
         }
         private void DamagePlayer(PooledEnemy enemy,float damage)
         {
+            damage = (float)Math.Min(float.MaxValue, (double)damage * enemy.DamageMultiplier);
             float before=player.State.Health;
             if(!player.State.TakeDamage(damage,run.ElapsedSeconds,player.Definition.Invulnerability))return;
             events.Publish(new CombatEvent(tick,++correlation,enemy.GetInstanceID(),player.GetInstanceID(),player.transform.position,before-player.State.Health,CombatEventType.DamageApplied));

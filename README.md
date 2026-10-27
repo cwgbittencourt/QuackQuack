@@ -6,13 +6,13 @@ inimigos e projéteis. A progressão planejada inclui armas, passivas, evoluçõ
 partida de 15 minutos.
 
 > Em desenvolvimento. Este repositório contém o projeto Unity e os artefatos do Spec Kit necessários
-> para continuar o trabalho. Inclui uma arena de treino jogável; a partida completa de 15 minutos
-> ainda está em desenvolvimento.
+> para continuar o trabalho. Inclui a orquestração jogável da partida e uma arena de treino;
+> tela final completa, aceite de gameplay, plataformas e desempenho continuam pendentes.
 
 ## Imagens do jogo
 
-A arena de treino já está montada com formas e cores temporárias. Abra Bootstrap e entre em Play
-para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MVP.
+Abra **RunBootstrap** para a partida do Lago ou **Bootstrap** para a arena de treino.
+Arte e áudio são temporários. Capturas de playtest serão adicionadas com o aceite do MVP.
 
 ## Estado da entrega
 
@@ -58,33 +58,36 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T057: fases do Sapo-Rei, ataques sinalizados e arena isolada | Concluída |
 | T058: resultado imutável, estatísticas e recompensa parcial | Concluída |
 | T059: save de relíquias versionado, gravação atômica e recuperação | Concluída |
-| Progressão, partida completa, multiplataforma e desempenho | Planejados |
+| T060: ondas, encontros 5/10/15, combate, três finais e save integrado | Concluída |
+| Tela final, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T059 foram revisadas e concluídas; a próxima tarefa é **T060**.
+da arena. T022–T060 foram revisadas e concluídas; a próxima tarefa é **T061**.
 
-Validação T059: **436/436 EditMode e 150/150 PlayMode aprovados, sem falhas**.
-Os 39 testes de save e o ciclo salvar/recarregar com o catálogo real passaram.
-Os nove testes de sinais da T049
-passaram com o controlador real. A cena FrogKingPractice permite explorar as fases
-no Editor; a integração do chefe à partida e às armas continua na T060.
-O resumo de resultado agora captura estatísticas e build sem permitir alterações
-posteriores. Sua coleta na partida e apresentação na tela final continuam nas T060/T061.
-Consulte o [relatório T059](specs/001-prototipo-lago/test-report-t059.md).
+Validação T060: **441/441 EditMode e 164/164 PlayMode aprovados, sem falhas**.
+Os testes integrados cobrem cronograma, combate por arma/Quack, pausa/seleção no
+chefe, vitória, morte, abandono e persistência de relíquias sem bloquear o final.
+O resultado captura o último golpe e a build; a tela final completa fica na T061.
+Consulte o [relatório T060](specs/001-prototipo-lago/test-report-t060.md).
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
 Consulte o [relatório T045](specs/001-prototipo-lago/test-report-t045.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
 Bootstrap abre a arena de treino com Bumerangue, três pickups cianos de XP e um raro roxo.
 A coleta abre cartas e pausa o combate; é possível escolher, rerrolar, banir ou
 pular. Evolução exibe estrela dourada e recompensa rara, losango roxo, com legendas
-e tons temporários. A partida completa e os demais aceites continuam pendentes.
+e tons temporários. Esse Bootstrap continua sendo uma fixture de treino independente.
 O botão RELÍQUIAS abre o loadout e pausa a arena. Até três bônus podem ser
 equipados; tempo sobrevivido e XP desbloqueiam as demais opções nesta sessão.
-O serviço de persistência de desbloqueios/loadout está disponível desde T059;
-sua ligação automática ao ciclo da arena permanece na T060.
+Em **RunBootstrap**, as ondas usam os cinco inimigos, com minibosses aos 5/10 minutos
+e Sapo-Rei aos 15. A câmera acompanha o Pato. PAUSAR/Esc permite continuar na mesma
+fase; ABANDONAR encerra sem vitória. Relíquias são carregadas antes do combate e
+salvas na pausa/seleção, ao encerrar ou sair, em `lake-relics.json` sob
+`Application.persistentDataPath`. O treino Bootstrap mantém estado por sessão.
+O schema atual persiste relíquias; carteira, recordes/desafios e tela final aguardam T061.
+Para reiniciar esta entrega no Editor, saia de Play e abra RunBootstrap novamente.
 
 ## Ambiente necessário
 

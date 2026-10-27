@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 527d4c14419a6464cbd62103ee8ffa1d, type: 3}
+  m_Name: LakeRunSettings
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Encounters.LakeRunSettings
+  Catalog: {fileID: 11400000, guid: 7d94b2b292495e74bbe676720ec590a3, type: 2}
+  BossSettings: {fileID: 11400000, guid: c40af1ed7362fb748af4df059da0e25b, type: 2}
+  BossPrefab: {fileID: 7634545742135283805, guid: 14d8e68641f0fdc46b062f0820a04afd, type: 3}
+  ExperiencePrefab: {fileID: 1907994707541191547, guid: 45f232792e1004f4483a6ede2f28c3d0, type: 3}
+  SpawnRegion:
+    serializedVersion: 2
+    x: -11.5
+    y: -6
+    width: 23
+    height: 12
+  CameraBounds:
+    serializedVersion: 2
+    x: -12.5
+    y: -7
+    width: 25
+    height: 14
+  MinimumSpawnDistance: 5
+  RequestLifetimeTicks: 60
+  PickupCapacity: 256
+  VictoryBonus: 50
+  BossCoins: 50
+  AbandonmentFactor: 0.5

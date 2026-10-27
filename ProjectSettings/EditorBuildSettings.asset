@@ -6,9 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/QuackQuack/Scenes/RunBootstrap.unity
+    guid: eb343e9c36d07004fbae95a2a1badd3b
+  - enabled: 1
     path: Assets/QuackQuack/Scenes/Bootstrap.unity
     guid: 99308e22f6bf6b54fa75835f552bc423
   - enabled: 1
     path: Assets/QuackQuack/Scenes/Lake.unity
     guid: fb86267c7de2e40479ccd6bec2e07d8a
+  - enabled: 1
+    path: Assets/QuackQuack/Scenes/LakeRun.unity
+    guid: d895481d771d8bb4d8d82b702d03163a
   m_configObjects: {}

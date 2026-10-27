@@ -94,13 +94,15 @@ Preparing -> Playing
 Playing <-> Paused
 Playing -> ChoosingUpgrade -> Playing
 Playing -> Boss -> Won
+Playing/Boss -> Paused/ChoosingUpgrade -> fase de origem
 Playing/Boss -> Lost
 Playing/Paused/ChoosingUpgrade/Boss -> Abandoned
 Won/Lost/Abandoned -> Results
 ```
 
 Regras: estados terminais sao idempotentes; pausa congela simulacao; selecao congela combate, mas nao
-duplica eventos; minuto 15 solicita o chefe exatamente uma vez.
+duplica eventos; minuto 15 solicita o chefe exatamente uma vez. T060 guarda a fase
+de origem em ResumePhase; TryResume não troca Boss por Playing após um modal.
 
 ### PlayerState
 

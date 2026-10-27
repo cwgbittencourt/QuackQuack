@@ -38,7 +38,8 @@ namespace QuackQuack.Gameplay.Upgrades
             UnlockProgress(); view.Bind(Loadout, ids, names, descriptions, requirements, Toggle, Show);
             run.Changed += PhaseChanged; Ready = true; PhaseChanged(run.Phase);
         }
-        private void Update() { if (Ready && run.Phase == RunPhase.Playing) UnlockProgress(); }
+        private void Update() { if (Ready && run.IsSimulating) UnlockProgress(); }
+        public void RefreshUnlocks() { if (Ready) UnlockProgress(); }
         private void UnlockProgress()
         {
             foreach (var d in definitions)
@@ -57,21 +58,21 @@ namespace QuackQuack.Gameplay.Upgrades
             if (visible)
             {
                 if (view.IsVisible) return;
-                if (run.Phase != RunPhase.Playing && run.Phase != RunPhase.Paused) return;
-                ownsPause = run.Phase == RunPhase.Playing;
+                if (!run.IsSimulating && run.Phase != RunPhase.Paused) return;
+                ownsPause = run.IsSimulating;
                 if (ownsPause) run.TryTransition(RunPhase.Paused);
                 view.SetVisible(true);
             }
             else
             {
                 view.SetVisible(false);
-                if (ownsPause && run.Phase == RunPhase.Paused) run.TryTransition(RunPhase.Playing);
+                if (ownsPause && run.Phase == RunPhase.Paused) run.TryResume();
                 ownsPause = false;
             }
         }
         private void PhaseChanged(RunPhase phase)
         {
-            view.SetAvailable(phase == RunPhase.Playing || phase == RunPhase.Paused);
+            view.SetAvailable(run.IsSimulating || phase == RunPhase.Paused);
             if (phase != RunPhase.Paused) { view.SetVisible(false); ownsPause = false; }
         }
         private void OnDestroy()

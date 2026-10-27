@@ -30,6 +30,8 @@ namespace QuackQuack.Systems.Spawning
         private uint random;
         private bool disposed, processing;
         public int Capacity => active.Length;
+        private int activeLimit;
+        public int ActiveLimit { get => activeLimit; set { if (value <= 0 || value > active.Length) throw new ArgumentOutOfRangeException(nameof(value)); activeLimit = value; } }
         public int PendingCount => pendingCount;
         public long SpawnedCount { get; private set; }
         public long ExpiredCount { get; private set; }
@@ -52,7 +54,7 @@ namespace QuackQuack.Systems.Spawning
                 this.definitions.Add(definition.Id,definition);
             }
             if(this.definitions.Count==0) throw new ArgumentException("Enemy catalog is empty.");
-            pending=new Pending[queueCapacity]; active=new Lease[activeLimit]; budget=spawnBudget; attempts=attemptsPerSpawn;
+            pending=new Pending[queueCapacity]; active=new Lease[activeLimit]; this.activeLimit=activeLimit; budget=spawnBudget; attempts=attemptsPerSpawn;
             this.exclusionPadding=exclusionPadding; random=unchecked((uint)seed); if(random==0) random=0x9e3779b9;
         }
 
@@ -81,7 +83,7 @@ namespace QuackQuack.Systems.Spawning
                 while(pendingCount>0 && work<budget)
                 {
                     int index=Best(); var item=pending[index];
-                    if(pools.GetActiveCount(PoolFamily.Enemy)>=active.Length) { ReducedCount+=item.Remaining; Remove(index); continue; }
+                    if(pools.GetActiveCount(PoolFamily.Enemy)>=activeLimit) { ReducedCount+=item.Remaining; Remove(index); continue; }
                     work++;
                     if(!TryPosition(item.Request,visibleArea,out Vector2 position)) { ReducedCount+=item.Remaining; Remove(index); continue; }
                     int slot=FreeSlot();

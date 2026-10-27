@@ -26,6 +26,8 @@ namespace QuackQuack.Gameplay.Upgrades
         [SerializeField] private ExperiencePickup rareRewardPrefab;
         [SerializeField] private Transform rareRewardSpawn;
         [SerializeField] private int rareRewardExperience;
+        [SerializeField] private bool trainingPickups = true;
+        public PrototypeBuildCatalog Catalog => catalog;
         private ExperiencePickup rarePickup;
         private ExperiencePickup[] pickups;
         private WeaponRunner runner;
@@ -55,6 +57,8 @@ namespace QuackQuack.Gameplay.Upgrades
             runner = gameObject.AddComponent<WeaponRunner>();
             runner.Initialize(bootstrap.Run, build, bootstrap.Pools, bootstrap.Events, player.transform,
                 () => player.State.Terrain, catalog.GetAllWeapons(), key, projectileCapacity);
+            if (trainingPickups)
+            {
             string xpKey = key + "-xp";
             bootstrap.Pools.Register(xpKey, PoolFamily.Pickup, () => Instantiate(experiencePrefab, transform), experienceSpawns.Length);
             pickups = new ExperiencePickup[experienceSpawns.Length];
@@ -66,6 +70,7 @@ namespace QuackQuack.Gameplay.Upgrades
                 bootstrap.Pools.Register(rareKey, PoolFamily.Pickup, () => Instantiate(rareRewardPrefab, transform), 1);
                 rarePickup = ExperiencePickup.SpawnRare(bootstrap.Pools, rareKey, Upgrades, rareRewardExperience,
                     rareRewardSpawn.position, bootstrap.Events);
+            }
             }
             Ready = true;
         }

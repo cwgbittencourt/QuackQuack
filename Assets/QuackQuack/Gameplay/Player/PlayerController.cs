@@ -88,8 +88,8 @@ namespace QuackQuack.Gameplay.Player
             if (State == null || !isActiveAndEnabled) return;
             if (command.PausePressed)
             {
-                if (run.Phase == RunPhase.Playing) run.TryTransition(RunPhase.Paused);
-                else if (run.Phase == RunPhase.Paused) run.TryTransition(RunPhase.Playing);
+                if (run.IsSimulating) run.TryTransition(RunPhase.Paused);
+                else if (run.Phase == RunPhase.Paused) run.TryResume();
                 ClearCommands();
                 return;
             }
@@ -149,6 +149,16 @@ namespace QuackQuack.Gameplay.Player
                 }
                 else
                 {
+                    if (target.HasCombatBinding)
+                    {
+                        Vector2 position = target.transform.position;
+                        var push = (position - body.position).normalized * hit.Knockback;
+                        target.ApplyBoundControl(push, hit.InterruptSeconds);
+                        if (target.ApplyBoundDamage(hit.Damage, source, tick, body.position) && full)
+                            events.Publish(new CombatEvent(tick, wave, source, id, position, 0, CombatEventType.CriticalHit));
+                        if (!CanSimulate) break;
+                        continue; // Bound actors publish only the accepted damage; no duplicate Quack damage event.
+                    }
                     target.Health = Mathf.Max(0, target.Health - hit.Damage);
                     if (hit.InterruptSeconds > 0)
                         target.InterruptedUntil = Mathf.Max(target.InterruptedUntil, (float)run.ElapsedSeconds + hit.InterruptSeconds);
@@ -164,7 +174,8 @@ namespace QuackQuack.Gameplay.Player
         public void SetStatus(string value) { Status = value; statusUntil = Time.time + 2; }
         public HudSnapshot Snapshot()
         {
-            string status = run.Phase == RunPhase.Paused ? "PAUSADO • Esc para continuar" : run.Phase == RunPhase.Lost ? "FIM DO TESTE • Saia de Play e inicie Bootstrap para reiniciar" : Time.time < statusUntil ? Status : "Use a água para recuperar Fôlego mais rápido.";
+            string status = run.Phase == RunPhase.Paused ? "PAUSADO • Esc para continuar" : run.Outcome.HasValue ?
+                (run.Outcome == RunPhase.Won ? "VITÓRIA • Sapo-Rei derrotado" : run.Outcome == RunPhase.Lost ? "DERROTA • Vida esgotada" : "PARTIDA ABANDONADA") : Time.time < statusUntil ? Status : "Use a água para recuperar Fôlego mais rápido.";
             string quackState = !CanSimulate ? "QUACK INDISPONÍVEL" : simulationSeconds < nextQuack ? "RECARREGANDO" :
                 State.Breath.Current <= 0 ? "SEM FÔLEGO" : State.Breath.IsFull ? "PRONTO • APRIMORADO" : "PRONTO • QUACK";
             return new HudSnapshot(State.Health, State.MaxHealth, State.Breath.Current, State.Breath.Capacity,
@@ -176,7 +187,7 @@ namespace QuackQuack.Gameplay.Player
         private void OnRunChanged(RunPhase phase)
         {
             if (!run.IsSimulating) ClearCommands();
-            if (previousPhase == RunPhase.ChoosingUpgrade && phase == RunPhase.Playing)
+            if (previousPhase == RunPhase.ChoosingUpgrade && run.IsSimulating)
             { input?.Read(); ClearCommands(); }
             previousPhase = phase;
         }

@@ -38,7 +38,7 @@ namespace QuackQuack.Presentation.UI
         {
             if (loadout == null || version == loadout.Version) return;
             version = loadout.Version;
-            summary.text = "RELÍQUIAS  " + loadout.EquippedIds.Count + "/3  •  Desbloqueios desta sessão";
+            summary.text = "RELÍQUIAS  " + loadout.EquippedIds.Count + "/3  •  Relíquias desbloqueadas";
             for (int i = 0; i < 10; i++)
             {
                 bool equipped = loadout.IsEquipped(ids[i]), unlocked = loadout.IsUnlocked(ids[i]);

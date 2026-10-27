@@ -15,8 +15,11 @@ namespace QuackQuack.Gameplay.Bosses
     public sealed class FrogKingController : MonoBehaviour, IPoolLifecycle
     {
         public bool AutomaticTick { get; set; } = true;
+        public bool AutomaticPatterns { get; set; }
         public FrogKingPhase Phase { get; private set; }
         public float Health { get; private set; }
+        public float MaxHealth { get; private set; }
+        private float damageMultiplier = 1;
         public int ActiveHazards { get; private set; }
         public int SuppressedHazards { get; private set; }
         public event Action<string, long> AttackCommitted;
@@ -54,7 +57,7 @@ namespace QuackQuack.Gameplay.Bosses
         // Full encounter composition. The small Initialize overload remains useful for isolated signal tests.
         public void InitializeEncounter(RunState state, GameplayEventBus eventBus, PoolService poolService,
             PlayerController target, FrogKingSettings definition, LineRenderer visual, AudioSource source,
-            FrogKingSafeArea[] refuges)
+            FrogKingSafeArea[] refuges, float healthMultiplier = 1, float damageMultiplier = 1)
         {
             if (run != null) throw new InvalidOperationException("Already initialized.");
             if (definition == null || !definition.IsValid(out _) || target == null || target.State == null
@@ -67,6 +70,8 @@ namespace QuackQuack.Gameplay.Bosses
                 for (int j = 0; j < i; j++) if (refuges[j] == refuges[i]) throw new ArgumentException("Duplicate refuge.");
             }
             if (visual == null || source == null || state == null || eventBus == null) throw new ArgumentNullException("Encounter presentation");
+            if (!Finite(healthMultiplier) || healthMultiplier <= 0 || !Finite(damageMultiplier) || damageMultiplier <= 0
+                || (double)definition.Health * healthMultiplier > float.MaxValue) throw new ArgumentException("Invalid boss encounter multipliers.");
             settings = definition; pools = poolService; player = target;
             safeAreas = (FrogKingSafeArea[])refuges.Clone(); hazards = new FrogKingHazard[definition.HazardCapacity];
             string key = "frog-king/" + GetInstanceID();
@@ -79,8 +84,9 @@ namespace QuackQuack.Gameplay.Bosses
                     () => Instantiate(definition.HazardPrefab).GetComponent<FrogKingHazard>(), definition.HazardCapacity);
             visual.sharedMaterial = definition.MarkerMaterial;
             Initialize(state, eventBus, visual, source, definition.WarningAudio, definition.TelegraphSeconds);
-            Health = definition.Health; Phase = FrogKingPhase.Opening; configured = true;
-            events.Publish(new PresentationEvent(0, Interlocked.Increment(ref correlations),
+            Health = MaxHealth = definition.Health * healthMultiplier; this.damageMultiplier = damageMultiplier;
+            Phase = FrogKingPhase.Opening; configured = true;
+            if (state.Phase == RunPhase.Boss) events.Publish(new PresentationEvent(0, Interlocked.Increment(ref correlations),
                 PresentationEventType.BossPresented, EventPriority.Essential, 3, transform.position));
         }
 
@@ -123,7 +129,7 @@ namespace QuackQuack.Gameplay.Bosses
         public void Advance(float seconds)
         {
             if (!Finite(seconds) || seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds));
-            if (!CanSimulate) { if (configured) Cancel(); return; }
+            if (!CanSimulate) { if (configured && (run.Outcome.HasValue || player == null || pools.IsDisposed)) Cancel(); return; }
             tick++;
             // Existing hazards consume this step; newly committed ones start on the following step.
             if (configured) AdvanceHazards(seconds);
@@ -140,7 +146,7 @@ namespace QuackQuack.Gameplay.Bosses
                 AttackCommitted?.Invoke(id, committedCorrelation);
                 return; // Never catch up multiple attacks in a long frame.
             }
-            if (!configured || !AutomaticTick || seconds == 0) return;
+            if (!configured || (!AutomaticTick && !AutomaticPatterns) || seconds == 0) return;
             recovery = Mathf.Max(0, recovery - seconds);
             if (recovery > 0) return;
             int count = Phase == FrogKingPhase.Opening ? 2 : Phase == FrogKingPhase.Summoning ? 3 : 4;
@@ -153,13 +159,18 @@ namespace QuackQuack.Gameplay.Bosses
         {
             if (!CanSimulate || !configured || Health <= 0 || !Finite(amount) || amount <= 0) return false;
             float applied = Mathf.Min(Health, amount); Health -= applied;
-            Phase = Health <= 0 ? FrogKingPhase.Defeated : Health <= settings.Health * settings.DestructionPhaseHealth
-                ? FrogKingPhase.Destruction : Health <= settings.Health * settings.SummonPhaseHealth ? FrogKingPhase.Summoning : FrogKingPhase.Opening;
+            Phase = Health <= 0 ? FrogKingPhase.Defeated : Health <= MaxHealth * settings.DestructionPhaseHealth
+                ? FrogKingPhase.Destruction : Health <= MaxHealth * settings.SummonPhaseHealth ? FrogKingPhase.Summoning : FrogKingPhase.Opening;
             long id = Interlocked.Increment(ref correlations);
-            // Establish the terminal state and release hazards before notifying observers.
-            if (Health <= 0) run.TryTransition(RunPhase.Won);
-            events.Publish(new CombatEvent(eventTick, id, source, GetInstanceID(), transform.position, applied, CombatEventType.DamageApplied));
-            if (Health <= 0) events.Publish(new CombatEvent(eventTick, id, source, GetInstanceID(), transform.position, 0, CombatEventType.EntityDefeated));
+            // Retire hazards, then publish final facts before the terminal snapshot freezes.
+            bool defeated = Health <= 0;
+            if (defeated) Cancel();
+            try
+            {
+                events.Publish(new CombatEvent(eventTick, id, source, GetInstanceID(), transform.position, applied, CombatEventType.DamageApplied));
+                if (defeated) events.Publish(new CombatEvent(eventTick, id, source, GetInstanceID(), transform.position, 0, CombatEventType.EntityDefeated));
+            }
+            finally { if (defeated) run.TryTransition(RunPhase.Won); }
             return true;
         }
         private void Commit(string id, Vector2 target, FrogKingSafeArea area, long attackCorrelation)
@@ -226,12 +237,13 @@ namespace QuackQuack.Gameplay.Bosses
         }
         private void DamagePlayer(float damage, long id)
         {
+            damage = (float)Math.Min(float.MaxValue, (double)damage * damageMultiplier);
             float before = player.State.Health;
             player.State.TakeDamage(damage, run.ElapsedSeconds, player.Definition.Invulnerability);
             float applied = before - player.State.Health;
             if (applied <= 0) return;
-            if (player.State.Health <= 0) run.TryTransition(RunPhase.Lost);
             events.Publish(new CombatEvent(tick, id, GetInstanceID(), player.GetInstanceID(), player.transform.position, applied, CombatEventType.DamageApplied));
+            if (player.State.Health <= 0) run.TryTransition(RunPhase.Lost);
         }
         private void FixedUpdate() { if (AutomaticTick) Advance(Time.fixedDeltaTime); }
         private void HideWarning() { if (marker != null) marker.enabled = false; if (audioSource != null) audioSource.Stop(); }
@@ -242,17 +254,22 @@ namespace QuackQuack.Gameplay.Bosses
             ActiveHazards = 0;
         }
         private void Cancel() { pending = null; pendingArea = null; HideWarning(); ClearHazards(); }
-        private void PhaseChanged(RunPhase phase) { if (phase != RunPhase.Boss) Cancel(); }
+        private void PhaseChanged(RunPhase phase)
+        {
+            if (phase == RunPhase.Paused || phase == RunPhase.ChoosingUpgrade) { if (audioSource != null) audioSource.Pause(); }
+            else if (phase == RunPhase.Boss) { if (pending != null && audioSource != null) audioSource.UnPause(); }
+            else if (run.Outcome.HasValue) Cancel();
+        }
         private void OnDisable() { Cancel(); }
         private void OnDestroy() { if (run != null) run.Changed -= PhaseChanged; Cancel(); }
-        public void OnAcquire() { }
+        public void OnAcquire() { enabled = true; }
         public void OnRelease() { Cancel(); }
         public void ResetState()
         {
             if (run != null) run.Changed -= PhaseChanged;
             Cancel(); run = null; events = null; marker = null; audioSource = null; clip = null;
             settings = null; pools = null; player = null; safeAreas = null; hazards = null; waveKey = tadpoleKey = null;
-            configured = false; AutomaticTick = true; Health = 0; Phase = FrogKingPhase.Opening;
+            configured = false; AutomaticTick = true; AutomaticPatterns = false; Health = MaxHealth = 0; damageMultiplier = 1; Phase = FrogKingPhase.Opening;
             remaining = recovery = lead = 0; tick = correlation = 0; pattern = SuppressedHazards = 0;
             AttackCommitted = null; transform.localPosition = Vector3.zero;
         }

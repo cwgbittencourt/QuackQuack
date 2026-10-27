@@ -723,8 +723,11 @@ do início para capturar o histórico; criação tardia não reconstrói encontr
 AddCoins e RecordItem somam recompensas já aceitas. IDs em branco, valores inválidos
 e somas com overflow são rejeitados sem mutação. RecordSynergy não aceita duplicatas.
 Os IDs são fornecidos pela composição com catálogo validado; Core não consulta assets.
-As chamadas de registro somente aceitam Playing/Boss; pausa, seleção, terminal e
-descarte não aceitam fatos de combate. Os produtores devem deduplicar seus eventos:
+Fatos de combate somente aceitam Playing/Boss; pausa, seleção, terminal e
+descarte não aceitam dano/derrotas/moedas. Desde T060, itens e sinergias podem ser
+capturados durante pausa/seleção para incluir a escolha/desbloqueio antes de um
+abandono. Terminal e descarte continuam recusando toda mutação.
+Os produtores devem deduplicar seus eventos:
 o acumulador recebe cada fato aceito uma vez, sem armazenar um histórico de impactos.
 
 SetRecord recebe valor anterior e valor desta partida; IsNewRecord compara ambos.
@@ -734,10 +737,10 @@ baseline e meta não podem mudar na sessão. A avaliação de regras de recordes
 e o crédito persistido permanecem nas tarefas de integração/UI, sem thresholds
 duplicados neste modelo. Repetir o mesmo snapshot de progresso não soma de novo.
 
-Todos os fatos finais devem chegar antes da transição terminal. Em particular,
-a integração T060 precisa atribuir o último dano/derrota/recompensa antes de Won/Lost;
-eventos publicados depois do encerramento são rejeitados. Esta T058 não conecta
-automaticamente GameplayEventBus nem altera o controlador do chefe da T057.
+Todos os fatos finais devem chegar antes da transição terminal. A T060 atribui
+o último dano/derrota/recompensa antes de Won/Lost; eventos publicados depois do
+encerramento são rejeitados. RunDirector conecta o GameplayEventBus ao acumulador
+com IDs de armas conhecidos e ajusta essa ordem no controlador do chefe.
 O fator de abandono modifica somente Coins; itens e estatísticas aceitas permanecem
 no resumo. O modelo não concede itens, moedas ou progresso persistido por consulta.
 
@@ -790,9 +793,8 @@ temporários de execução interrompida são ignorados, não promovidos automati
 
 O serviço serializa operações de uma instância com lock; o chamador deve manter
 um único proprietário por caminho. I/O é síncrono e deve ocorrer fora do combate.
-Esta tarefa fornece o serviço, não conecta LakeRelics ao diretório pessoal.
-A T060 deve definir o caminho local, carregar desbloqueios/equipamento antes da
-aplicação dos efeitos e salvar em pontos de ciclo de vida apropriados. Reaplicar
+Na partida T060, RunDirector define o caminho local, carrega desbloqueios/equipamento
+antes de iniciar a simulação e salva em pontos de ciclo de vida fora do combate. Reaplicar
 os IDs em RelicLoadout usa Unlock/Equip idempotentes, sem acumular bônus.
 
 ## Sinais do Sapo-Rei (T049; implementação T057)
@@ -859,14 +861,73 @@ o proprietário da partida o avança uma vez por passo.
 Dano do Pato respeita a invulnerabilidade de PlayerState. Vida zero encerra como
 Lost; vida zero do chefe encerra como Won, cancela sinais/efeitos e emite derrota
 uma vez. Estado terminal, desativação ou pool descartado cancelam trabalho pendente.
-Não há recuperação de ataque antigo ao reativar. A integração de armas/Quack,
-entrada aos 900 segundos e composição da partida continuam na T060.
+Não há recuperação de ataque antigo ao reativar. A T060 integra armas/Quack e a
+entrada aos 900 segundos. Pausa/seleção congelam aviso, som e efeitos, preservando
+o ataque pendente; ao retomar Boss, a antecedência restante continua. Os fatores
+de vida/dano do encontro são aplicados sem alterar FrogKingSettings.
 
 FrogKingPractice.unity é uma fixture jogável apenas no Editor, fora das cenas da
 build. WASD/setas movem o Pato; um botão aplica 10% de dano ao chefe para explorar
 as fases. Esse botão é um instrumento de treino, não combate por arma. O teste
 carrega a cena, verifica a composição e captura uma imagem; não constitui aceite
 humano de percepção, justiça ou desempenho.
+
+## RunDirector e composição da partida (T060)
+
+RunBootstrap abre LakeRun, com GameBootstrap aguardando Preparing até progressão,
+Pato e loadout ficarem prontos. RunDirector assume ExternalClock; GameBootstrap
+não avança um segundo relógio. Bootstrap/Lake continuam como fixtures de treino.
+RunBootstrap é a primeira cena da lista de build; o gerador LakeRunSetup mantém
+as cenas de treino e preserva seus GUIDs.
+
+Initialize recebe serviços, Pato, UpgradeSystem, WeaponRunner, catálogo da build,
+loadout, LakeRunSettings, refúgios e JsonSaveService. A inicialização valida o
+conteúdo e aquece os pools de inimigos, XP, chefe e invocações antes da simulação.
+O chefe é devolvido após aquecer seus pools e adquirido aos 900 segundos.
+Advance(seconds, visibleArea) dirige relógio, timeline, spawn, scheduler, armas
+e chefe. Os demais runners não avançam automaticamente esse mesmo trabalho.
+
+Cada início de onda e marco da timeline emite EncounterStarted uma vez. Ondas
+repetem sua composição na cadência autoral e ajustam SpawnDirector.ActiveLimit
+ao MaxActive da onda, dentro da capacidade global. Um frame longo não produz
+todos os lotes atrasados. Minibosses têm prioridade Essential e retry limitado
+se não houver espaço; o pool de cada miniboss contém uma única instância.
+Aos 900 segundos, BossRequests passa a 1, ondas/pendências/inimigos anteriores
+são limpos sem recompensa de despawn e o chefe começa. O relógio continua durante
+o combate final; completar 900 segundos sozinho não concede vitória.
+
+Combate usa CombatTargetBinding/QuackTarget nos sete inimigos e chefe. Delegates
+estáveis resolvem o lease atual e encaminham arma/Quack ao scheduler ou chefe;
+os produtores de dano aceito publicam os eventos, evitando dano duplicado no bus.
+Controle por Quack respeita resistências; dano frontal do Besouro usa o scheduler.
+Fatores de vida/dano do encontro são aplicados uma vez por lease; reset os remove.
+As composições de ondas/receitas/IDs são copiadas na inicialização, sem consultar
+getters que criam snapshots dentro do loop de spawn.
+
+EnemyReward registra derrota/moedas uma vez e cria XP no pool limitado; saturação
+suprime o pickup e incrementa SuppressedPickups. Armas são atribuídas por ID de
+conteúdo e Quack pela origem do Pato. O golpe e a derrota finais do Sapo-Rei são
+publicados antes de Won, para entrarem no snapshot da T058. Vida zero do Pato
+encerra Lost; TryAbandon aceita estados ativos/modais e nunca gera vitória.
+
+RunState.ResumePhase guarda Playing ou Boss ao entrar em Paused/ChoosingUpgrade;
+TryResume volta à origem. Escape/botão de pausa, loadout e cartas usam esse caminho.
+Um modal do chefe não reinicia ondas nem pede outro chefe. Controles e invocações
+congelam durante os modais. Ao terminar, o diretor limpa entidades próprias,
+congela Result e emite ResultAvailable/ResultsAvailable uma vez, após sair da
+pilha de dano. Não avança automaticamente a Results: a tela completa fica na T061.
+
+Na cena, SavePathProvider resolve lake-relics.json em Application.persistentDataPath;
+testes substituem esse provider por um diretório exclusivo. O save carrega antes
+de iniciar o combate. Unlocks/equipamento são gravados quando sujos em pausa,
+seleção ou terminal, ao suspender o app e ao descarregar a sessão. Falhas ficam
+em LastSave com diagnóstico e não impedem resultado/encerramento. Persist não
+credita moedas/recordes/desafios, ausentes do schema 1.
+
+RunDirectorFlowTests usa serviços/assets reais com clock manual para verificar
+limites e finais. RunSceneFlowTests abre as cenas, verifica relógio único, HUD,
+controles/loadout e persistência. Essas evidências não aprovam balanceamento,
+percepção dos sinais ou FPS em hardware; a matriz de plataforma/playtest permanece.
 
 ## PresentationEvent
 

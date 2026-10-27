@@ -28,6 +28,13 @@ namespace QuackQuack.Gameplay.Enemies
         public EnemyDefinition Definition { get; private set; }
         public Transform Target { get; private set; }
         public long LeaseId => lease;
+        public float DamageMultiplier { get; private set; } = 1;
+        public bool ConfigureEncounter(float healthMultiplier, float damageMultiplier)
+        {
+            if (!IsReady || float.IsNaN(damageMultiplier) || float.IsInfinity(damageMultiplier) || damageMultiplier <= 0
+                || !State.TryScaleEncounter(lease, healthMultiplier)) return false;
+            DamageMultiplier = damageMultiplier; return true;
+        }
         public bool IsReady => acquired && owner != null && !owner.IsDisposed && State.IsActive;
 
         private void Awake() { body = GetComponent<Rigidbody2D>(); shape=GetComponent<CircleCollider2D>(); body.gravityScale = 0; body.freezeRotation=true; }
@@ -101,7 +108,7 @@ namespace QuackQuack.Gameplay.Enemies
         public void ResetState()
         {
             if (State.IsActive) State.Reset(State.LeaseId);
-            acquired = false; lease = 0; owner = null; run = null; events = null; rewardSink = null;
+            acquired = false; lease = 0; owner = null; run = null; events = null; rewardSink = null; DamageMultiplier = 1;
             Definition = null; Target = null;
             if (body == null) body = GetComponent<Rigidbody2D>();
             body.linearVelocity = Vector2.zero; body.angularVelocity = 0;

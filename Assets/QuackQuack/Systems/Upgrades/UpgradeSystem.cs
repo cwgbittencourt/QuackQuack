@@ -39,7 +39,7 @@ namespace QuackQuack.Systems.Upgrades
         public int Experience => experience == null ? 0 : experience.Experience;
         public int Level => experience == null ? 1 : experience.Level;
         public int PendingLevels => pendingLevels;
-        public bool CanCollectExperience => !disposed && experience != null && run != null && run.Phase == RunPhase.Playing;
+        public bool CanCollectExperience => !disposed && experience != null && run != null && run.IsSimulating;
         public BuildState Build => build;
         public UpgradeOffer CurrentOffer { get; private set; }
         public IReadOnlyList<string> ConfirmedChoices { get; }
@@ -136,7 +136,7 @@ namespace QuackQuack.Systems.Upgrades
             candidates = eligibleIds == null ? Array.Empty<string>() : (string[])eligibleIds.Clone();
             var choices = SelectChoices();
             if (choices.Count == 0) { offers.Add(offerId, null); CurrentOffer = null; return null; }
-            if (run != null && run.Phase == RunPhase.Playing) run.TryTransition(RunPhase.ChoosingUpgrade);
+            if (run != null && run.IsSimulating) run.TryTransition(RunPhase.ChoosingUpgrade);
             return Publish(offerId, choices);
         }
 
@@ -176,7 +176,7 @@ namespace QuackQuack.Systems.Upgrades
             return true;
         }
 
-        private bool CanSelect() => run == null || run.Phase == RunPhase.Playing || run.Phase == RunPhase.ChoosingUpgrade;
+        private bool CanSelect() => run == null || run.IsSimulating || run.Phase == RunPhase.ChoosingUpgrade;
         private bool IsOpen(string id) => !disposed && CanSelect() && id != null && CurrentOffer != null && !CurrentOffer.IsClosed && CurrentOffer.OfferId == id;
         private bool IsOffered(string id)
         {
@@ -257,7 +257,7 @@ namespace QuackQuack.Systems.Upgrades
             {
                 OpenPendingLevels();
                 if (run != null && run.Phase == RunPhase.ChoosingUpgrade && (CurrentOffer == null || CurrentOffer.IsClosed))
-                    run.TryTransition(RunPhase.Playing);
+                    run.TryResume();
             }
         }
         public void Dispose() { disposed = true; OfferChanged = null; OfferResolved = null; ChoiceConfirmed = null; }
