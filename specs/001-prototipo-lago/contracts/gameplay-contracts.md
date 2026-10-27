@@ -394,6 +394,30 @@ Eventos: `RunStarted`, `RunPaused`, `UpgradeStarted`, `BossStarted`, `RunEnded`,
 Invariantes: transicoes seguem [data-model.md](../data-model.md); comandos invalidos nao alteram
 estado; `RunEnded` e `ResultsReady` ocorrem no maximo uma vez.
 
+## Resultado único (T047; implementação T058/T060)
+
+Fronteira proposta no Core: `RunResultSession(RunState run, int earnedCoins,
+int victoryBonus, double abandonmentFactor)`, em QuackQuack.Core.Run. Uma sessão
+por partida recebe valores de recompensa já calculados/injetados; os números
+101 moedas, bônus 50 e fatores 0,5/0,25 dos testes são fixtures, não balanceamento
+aprovado. Composição com estatísticas finais pertence às T058/T060.
+
+`FinalizeResult()` retorna null enquanto não há Outcome terminal; depois cria
+um único RunResult e retorna a mesma instância em toda chamada posterior,
+inclusive em Results. Consulta antecipada não consome a possibilidade de fechar.
+Outcome preserva Won/Lost/Abandoned; IsVictory somente é true para Won.
+DurationSeconds captura o tempo da partida encerrada. Coins no abandono é
+floor(earnedCoins * abandonmentFactor), sem bônus de vitória; Won recebe moedas
+ganhas e bônus. Os testes não fixam a política de moedas da derrota.
+
+Abandono vindo de Playing, Paused, ChoosingUpgrade ou Boss jamais muda para
+vitória por callback tardio. Sessões, mesmo com seed igual, não compartilham
+resultado. A fronteira não grava saves ou credita carteira: entrega o resultado
+estável para o consumidor; idempotência de persistência fica na integração futura.
+Os demais campos de RunResult continuam no escopo T058. Reflexão temporária nos
+testes mantém a fase vermelha compilável, exigindo a implementação real no SetUp;
+migrar para chamadas tipadas ao implementar.
+
 ## SaveService
 
 Operacoes: `Load`, `Save`, `CreateDefault`, `Migrate` e `RestoreBackup`.
