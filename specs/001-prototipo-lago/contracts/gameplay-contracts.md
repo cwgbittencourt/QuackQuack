@@ -460,6 +460,37 @@ Resultados usam `Success`, `Recovered`, `Defaulted` ou `Failed` e incluem diagno
 sensiveis. Uma falha de persistencia nao bloqueia uma partida; salvamento ocorre fora do loop critico;
 substituicao do arquivo principal e atomica.
 
+## Sinais do Sapo-Rei (T049; implementação T057)
+
+Fronteira proposta para exercitar a composição real em PlayMode:
+Gameplay.Bosses.FrogKingController é MonoBehaviour com AutomaticTick configurável,
+Advance(float seconds) e TryBeginAttack(string attackId, Vector2 target).
+Initialize(RunState, GameplayEventBus, LineRenderer, AudioSource, AudioClip,
+float leadSeconds) recebe as dependências do sinal e antecedência autoral.
+O teste usa 0,5 segundo e tom sintetizado como fixtures, sem definir balanceamento
+ou áudio final. Com AutomaticTick=false, somente Advance dirige a simulação.
+
+Os IDs de padrões jump, wave, tadpoles e destroy-safe-area exercitam o mesmo
+caminho de preparação/execução usado pelo chefe. A entrada explícita permite
+isolar cada padrão sem esperar o seletor automático de fases; elegibilidade e
+composição das fases reais continuam na T057. Antes de executar, cada padrão
+publica DangerTelegraphed com prioridade Danger, correlação positiva, posição
+alvo e duração que cobre a antecedência. A marcação possui geometria não nula,
+largura/opacidade positivas e renderer ativo; AudioSource reproduz o clip de
+aviso sem mute e com volume positivo. Ambos precedem o commit do ataque.
+
+AttackCommitted (Action<string, long>) informa padrão e a mesma correlação do
+aviso uma única vez após a antecedência. Nenhum evento de combate é permitido
+durante a janela de aviso. Pedido concorrente não substitui o ataque pendente
+nem duplica aviso. Won/Lost/Abandoned ou desativação cancelam o pendente e param
+renderer/áudio; reativar não executa ataque antigo.
+
+FrogKingTelegraphTests cria componentes Unity reais em uma fixture isolada;
+reflexão temporária exige o controlador de produção no SetUp, sem implementação
+substituta. Migrar para chamadas tipadas na T057. Verificações de componente e
+ordenação não aprovam legibilidade em tela, percepção sonora, dano real, fases,
+pooling ou justiça de gameplay; esses aceites exigem integração e playtest.
+
 ## PresentationEvent
 
 Eventos minimos: terreno alterado, Folego pronto/consumido, perigo telegrafado, boss apresentado,

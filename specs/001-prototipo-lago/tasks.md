@@ -125,7 +125,7 @@ todos os campos da tela de resultado.
 - [x] T046 [P] [US3] Criar testes EditMode para cronograma, dois minibosses antes de 15 minutos e Sapo-Rei solicitado uma vez em `Assets/QuackQuack/Tests/EditMode/EncounterScheduleTests.cs`
 - [x] T047 [P] [US3] Criar testes EditMode para resultado unico, abandono parcial e vitoria nunca registrada no abandono em `Assets/QuackQuack/Tests/EditMode/RunResultTests.cs`
 - [x] T048 [P] [US3] Criar testes EditMode para desbloquear somente IDs conhecidos, equipar zero a tres reliquias, aplicar/remover efeitos sem duplicacao e recuperar SaveData invalido em `Assets/QuackQuack/Tests/EditMode/SaveServiceTests.cs`
-- [ ] T049 [P] [US3] Criar testes PlayMode para sinais visuais/sonoros anteriores aos ataques do Sapo-Rei em `Assets/QuackQuack/Tests/PlayMode/FrogKingTelegraphTests.cs`
+- [x] T049 [P] [US3] Criar testes PlayMode para sinais visuais/sonoros anteriores aos ataques do Sapo-Rei em `Assets/QuackQuack/Tests/PlayMode/FrogKingTelegraphTests.cs`
 
 ### Implementation for User Story 3
 
