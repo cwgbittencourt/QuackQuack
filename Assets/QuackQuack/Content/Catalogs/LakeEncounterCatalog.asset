@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2af13e66e283364eaa27e35ab1aea76, type: 3}
+  m_Name: LakeEncounterCatalog
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Catalogs.LakeEncounterCatalog
+  commonEnemies:
+  - {fileID: 11400000, guid: 8d94971c51ac42d4aa380d0af6dedf0c, type: 2}
+  - {fileID: 11400000, guid: bb01b135684b1d84ea920c4b055067a1, type: 2}
+  - {fileID: 11400000, guid: c06783a9cc31c9c4084c1d99d9b522da, type: 2}
+  - {fileID: 11400000, guid: 5be9813d3d57cbb439249e79fae5f1dc, type: 2}
+  - {fileID: 11400000, guid: 5821232dadeff844fa2bf1b576fdfa41, type: 2}
+  miniBosses:
+  - {fileID: 11400000, guid: 14fe908e9d1695e478b3da6b93acb653, type: 2}
+  - {fileID: 11400000, guid: 575a007bf33e5c743beab02646f1f88c, type: 2}
+  waves:
+  - {fileID: 11400000, guid: 46db3b318ecdd864cbefd0ac60b8df52, type: 2}
+  - {fileID: 11400000, guid: d82480f3ba2dbfc42b5f8a60a02aaec5, type: 2}
+  - {fileID: 11400000, guid: c8e7d0e35dd63aa4a993de2e0c58c127, type: 2}
+  - {fileID: 11400000, guid: ca0aee6348bdad944985bee5eaf38b17, type: 2}
+  - {fileID: 11400000, guid: 25717ec56008f814b9d51c0336d83ecf, type: 2}
+  - {fileID: 11400000, guid: 7c700b07100938b41b410b87cd713117, type: 2}
+  miniBossEncounters:
+  - {fileID: 11400000, guid: 309252c4f12849046bcdaf2783424d32, type: 2}
+  - {fileID: 11400000, guid: 9462b3636a2daed44a932d50296cb415, type: 2}
+  finalBossEncounter: {fileID: 11400000, guid: 65a110cd7a7f6be47800fba1b0c6ed01, type: 2}
+  behaviorSettings: {fileID: 11400000, guid: 36eb0fd51fa930f439f8029620d22dc4, type: 2}
+  activeLimit: 200
+  queueCapacity: 32
+  spawnBudget: 8
+  positionAttempts: 16
+  exclusionPadding: 1.5

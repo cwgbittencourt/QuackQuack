@@ -123,6 +123,22 @@ preservando GUIDs. Ele não modifica cenas nem altera a seleção de cartas.
   pelo Unity, preservando GUIDs existentes e atualizando somente a raiz Relics T052
   na cena Lake. Não precisa executá-lo para jogar um clone normal.
 
+### Catálogo de encontros disponível após T056
+
+- Abrir `Assets/QuackQuack/Content/Catalogs/LakeEncounterCatalog.asset` no Inspector.
+  Verificar cinco comuns, Libélula Alfa, Sapo-Cururu, settings, seis ondas e três marcos.
+- Prefabs temporários estão em `Prefabs/Prototype/Enemies`; as definições e as
+  ondas estão em `Content/Enemies/Prototype` e `Content/Encounters/Prototype`.
+- O menu `QuackQuack → Build T056 lake encounter catalog` é manutenção: regrava
+  o catálogo e dados iniciais preservando GUIDs. Assets já estão versionados e
+  não precisam ser gerados para abrir um clone normal.
+- A prévia de manutenção `LakeEncounterCatalogSetup.Preview` rende uma galeria
+  sem salvar cena. Os testes usam os assets reais para criar pools/diretor e
+  verificar os dois minibosses com o scheduler compartilhado.
+- Este catálogo prepara a composição da partida; o acionamento de ondas na arena
+  e a integração com chefe/finalização permanecem nas T057/T060. O Bootstrap
+  continua abrindo a arena de treino existente.
+
 ### Marco 1 - Fundamentos
 
 - Abrir `Bootstrap`, iniciar `Lake` e mover o Pato com teclado, controle e toque.

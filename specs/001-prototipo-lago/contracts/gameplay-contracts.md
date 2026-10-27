@@ -53,6 +53,40 @@ sem acumular modificadores nem alterar o asset. Sem afinidade, retorna os valore
 base. A validação rejeita NaN, infinitos e produtos que excedam float ou zerem
 por underflow. Os comportamentos de combate dessas armas são de T042.
 
+## LakeEncounterCatalog (T056)
+
+Asset Content/Catalogs/LakeEncounterCatalog.asset com cinco inimigos comuns
+canônicos, dois minibosses, seis ondas, dois encontros de miniboss e o encontro
+final. CommonEnemies contém Formiga/Swarm, Aranha/WebCaster, Vespa/Charger,
+Besouro/FrontalArmored e Caramujo Aquático/SlowingTrail. MiniBosses contém
+Libélula Alfa/Charger e Sapo-Cururu/WebCaster, com parâmetros próprios e pools
+de uma instância. São composições das estratégias existentes, sem fases extras.
+
+IsValid exige IDs únicos, elenco e papéis fechados, PooledEnemy nos prefabs e
+EnemyAreaEffect nos sinais especiais. Ondas usam somente espécies comuns,
+particionam [0,900) sem lacunas/sobreposições, contêm as cinco espécies ao longo
+da progressão e têm intervalo não crescente/limite ativo não decrescente.
+MaxActive de cada onda não excede ActiveLimit global. Encontros de Libélula Alfa,
+Sapo-Cururu e Sapo-Rei respeitam os marcos validados na T051.
+
+GetAllEnemies retorna cópia das sete definições. GetAllEncounters inclui ondas,
+minibosses e pedido final; getters de coleções expõem snapshots protegidos.
+CreateSchedule usa os IDs de inimigo do catálogo mais sapo-rei como alvo externo
+reservado para o controlador T057/T060. Não existe definição/prefab fictício do
+chefe no elenco comum. RegisterPools pré-aquece as sete famílias específicas;
+CreateDirector compõe SpawnDirector com os orçamentos editáveis e pools registrados.
+
+Dados iniciais: limite global 200, fila 32, orçamento 8 por tick, 16 tentativas
+por posição e margem de exclusão 1,5. Pools máximos 128/64/48/32/32 para comuns,
+um por miniboss; total 306 instâncias pré-aquecidas. Settings táticos usam steering
+64 e oito efeitos por tipo. Estes números são autoria inicial, sem perfil aceito.
+
+LakeEncounterCatalogSetup.Build gera assets, prefabs, material e tons temporários
+pelo Editor, preservando GUIDs existentes. Preview rende galeria sem salvar cena.
+O catálogo está pronto para composição; produção periódica de lotes, limites por
+onda, câmera, armas/Quack, recompensas e ciclo final serão ligados pela orquestração
+da partida. A T056 não inicia hordas automaticamente na arena de treino.
+
 ## EnemyDefinition (T050)
 
 ScriptableObject em Content/Enemies, derivado de ContentDefinition, com dados

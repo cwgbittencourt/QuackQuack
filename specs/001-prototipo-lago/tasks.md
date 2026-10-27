@@ -135,7 +135,7 @@ todos os campos da tela de resultado.
 - [x] T053 [US3] Implementar `EnemyState` com recompensa unica e ciclo de aquisicao/limpeza exclusivamente pelo `PoolService` em `Assets/QuackQuack/Core/Combat/EnemyState.cs`
 - [x] T054 [US3] Implementar `SpawnDirector` com limite ativo, area de exclusao, expiracao e reducao de densidade sem criar inimigos fora do pool em `Assets/QuackQuack/Systems/Spawning/SpawnDirector.cs`
 - [x] T055 [US3] Implementar comportamentos taticos e atualizacao agrupada sem `Update` individual por inimigo em `Assets/QuackQuack/Gameplay/Enemies/EnemyUpdateScheduler.cs`
-- [ ] T056 [US3] Criar catalogo de Formiga, Aranha, Vespa, Besouro, Caramujo Aquatico, Libelula Alfa e Sapo-Cururu com cronograma fechado em `Assets/QuackQuack/Content/Catalogs/LakeEncounterCatalog.asset`
+- [x] T056 [US3] Criar catalogo de Formiga, Aranha, Vespa, Besouro, Caramujo Aquatico, Libelula Alfa e Sapo-Cururu com cronograma fechado em `Assets/QuackQuack/Content/Catalogs/LakeEncounterCatalog.asset`
 - [ ] T057 [US3] Implementar fases do Sapo-Rei com salto marcado, ondas, girinos e destruicao de areas seguras em `Assets/QuackQuack/Gameplay/Bosses/FrogKingController.cs`
 - [ ] T058 [US3] Implementar `RunResult` com tempo, chefe, derrotas, dano por arma, sequencia, build, sinergias, moedas, itens e desafios em `Assets/QuackQuack/Core/Run/RunResult.cs`
 - [ ] T059 [US3] Implementar JSON versionado para desbloqueios/loadout de reliquias, escrita atomica, backup e valores padrao em `Assets/QuackQuack/Systems/Save/JsonSaveService.cs`

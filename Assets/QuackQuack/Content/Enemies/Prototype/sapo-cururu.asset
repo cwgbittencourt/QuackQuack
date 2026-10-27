@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2249285519c8fc74090b394c82f24ee4, type: 3}
+  m_Name: sapo-cururu
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Enemies.EnemyDefinition
+  id: sapo-cururu
+  displayName: Sapo-Cururu
+  role: 1
+  health: 300
+  moveSpeed: 1.1
+  contactDamage: 10
+  attackInterval: 3.5
+  attackRange: 6
+  attackDamage: 14
+  effectDuration: 4
+  slowMultiplier: 0.65
+  chargeSpeed: 6
+  chargeDuration: 0.65
+  frontalDamageMultiplier: 0.25
+  frontalArcDegrees: 120
+  knockbackResistance: 0.5
+  interruptionResistance: 0.35
+  experienceReward: 50
+  coinReward: 15
+  prefab: {fileID: 159673106473632315, guid: cb8b6393d77616e438ca420fd20cdbfd, type: 3}
+  poolInitialSize: 1
+  poolMaxSize: 1
+  telegraphSeconds: 1
+  telegraphVisual: {fileID: 7917990898139540453, guid: 73a6f411f509d6d4aa33baa56651a311, type: 3}
+  telegraphAudio: {fileID: 8300000, guid: c582074e7ef7b2e42aec7542b2891e94, type: 3}

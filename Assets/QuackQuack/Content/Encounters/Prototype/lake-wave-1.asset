@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40c650af2ec715940a13a4136a0bad85, type: 3}
+  m_Name: lake-wave-1
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Encounters.EncounterDefinition
+  id: lake-wave-1
+  displayName: Onda 1
+  kind: 0
+  startSeconds: 0
+  endSeconds: 150
+  enemyIds:
+  - formiga
+  quantities: 02000000
+  spawnInterval: 3
+  healthMultiplier: 1
+  damageMultiplier: 1
+  maxActive: 32
+  arenaId: lake
