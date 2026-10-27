@@ -505,6 +505,46 @@ futuro deve devolver aquisições ao encerrar/desativar encontros. Esta tarefa e
 o ciclo isolado; spawn de hordas, IA, integração de dano dos alvos legados e
 consumo da recompensa no gameplay continuam nas T054–T056/T060.
 
+## Atualização tática centralizada (T055)
+
+Gameplay.Enemies.EnemyUpdateScheduler tem um FixedUpdate para todas as aquisições
+do SpawnDirector. Initialize recebe serviços, PlayerController, definições e
+EnemyBehaviorSettings validados. Advance permite dirigir simulação manualmente;
+AutomaticTick=false evita avanço duplicado em testes. Slots acompanham objeto e
+lease; reutilização limpa o estado de decisão/ataque anterior. SteeringBudget
+distribui decisões de direção em rodízio, enquanto movimento, prazos e contato
+são processados para todas as aquisições ativas a cada avanço.
+
+Swarm persegue; WebCaster mantém distância e deixa teia no ponto anunciado;
+Charger trava alvo no aviso e investe naquela direção; FrontalArmored reduz dano
+dentro do arco frontal, permitindo flanqueamento; SlowingTrail deixa área lenta
+na posição anunciada. Aranha/Vespa/Caramujo preparam avisos por antecedência autoral,
+com evento DangerTelegraphed e EnemyAreaEffect pooled com LineRenderer/AudioSource.
+Sem capacidade para sinalizar, ataque é suprimido. Teia/trilha usam duração e
+multiplicador autorais, aplicando a maior lentidão sem multiplicar sobreposições.
+
+EnemyBehaviorSettings guarda orçamento de steering, capacidade de efeitos por
+tipo, alcance de contato do jogador, raio de campo, distância preferida, margem
+de colisão, decaimento do empurrão e cores. Intervalo de ataque de todos os papéis
+deve ser positivo, inclusive para contato. Movimento varre CircleCollider2D contra
+paredes na camada 8; buffer saturado bloqueia movimento. Contato varre o percurso,
+inclui raio do inimigo e respeita obstáculos e invulnerabilidade do PlayerState.
+Cada dano aceito tem correlação própria; vida zero solicita Lost.
+
+ApplyHit recebe lease e origem do ataque para armadura frontal; ApplyControl
+compõe resistências, interrompe preparação/investida e aplica empurrão com colisão.
+Ambos exigem aquisição gerenciada atual e simulação ativa. São fronteiras para
+conectar as armas/Quack na composição seguinte, sem alterar alvos legados aqui.
+EnemySlowMultiplier é aplicado pelo PlayerController à velocidade base/relicada;
+remoção/expiração dos campos restaura o valor um.
+
+EnemyAreaEffect não tem Update: o scheduler avança idade, faz consultas espaciais
+e devolve efeitos exclusivamente pelo pool. Avisos são cancelados com derrota,
+lease antigo ou interrupção; campos já aceitos persistem pela duração autoral.
+Pausa/seleção congelam tempos e áudio; fim/desativação limpam efeitos e lentidão.
+O diretor permanece pertencendo ao chamador, que devolve suas aquisições na saída.
+O catálogo e montagem de cena são da T056; não há aceite de hordas/performance aqui.
+
 ## PoolLifecycle
 
 Inimigos, projeteis, pickups/recompensas e VFX implementam `OnAcquire`, `OnRelease` e `ResetState`.

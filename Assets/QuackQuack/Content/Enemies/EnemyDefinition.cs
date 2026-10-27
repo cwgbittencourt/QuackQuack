@@ -58,8 +58,8 @@ namespace QuackQuack.Content.Enemies
             if (!base.IsValid(out reason)) return false;
             if (string.IsNullOrWhiteSpace(DisplayName)) reason = "Enemy display name is required.";
             else if (!Enum.IsDefined(typeof(EnemyRole), role)) reason = "Enemy tactical role is invalid.";
-            else if (!Positive(health) || !Positive(moveSpeed) || !Nonnegative(contactDamage))
-                reason = "Enemy health/speed must be positive and contact damage nonnegative, all finite.";
+            else if (!Positive(health) || !Positive(moveSpeed) || !Nonnegative(contactDamage) || !Positive(attackInterval))
+                reason = "Enemy health, speed and attack interval must be positive; contact damage nonnegative; all finite.";
             else if (!Unit(knockbackResistance) || !Unit(interruptionResistance))
                 reason = "Enemy resistances must be finite normalized values.";
             else if (experienceReward < 0 || coinReward < 0) reason = "Enemy rewards cannot be negative.";

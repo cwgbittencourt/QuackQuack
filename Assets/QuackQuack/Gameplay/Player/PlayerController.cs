@@ -32,6 +32,12 @@ namespace QuackQuack.Gameplay.Player
         private readonly QuackSystem quack = new QuackSystem();
         public PlayerState State { get; private set; }
         public RelicLoadout Relics { get; set; }
+        public float EnemySlowMultiplier {get;private set;}=1;
+        public void SetEnemySlow(float multiplier)
+        {
+            if(float.IsNaN(multiplier)||float.IsInfinity(multiplier)||multiplier<=0||multiplier>1)throw new System.ArgumentOutOfRangeException(nameof(multiplier));
+            EnemySlowMultiplier=multiplier;
+        }
         public string Status { get; private set; } = "Explore o lago e experimente o Quack.";
         public CharacterDefinition Definition => definition;
         public bool QuackReady => CanSimulate && simulationSeconds >= nextQuack && State.Breath.Current > 0;
@@ -105,6 +111,7 @@ namespace QuackQuack.Gameplay.Player
             }
             body.linearVelocity = move * TerrainAffinity.Select(definition.LandSpeed, definition.WaterSpeed, terrain);
             if (Relics != null) body.linearVelocity *= 1 + Relics.GetBonus(RelicAttribute.MovementSpeed, terrain);
+            body.linearVelocity*=EnemySlowMultiplier;
             bool wasFull = State.Breath.IsFull;
             State.Breath.Recover(Time.fixedDeltaTime * (1 + (Relics?.GetBonus(RelicAttribute.BreathRecovery, terrain) ?? 0)), terrain);
             if (!wasFull && State.Breath.IsFull)

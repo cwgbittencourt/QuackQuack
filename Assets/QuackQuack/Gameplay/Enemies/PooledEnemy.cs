@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace QuackQuack.Gameplay.Enemies
 {
-    [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(Rigidbody2D),typeof(CircleCollider2D))]
     public sealed class PooledEnemy : MonoBehaviour, IPoolLifecycle
     {
         private static long nextLease;
@@ -21,13 +21,16 @@ namespace QuackQuack.Gameplay.Enemies
         private GameplayEventBus events;
         private Action<EnemyReward> rewardSink;
         private Rigidbody2D body;
+        private CircleCollider2D shape;
+        public Rigidbody2D Body=>body;
+        public CircleCollider2D Shape=>shape;
         public EnemyState State { get; } = new EnemyState();
         public EnemyDefinition Definition { get; private set; }
         public Transform Target { get; private set; }
         public long LeaseId => lease;
         public bool IsReady => acquired && owner != null && !owner.IsDisposed && State.IsActive;
 
-        private void Awake() { body = GetComponent<Rigidbody2D>(); body.gravityScale = 0; }
+        private void Awake() { body = GetComponent<Rigidbody2D>(); shape=GetComponent<CircleCollider2D>(); body.gravityScale = 0; body.freezeRotation=true; }
 
         public static void RegisterPool(PoolService pools, EnemyDefinition definition, Transform parent = null)
         {
