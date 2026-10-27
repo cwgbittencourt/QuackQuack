@@ -334,6 +334,28 @@ EVOLUÇÃO! é distinto do losango roxo RECOMPENSA RARA e dos sinais do Quack ma
 Clipes, perfis e prefabs são assets gerados pelo Unity; não há criação recorrente
 de objetos ou AudioClip durante as ativações.
 
+## Cronograma de encontros (T046; implementação T051/T060)
+
+Fronteira proposta no Core: `QuackQuack.Core.Run.EncounterSchedule`, com construtor
+`EncounterSchedule(RunState run, string[] encounterIds, double[] scheduledSeconds)`.
+Recebe e copia IDs e tempos autorais correspondentes, em ordem cronológica. O
+catálogo do Lago deverá fornecer Libélula Alfa aos 300 segundos, Sapo-Cururu aos
+600 e Sapo-Rei aos 900; esses valores nos testes são fixtures, não balanceamento
+embutido em um controlador. Catálogo e validação autoral pertencem às T051/T056.
+
+`CollectDue()` retorna `IReadOnlyList<string>` com os pedidos ainda não emitidos
+cujo tempo seja menor ou igual a RunState.ElapsedSeconds, na ordem do cronograma.
+Uma consulta que cruza vários marcos retorna todos, sem perder encontros; cada ID
+é solicitado uma vez por sessão. Consultas repetidas e a entrada em Boss não
+repetem o Sapo-Rei. Nova partida possui seu próprio cursor.
+
+Preparing, Paused, ChoosingUpgrade e estados terminais não emitem pedidos.
+Pausa/seleção preservam pedidos vencidos até retomar Playing; tempo suspenso não
+conta. O cronograma não cria inimigos, não transiciona fases nem concede vitória:
+essas responsabilidades ficam nos consumidores das T054/T060. Os testes T046
+usam reflexão temporária para compilar sem a classe real, exigida no SetUp; não
+há implementação substituta. Migrar para chamadas tipadas na implementação.
+
 ## SpawnRequest
 
 Produzido pelo `SpawnDirector` e consumido pelo `PoolService`.

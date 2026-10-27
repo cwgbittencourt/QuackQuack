@@ -44,15 +44,18 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T043: catálogo de seis armas, seis passivas e três evoluções | Concluída |
 | T044: seleção de cartas e progressão integrada à arena | Concluída |
 | T045: feedback pooled de evolução e recompensa rara | Concluída |
+| T046: testes do cronograma e pedido único do chefe | Concluída (fase vermelha; implementação T051/T060) |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T045 foram revisadas e concluídas; a próxima tarefa é **T046**.
+da arena. T022–T046 foram revisadas e concluídas; a próxima tarefa é **T047**.
 
-Validação T045: **209 testes EditMode e 77 PlayMode aprovados, sem falhas**.
+Validação T046: **209 testes EditMode aprovados e 12 falhas esperadas** pela ausência
+do cronograma de produção. Consulte o [relatório T046](specs/001-prototipo-lago/test-report-t046.md).
+Última validação PlayMode (T045): **77 aprovados, sem falhas**.
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
 Consulte o [relatório T045](specs/001-prototipo-lago/test-report-t045.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.
