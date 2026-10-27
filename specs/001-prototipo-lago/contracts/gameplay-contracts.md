@@ -53,6 +53,40 @@ sem acumular modificadores nem alterar o asset. Sem afinidade, retorna os valore
 base. A validação rejeita NaN, infinitos e produtos que excedam float ou zerem
 por underflow. Os comportamentos de combate dessas armas são de T042.
 
+## EnemyDefinition (T050)
+
+ScriptableObject em Content/Enemies, derivado de ContentDefinition, com dados
+serializados editáveis e getters sem setters públicos. EnemyRole declara Swarm
+(Formiga), WebCaster (Aranha), Charger (Vespa), FrontalArmored (Besouro) e
+SlowingTrail (Caramujo Aquático). A seleção do comportamento pelo scheduler e os
+assets autorais do elenco ficam nas T055/T056.
+
+Health/MoveSpeed são positivos finitos; ContactDamage não negativo. Resistências
+a empurrão/interrupção usam [0,1]; recompensas de XP/moedas são inteiros não negativos.
+Dados específicos: intervalo/alcance/dano de ataque, duração e multiplicador de
+lentidão, velocidade/duração de investida e arco/multiplicador de armadura frontal.
+Aranha/Caramujo exigem lentidão em (0,1) e duração positiva; Vespa exige investida
+mais rápida que seu movimento; Besouro exige redução em [0,1) e arco em (0,180],
+preservando flanqueamento. Todos os campos usados por cada papel são validados.
+
+Prefab deve ter componente IPoolLifecycle na raiz. PoolInitialSize/PoolMaxSize
+exigem 0 < inicial <= máximo. PoolFamily é Enemy, PoolKey deriva de `enemy/` + Id,
+e TelemetryId reutiliza Id estável, evitando identidades divergentes. Isso fornece
+configuração para pool/telemetria, sem registrar pools, emitir contadores ou
+instanciar inimigos. PoolService atual pré-aquece capacidade fixa; o consumidor
+futuro deve respeitar o máximo sem criar fora do pool. A instrumentação é da T072.
+
+WebCaster, Charger e SlowingTrail declaram HasTelegraphedAttack e exigem referência
+visual, AudioClip não vazio e TelegraphSeconds positivo não maior que AttackInterval.
+Swarm/FrontalArmored usam contato/defesa, sem exigir sinal de ataque especial.
+Referências válidas não comprovam antecipação/legibilidade/audibilidade em jogo.
+
+IsValidCatalog valida subconjuntos não vazios, elementos existentes/válidos e IDs
+únicos, garantindo também unicidade de chaves de pool/telemetria. Exigir exatamente
+cinco tipos comuns e montar prefabs/catalogar encontros pertence à T056. A definição
+não altera assets em consultas nem implementa estado, recompensa única, spawn ou IA;
+essas entregas continuam nas T053–T055.
+
 ## PrototypeBuildCatalog (T043)
 
 Asset em Content/Catalogs/PrototypeBuildCatalog.asset com seis armas básicas,

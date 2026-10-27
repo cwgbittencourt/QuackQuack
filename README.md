@@ -48,18 +48,20 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T047: testes de resultado único e abandono parcial | Concluída (fase vermelha; implementação T058/T060) |
 | T048: testes de relíquias e recuperação de save | Concluída (fase vermelha; implementação T052/T059) |
 | T049: testes dos sinais visuais/sonoros do Sapo-Rei | Concluída (fase vermelha; implementação T057) |
+| T050: definição de inimigos, papéis táticos, pool e identidade de telemetria | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T049 foram revisadas e concluídas; a próxima tarefa é **T050**.
+da arena. T022–T050 foram revisadas e concluídas; a próxima tarefa é **T051**.
 
-Validação T048: **209 testes EditMode aprovados e 52 falhas esperadas**: 12 do
+Validação T050: **240 testes EditMode aprovados e 52 falhas esperadas**: 12 do
 cronograma (T046), 18 de resultado (T047) e 22 de relíquias/save (T048), cujas
 implementações continuam pendentes.
-Consulte o [relatório T048](specs/001-prototipo-lago/test-report-t048.md).
+Os 31 testes novos da definição de inimigos passaram. Consulte o
+[relatório T050](specs/001-prototipo-lago/test-report-t050.md).
 Validação PlayMode T049: **77 aprovados e 9 falhas esperadas** pela ausência do
 controlador do Sapo-Rei. Consulte o [relatório T049](specs/001-prototipo-lago/test-report-t049.md).
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.

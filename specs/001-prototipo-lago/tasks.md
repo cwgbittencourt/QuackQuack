@@ -129,7 +129,7 @@ todos os campos da tela de resultado.
 
 ### Implementation for User Story 3
 
-- [ ] T050 [P] [US3] Implementar definicoes de Formiga, Aranha, Vespa, Besouro e Caramujo Aquatico com funcoes taticas, pool e telemetria em `Assets/QuackQuack/Content/Enemies/EnemyDefinition.cs`
+- [x] T050 [P] [US3] Implementar definicoes de Formiga, Aranha, Vespa, Besouro e Caramujo Aquatico com funcoes taticas, pool e telemetria em `Assets/QuackQuack/Content/Enemies/EnemyDefinition.cs`
 - [ ] T051 [P] [US3] Implementar encontros de Libelula Alfa no minuto 5, Sapo-Cururu no minuto 10 e Sapo-Rei no minuto 15 sem lacunas de progressao em `Assets/QuackQuack/Content/Encounters/EncounterDefinition.cs`
 - [ ] T052 [P] [US3] Implementar dez `RelicDefinition`, `RelicLoadout` limitado a tres, desbloqueio, aplicacao idempotente e tela de equipar/desequipar em `Assets/QuackQuack/Content/Relics/RelicDefinition.cs`, `Assets/QuackQuack/Core/Progression/RelicLoadout.cs` e `Assets/QuackQuack/Presentation/UI/RelicLoadoutView.cs`
 - [ ] T053 [US3] Implementar `EnemyState` com recompensa unica e ciclo de aquisicao/limpeza exclusivamente pelo `PoolService` em `Assets/QuackQuack/Core/Combat/EnemyState.cs`
