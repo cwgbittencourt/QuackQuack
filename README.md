@@ -52,19 +52,20 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T051: definição e cronograma dos encontros sem lacunas | Concluída |
 | T052: dez relíquias, desbloqueios, efeitos e tela de loadout | Concluída |
 | T053: estado de inimigo, recompensa única e ciclo pooled | Concluída |
+| T054: diretor de spawn com limites, exclusão e expiração | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T053 foram revisadas e concluídas; a próxima tarefa é **T054**.
+da arena. T022–T054 foram revisadas e concluídas; a próxima tarefa é **T055**.
 
-Validação T053: **306 testes EditMode aprovados e 29 falhas esperadas**: 18 de
+Validação T054: **316 testes EditMode aprovados e 29 falhas esperadas**: 18 de
 resultado (T047) e 11 de save (T048), cujas implementações continuam pendentes.
-PlayMode completo: **90 aprovados e 9 falhas esperadas** pela ausência do controlador
-do Sapo-Rei; a execução final dirigida aprovou os 12 casos de inimigo pooled.
-Consulte o [relatório T053](specs/001-prototipo-lago/test-report-t053.md).
+PlayMode completo: **107 aprovados e 9 falhas esperadas** pela ausência do controlador
+do Sapo-Rei. Os 10 novos EditMode e 15 novos PlayMode da T054 passaram.
+Consulte o [relatório T054](specs/001-prototipo-lago/test-report-t054.md).
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
 Consulte o [relatório T045](specs/001-prototipo-lago/test-report-t045.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.

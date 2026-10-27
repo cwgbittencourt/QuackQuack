@@ -427,6 +427,49 @@ prioridade e tick limite.
 Invariantes: nunca surge dentro da area de exclusao visivel; respeita limite ativo; uma requisicao
 expirada e descartada; falha de capacidade reduz densidade antes de criar fora do pool.
 
+### SpawnDirector (T054)
+
+Core.Run.SpawnRequest é snapshot por valor com RequestId, EncounterId, EnemyId,
+Quantity, Region (Rect de mundo), MinimumDistance, Priority e DeadlineTick.
+Validação rejeita IDs vazios, quantidade/ID de pedido não positivos, regiões
+degeneradas/não finitas, distância negativa/não finita, prioridade inválida e
+prazo negativo. O consumidor de encontros futuro produz esses pedidos a partir
+dos dados autorais; o diretor os executa usando PoolService.
+
+Systems.Spawning.SpawnDirector recebe RunState, pools registrados, barramento,
+alvo, definições, limite ativo global, capacidade da fila, orçamento por tick,
+tentativas por posição, margem de exclusão, seed e consumidor de recompensa.
+Valida definições e registro tipado dos pools na composição. A via interna
+SpawnPrepared evita repetir validação de ScriptableObjects no loop de spawn;
+as APIs públicas do PooledEnemy continuam validando entrada externa.
+
+TryEnqueue exige RequestId estritamente maior que o último aceito, evitando
+replay com memória limitada; fila cheia ou pedido inválido não consome o ID.
+Process(tick, visibleArea) usa tick de simulação monotônico e retângulo atual
+da câmera. Cada tick só é processado uma vez. Antes da prioridade, remove todos
+os pedidos com tick > DeadlineTick; o prazo é inclusivo. Prioridade maior é
+processada primeiro, com RequestId crescente como desempate.
+
+Posições usam PRNG local por seed, dentro da região permitida, fora do retângulo
+visível expandido pela margem (inclusive bordas), e respeitam a distância ao
+alvo na hora da execução. Tentativas e trabalho por tick são limitados. Sem
+espaço, pool disponível ou capacidade global, descarta o restante do lote,
+contabilizando ReducedCount. Orçamento de tick esgotado preserva o restante até
+próximo tick/prazo, sem acumular spawns expirados.
+
+O limite global inclui todos os inimigos ativos na família Enemy, inclusive de
+outros consumidores. As próprias aquisições são rastreadas por objeto e lease;
+TryGetActive permite leitura agrupada sem criar snapshots. Process em estado
+terminal limpa fila e devolve somente aquisições próprias ainda válidas. Pausa
+e seleção preservam fila sem processar prazos. Dispose é idempotente, preserva
+o pool compartilhado e não devolve leases externos que reutilizaram um objeto.
+SpawnedCount/ExpiredCount/ReducedCount expõem resultados das políticas.
+
+Não há Instantiate/Destroy no diretor; pré-aquecimento permanece na composição.
+Arrays são alocados na inicialização e Process não cria coleções. Integração de
+câmera real, produção de pedidos por cronograma, scheduler e catálogo/cena continuam
+nas T055/T056/T060. Estes testes não aprovam desempenho ou exclusão visual em aparelho.
+
 ## EnemyState e PooledEnemy (T053)
 
 Core.Combat.EnemyState é reutilizável por instância: TryActivate recebe leaseId

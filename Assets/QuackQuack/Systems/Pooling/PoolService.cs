@@ -29,6 +29,8 @@ namespace QuackQuack.Systems.Pooling
         private bool disposed;
         public bool IsDisposed => disposed;
         public int ActiveCount => active.Count;
+        public bool IsRegistered<T>(string key, PoolFamily family) where T : Component, IPoolLifecycle =>
+            !disposed && key != null && entries.TryGetValue(key, out var entry) && entry.Type == typeof(T) && entry.Family == family;
 
         public void Register<T>(string key, PoolFamily family, Func<T> factory, int capacity) where T : Component, IPoolLifecycle
         {

@@ -40,21 +40,34 @@ namespace QuackQuack.Gameplay.Enemies
 
         public static PooledEnemy Spawn(PoolService pools, EnemyDefinition definition, RunState run,
             GameplayEventBus events, Transform target, Vector2 position, Action<EnemyReward> rewardSink)
+            => SpawnCore(pools, definition, run, events, target, position, rewardSink, true);
+
+        // SpawnDirector validates immutable definitions once at composition, outside the spawn loop.
+        internal static PooledEnemy SpawnPrepared(PoolService pools, EnemyDefinition definition, RunState run,
+            GameplayEventBus events, Transform target, Vector2 position, Action<EnemyReward> rewardSink)
+            => SpawnCore(pools, definition, run, events, target, position, rewardSink, false);
+
+        private static PooledEnemy SpawnCore(PoolService pools, EnemyDefinition definition, RunState run,
+            GameplayEventBus events, Transform target, Vector2 position, Action<EnemyReward> rewardSink, bool validate)
         {
             if (pools == null || pools.IsDisposed || run == null || !run.IsSimulating) return null;
-            if (definition == null || !definition.IsValid(out _)) throw new ArgumentException("Invalid enemy definition.");
+            if (definition == null || (validate && !definition.IsValid(out _))) throw new ArgumentException("Invalid enemy definition.");
             var instance = pools.Acquire<PooledEnemy>(definition.PoolKey);
             if (instance == null) return null;
-            try { instance.Initialize(pools, definition, run, events, target, position, rewardSink); return instance; }
+            try { instance.InitializeCore(pools, definition, run, events, target, position, rewardSink, false); return instance; }
             catch { pools.Release(instance); throw; }
         }
 
         public void Initialize(PoolService pools, EnemyDefinition definition, RunState run, GameplayEventBus events,
             Transform target, Vector2 position, Action<EnemyReward> rewardSink)
+            => InitializeCore(pools, definition, run, events, target, position, rewardSink, true);
+
+        private void InitializeCore(PoolService pools, EnemyDefinition definition, RunState run, GameplayEventBus events,
+            Transform target, Vector2 position, Action<EnemyReward> rewardSink, bool validate)
         {
             if (!acquired || pools == null || !pools.IsActive(this, PoolFamily.Enemy) || State.IsActive)
                 throw new InvalidOperationException("Enemy must be acquired once from its owning enemy pool.");
-            if (definition == null || !definition.IsValid(out _) || run == null || !run.IsSimulating || events == null || rewardSink == null)
+            if (definition == null || (validate && !definition.IsValid(out _)) || run == null || !run.IsSimulating || events == null || rewardSink == null)
                 throw new ArgumentException("Valid enemy services and reward consumer are required.");
             if (!State.TryActivate(lease, definition.Id, definition.Health, definition.ExperienceReward, definition.CoinReward,
                 position, target == null ? 0 : target.GetInstanceID())) throw new ArgumentException("Invalid enemy lease data.");
