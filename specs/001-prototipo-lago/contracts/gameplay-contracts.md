@@ -622,12 +622,13 @@ IDs desconhecidos e duplicados são filtrados com diagnóstico (Recovered);
 equipamento é filtrado por desbloqueados/conhecidos, preservando os primeiros
 três distintos na ordem salva. Coleções null tornam-se vazias por recuperação ou
 padrões. Repetir Load não multiplica entradas. O JSON mínimo da fixture testa
-somente os campos de relíquias; os demais campos de SaveData usam seus padrões.
-Escrita atômica, migração e integração da carteira continuam na T059.
+somente os campos de relíquias; os demais campos do SaveData planejado ainda
+exigem extensão versionada do schema inicial.
+Escrita atômica e migração foram implementadas na T059. A composição com a partida
+e o crédito de carteira permanecem nas tarefas de integração.
 
 SaveServiceTests.cs contém fixtures separadas RelicLoadoutTests/SaveServiceTests.
-RelicLoadoutTests agora usa chamadas tipadas. Reflexão temporária em SaveServiceTests
-exige o serviço real no SetUp, mantendo a fase vermelha compilável, sem substitutos.
+As duas fixtures usam chamadas tipadas desde T052/T059, sem serviço substituto.
 Arquivos são criados em diretório temporário exclusivo
 com GUID, removido somente após validar seu caminho. Migrar para chamadas tipadas
 nas respectivas implementações. Nenhum save pessoal é usado.
@@ -747,6 +748,52 @@ Operacoes: `Load`, `Save`, `CreateDefault`, `Migrate` e `RestoreBackup`.
 Resultados usam `Success`, `Recovered`, `Defaulted` ou `Failed` e incluem diagnostico sem dados
 sensiveis. Uma falha de persistencia nao bloqueia uma partida; salvamento ocorre fora do loop critico;
 substituicao do arquivo principal e atomica.
+
+### Persistência de relíquias (T059)
+
+JsonSaveService recebe caminho de arquivo e exatamente dez IDs conhecidos únicos,
+copiados na construção. Não escolhe um caminho pessoal nem faz I/O automaticamente
+no ciclo de gameplay. SaveData é um snapshot somente leitura da versão e das listas
+de IDs. O schema 1 desta tarefa contém schemaVersion, unlockedRelicIds e
+equippedRelicIds; carteira, recordes, desafios e configurações exigirão extensão
+versionada posterior. Não há crédito automático de RunResult nesta API.
+
+CreateDefault retorna versão atual, desbloqueios e equipamento vazios, sem I/O.
+Migrate aceita schema 0 (mesmas listas; equipamento pode estar ausente) e schema 1.
+A versão 0 é a política de compatibilidade definida para esta implementação, não
+evidência de um save anteriormente publicado. O método filtra desconhecidos,
+duplicatas e equipamento bloqueado, preservando os primeiros três IDs distintos
+na ordem salva. Versão negativa/futura é recusada. IDs não são extraídos de assets
+no serviço: o proprietário fornece os IDs do catálogo validado.
+
+Load lê principal antes do backup; ambos inválidos/ausentes retornam Defaulted.
+Migração/normalização e backup retornam Recovered. Load é somente leitura, inclusive
+na recuperação: não regrava principal ou backup. Objetos truncados, tipos inválidos,
+schema duplicado e framing incompleto não viram progresso utilizável. Leitura usa
+o leitor JSON da biblioteca .NET com verificação prévia de fechamento da estrutura;
+gravação usa JsonUtility, sem dependência externa. Entradas têm limite de 1 MiB
+e profundidade 32; arquivos grandes demais/ilegíveis não são sobrescritos por Save.
+
+Save(SaveData) e Save(RelicLoadout) normalizam cópias, serializam UTF-8 para um
+temporário exclusivo no mesmo diretório e chamam Flush(true). Primeiro save usa
+File.Move; substituições usam File.Replace. Somente um principal anterior legível
+e válido é rotacionado para .bak. Principal corrompido não substitui backup bom;
+backup de versão futura é preservado. Principal de versão futura tem gravação
+recusada, mesmo se Load conseguiu recuperar um backup antigo.
+
+RestoreBackup valida e promove explicitamente o backup pelo mesmo caminho atômico,
+preservando o próprio backup; também recusa substituir principal de versão futura.
+Não há fallback que delete o principal antes de mover. Se o filesystem não suporta
+a operação ou falha, retorna Failed com dados utilizáveis e diagnóstico sem paths,
+conteúdo do arquivo ou detalhes de exceção. Cada operação só limpa seu temporário;
+temporários de execução interrompida são ignorados, não promovidos automaticamente.
+
+O serviço serializa operações de uma instância com lock; o chamador deve manter
+um único proprietário por caminho. I/O é síncrono e deve ocorrer fora do combate.
+Esta tarefa fornece o serviço, não conecta LakeRelics ao diretório pessoal.
+A T060 deve definir o caminho local, carregar desbloqueios/equipamento antes da
+aplicação dos efeitos e salvar em pontos de ciclo de vida apropriados. Reaplicar
+os IDs em RelicLoadout usa Unlock/Equip idempotentes, sem acumular bônus.
 
 ## Sinais do Sapo-Rei (T049; implementação T057)
 

@@ -118,7 +118,7 @@ preservando GUIDs. Ele não modifica cenas nem altera a seleção de cartas.
   preservam os atributos aceitos naquele disparo. Concha aumenta a recuperação de Fôlego.
 - As dez definições e o catálogo estão em Content/Relics; todos os bônus iniciais
   são 5%. Esses números não representam balanceamento aprovado. Desbloqueios são
-  desta sessão; salvamento entre sessões continua na T059.
+  desta sessão na arena atual; serviço de save disponível na T059, ligação automática na T060.
 - O menu `QuackQuack → Build T052 relic loadout` é manutenção: gera assets e prefab
   pelo Unity, preservando GUIDs existentes e atualizando somente a raiz Relics T052
   na cena Lake. Não precisa executá-lo para jogar um clone normal.
@@ -214,10 +214,34 @@ o resumo continua igual mesmo se a build/loadout original mudar depois.
 Consulte o [relatório T058](test-report-t058.md) e o contrato de resultado para a API.
 
 A T058 entrega o modelo e acumulador em Core. Ainda não há tela de resultado
-na arena; coleta dos eventos reais fica na T060, apresentação na T061 e save na T059.
+na arena; coleta dos eventos reais fica na T060 e apresentação na T061.
+O serviço de save da T059 também aguarda sua ligação ao ciclo da partida.
 O produtor deve atribuir o último dano/derrota/recompensa antes da transição terminal,
 pois fatos posteriores são rejeitados. Consultar o resultado não credita carteira
 nem grava progresso.
+
+## Serviço de save disponível após T059
+
+No Test Runner, executar `SaveServiceTests` e `JsonSaveWriteTests` em EditMode
+(39 casos) e `RelicSaveRoundTripTests` em PlayMode. As fixtures usam diretórios
+temporários exclusivos e removem somente seus próprios dados, com caminho validado.
+Não leem nem alteram saves pessoais.
+
+`JsonSaveService(caminho, idsConhecidos)` recebe os dez IDs do catálogo. `Load()`
+retorna Data, Status e Diagnostic; Data contém versão, desbloqueios e equipamento.
+Reaplicar os IDs usa Unlock/Equip, respeitando os três slots e a idempotência do
+loadout. `Save(loadout)` grava um snapshot, preservando a ordem equipada.
+`RestoreBackup()` promove explicitamente o backup validado; Load apenas o consulta.
+
+O schema atual é 1; versão 0 migra as mesmas listas e usa equipamento vazio se
+ausente. Versão futura no principal impede gravação/restauração por esta versão.
+Sem principal/backup utilizável, Load retorna padrões vazios para o jogo continuar.
+Falhas de escrita retornam Failed com diagnóstico, sem expor caminho ou conteúdo.
+O serviço não faz I/O por frame nem determina sozinho o caminho pessoal.
+
+O menu de relíquias da arena ainda mantém estado por sessão. A T060 deve definir
+o caminho local e os momentos de carregar/salvar; carteira, recordes e desafios
+exigirão ampliação versionada do schema. Ver [relatório T059](test-report-t059.md).
 
 ## Evidencias a conservar
 
