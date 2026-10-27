@@ -132,7 +132,7 @@ todos os campos da tela de resultado.
 - [x] T050 [P] [US3] Implementar definicoes de Formiga, Aranha, Vespa, Besouro e Caramujo Aquatico com funcoes taticas, pool e telemetria em `Assets/QuackQuack/Content/Enemies/EnemyDefinition.cs`
 - [x] T051 [P] [US3] Implementar encontros de Libelula Alfa no minuto 5, Sapo-Cururu no minuto 10 e Sapo-Rei no minuto 15 sem lacunas de progressao em `Assets/QuackQuack/Content/Encounters/EncounterDefinition.cs`
 - [x] T052 [P] [US3] Implementar dez `RelicDefinition`, `RelicLoadout` limitado a tres, desbloqueio, aplicacao idempotente e tela de equipar/desequipar em `Assets/QuackQuack/Content/Relics/RelicDefinition.cs`, `Assets/QuackQuack/Core/Progression/RelicLoadout.cs` e `Assets/QuackQuack/Presentation/UI/RelicLoadoutView.cs`
-- [ ] T053 [US3] Implementar `EnemyState` com recompensa unica e ciclo de aquisicao/limpeza exclusivamente pelo `PoolService` em `Assets/QuackQuack/Core/Combat/EnemyState.cs`
+- [x] T053 [US3] Implementar `EnemyState` com recompensa unica e ciclo de aquisicao/limpeza exclusivamente pelo `PoolService` em `Assets/QuackQuack/Core/Combat/EnemyState.cs`
 - [ ] T054 [US3] Implementar `SpawnDirector` com limite ativo, area de exclusao, expiracao e reducao de densidade sem criar inimigos fora do pool em `Assets/QuackQuack/Systems/Spawning/SpawnDirector.cs`
 - [ ] T055 [US3] Implementar comportamentos taticos e atualizacao agrupada sem `Update` individual por inimigo em `Assets/QuackQuack/Gameplay/Enemies/EnemyUpdateScheduler.cs`
 - [ ] T056 [US3] Criar catalogo de Formiga, Aranha, Vespa, Besouro, Caramujo Aquatico, Libelula Alfa e Sapo-Cururu com cronograma fechado em `Assets/QuackQuack/Content/Catalogs/LakeEncounterCatalog.asset`

@@ -427,6 +427,41 @@ prioridade e tick limite.
 Invariantes: nunca surge dentro da area de exclusao visivel; respeita limite ativo; uma requisicao
 expirada e descartada; falha de capacidade reduz densidade antes de criar fora do pool.
 
+## EnemyState e PooledEnemy (T053)
+
+Core.Combat.EnemyState é reutilizável por instância: TryActivate recebe leaseId
+monotônico, ID da definição, vida, recompensas, posição e ID do alvo. Rejeita
+ativação sobre sessão ativa, IDs vazios, lease antigo, números inválidos e recompensas
+negativas. TryDamage exige lease atual e dano finito positivo, limita o dano à vida
+restante e reserva EnemyReward uma única vez antes de qualquer observador externo.
+O snapshot contém lease, ID de conteúdo, XP, moedas e posição aceitos.
+
+TrySetControl/TrySetPosition exigem aquisição atual viva. Reset(leaseId) limpa vida,
+referências por ID, alvo, posição, controle e trava da recompensa; preserva somente
+o maior lease já visto para rejeitar callbacks antigos após reutilização. O Core
+não conhece GameObjects, serviços, carteiras ou eventos de apresentação.
+
+Gameplay.Enemies.PooledEnemy implementa IPoolLifecycle sem Update. RegisterPool
+pré-aquece PoolMaxSize pelo PoolService a partir de prefab com PooledEnemy na raiz.
+Spawn usa Acquire e retorna null na saturação ou fora de simulação; erro na
+configuração devolve a instância. Initialize exige aquisição ativa na família Enemy
+do dono informado, definição válida e serviços de partida/eventos/recompensa.
+
+TakeDamage recebe o lease esperado e rejeita pausa/seleção/fim. Em derrota captura
+dados/delegates, devolve a instância pelo pool e então publica DamageApplied e
+EntityDefeated, chamando o consumidor de recompensa uma vez. Cada acerto tem
+correlação de combate própria; cada aquisição tem lease próprio. Reentrada pode
+readquirir o objeto sem permitir que o callback antigo danifique a nova aquisição.
+O consumidor de recompensa é chamado em finally mesmo se observador de combate
+lançar exceção; a notificação que falhou não é repetida automaticamente.
+
+Despawn(leaseId) retorna sem recompensa. ResetState limpa referências da definição,
+alvo, run, barramento/delegate, estado Core, transformação e velocidades físicas.
+Dispose do pool executa a mesma limpeza sem conceder recompensa. O scheduler
+futuro deve devolver aquisições ao encerrar/desativar encontros. Esta tarefa entrega
+o ciclo isolado; spawn de hordas, IA, integração de dano dos alvos legados e
+consumo da recompensa no gameplay continuam nas T054–T056/T060.
+
 ## PoolLifecycle
 
 Inimigos, projeteis, pickups/recompensas e VFX implementam `OnAcquire`, `OnRelease` e `ResetState`.
