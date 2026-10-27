@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bafba8ef369cbcd4b9a63adbcee9b833, type: 3}
+  m_Name: PrototypeRelicCatalog
+  m_EditorClassIdentifier: QuackQuack.Runtime::QuackQuack.Content.Relics.PrototypeRelicCatalog
+  relics:
+  - {fileID: 11400000, guid: ca3eb34e0e962514b831311402c05fe4, type: 2}
+  - {fileID: 11400000, guid: 6bc83462368a361499d9a85485a4b918, type: 2}
+  - {fileID: 11400000, guid: 3e4e6d83770637d419deee208765ded4, type: 2}
+  - {fileID: 11400000, guid: e55b8815ccfc7b344b9d59adc28a62ec, type: 2}
+  - {fileID: 11400000, guid: f3e08bc0f7e2cf84aa13563613c7534e, type: 2}
+  - {fileID: 11400000, guid: 18f37504609f0a94ab22e42af1e8acb4, type: 2}
+  - {fileID: 11400000, guid: e4ebe5168521d834d82a483ca6c050fd, type: 2}
+  - {fileID: 11400000, guid: 57b8670c92c196e46804824087dff154, type: 2}
+  - {fileID: 11400000, guid: c73d6d1abc50bd64a99aa897d572acaf, type: 2}
+  - {fileID: 11400000, guid: b2e5a225ceec4984698250c0f08ce72f, type: 2}

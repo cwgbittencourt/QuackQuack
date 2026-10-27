@@ -62,6 +62,7 @@ namespace QuackQuack.Gameplay.Weapons
         private double clock;
         private bool initialized;
         public bool AutomaticTick { get; set; } = true;
+        public RelicLoadout Relics { get; set; }
         public Vector2 Facing { get; set; } = Vector2.right;
         public int ActiveProjectileCount => active == null ? 0 : active.Count;
         private static ContactFilter2D TargetFilter => new ContactFilter2D { useTriggers = true, useLayerMask = true, layerMask = 1 << 9 };
@@ -124,6 +125,14 @@ namespace QuackQuack.Gameplay.Weapons
                 var slot = slots[i];
                 if (slot.Definition == null || clock < slot.Next) continue;
                 var stats = slot.Definition.GetLevel(slot.Level, terrain());
+                if (Relics != null)
+                {
+                    var ground = terrain();
+                    stats = new WeaponLevel(Relics.ApplyEffects(stats.Damage, RelicAttribute.Damage, ground),
+                        stats.Cooldown / (1 + Relics.GetBonus(RelicAttribute.AttackSpeed, ground)),
+                        Relics.ApplyEffects(stats.Range, RelicAttribute.Range, ground), stats.ProjectileCount,
+                        Relics.ApplyEffects(stats.AreaRadius, RelicAttribute.Area, ground));
+                }
                 var target = Nearest(owner.position, stats.Range);
                 Vector2 direction = Facing.sqrMagnitude > 0 && Finite(Facing) ? Facing.normalized : Vector2.right;
                 if (slot.Definition.TargetMode == WeaponTargetMode.NearestEnemy)

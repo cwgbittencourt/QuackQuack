@@ -29,6 +29,7 @@ namespace QuackQuack.Gameplay.Upgrades
         private ExperiencePickup rarePickup;
         private ExperiencePickup[] pickups;
         private WeaponRunner runner;
+        public WeaponRunner Runner => runner;
         private GameBootstrap bootstrap;
         public UpgradeSystem Upgrades { get; private set; }
         public UpgradeSelectionBridge Bridge { get; private set; }

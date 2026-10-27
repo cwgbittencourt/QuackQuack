@@ -1,5 +1,6 @@
 using QuackQuack.Content.Characters;
 using QuackQuack.Core.Combat;
+using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
 using QuackQuack.Core.Shared;
 using QuackQuack.Gameplay.Terrain;
@@ -30,6 +31,7 @@ namespace QuackQuack.Gameplay.Player
         private readonly Collider2D[] overlaps = new Collider2D[128];
         private readonly QuackSystem quack = new QuackSystem();
         public PlayerState State { get; private set; }
+        public RelicLoadout Relics { get; set; }
         public string Status { get; private set; } = "Explore o lago e experimente o Quack.";
         public CharacterDefinition Definition => definition;
         public bool QuackReady => CanSimulate && simulationSeconds >= nextQuack && State.Breath.Current > 0;
@@ -102,8 +104,9 @@ namespace QuackQuack.Gameplay.Player
                 events.Publish(new PresentationEvent(tick, wave, PresentationEventType.TerrainChanged, EventPriority.Essential, 1, body.position));
             }
             body.linearVelocity = move * TerrainAffinity.Select(definition.LandSpeed, definition.WaterSpeed, terrain);
+            if (Relics != null) body.linearVelocity *= 1 + Relics.GetBonus(RelicAttribute.MovementSpeed, terrain);
             bool wasFull = State.Breath.IsFull;
-            State.Breath.Recover(Time.fixedDeltaTime, terrain);
+            State.Breath.Recover(Time.fixedDeltaTime * (1 + (Relics?.GetBonus(RelicAttribute.BreathRecovery, terrain) ?? 0)), terrain);
             if (!wasFull && State.Breath.IsFull)
                 events.Publish(new PresentationEvent(tick, wave, PresentationEventType.BreathReady, EventPriority.Essential, 1, body.position));
             if (requestedQuack) { ActivateQuack(); requestedQuack = false; }

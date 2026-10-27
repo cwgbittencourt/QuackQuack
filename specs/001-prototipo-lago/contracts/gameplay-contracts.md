@@ -450,7 +450,7 @@ testavel e nao alteram o loadout.
 `Core.Progression.RelicLoadout(string[] knownIds, float[] damageBonuses)` recebe
 cópias de dez IDs e bônus percentuais correspondentes de uma fixture. É uma
 fronteira inicial para testar composição de dano; a autoria e demais tipos de
-efeito continuam em RelicDefinition/T052. Unlock, Equip e Unequip recebem ID e
+efeito são definidos na T052. Unlock, Equip e Unequip recebem ID e
 retornam bool de aceitação; repetição retorna false, sem mutação. UnlockedIds e
 EquippedIds expõem coleções somente de leitura. Equip exige conhecido/desbloqueado
 e no máximo três. ApplyEffects(float baseDamage) recompõe o valor da base com a
@@ -474,10 +474,39 @@ somente os campos de relíquias; os demais campos de SaveData usam seus padrões
 Escrita atômica, migração e integração da carteira continuam na T059.
 
 SaveServiceTests.cs contém fixtures separadas RelicLoadoutTests/SaveServiceTests.
-Reflexão temporária exige os tipos reais no SetUp, mantendo a fase vermelha
-compilável, sem substitutos. Arquivos são criados em diretório temporário exclusivo
+RelicLoadoutTests agora usa chamadas tipadas. Reflexão temporária em SaveServiceTests
+exige o serviço real no SetUp, mantendo a fase vermelha compilável, sem substitutos.
+Arquivos são criados em diretório temporário exclusivo
 com GUID, removido somente após validar seu caminho. Migrar para chamadas tipadas
 nas respectivas implementações. Nenhum save pessoal é usado.
+
+### Implementação de relíquias T052
+
+RelicDefinition declara ID, nome, descrição, raridade, atributo, terreno, bônus e
+condição/limiar de desbloqueio. Bônus do protótipo são positivos até 10%; os dez
+assets iniciais usam 5%. PrototypeRelicCatalog exige exatamente dez IDs únicos e
+dados válidos, criando loadouts independentes. O catálogo usa Botas do Lago como
+referência do documento funcional e nove itens de autoria inicial para efeitos
+suportados no protótipo; não declara as sugestões mais amplas do PDF implementadas.
+
+RelicLoadout aceita também RelicModifier tipado por atributo/terreno. Copia os dados,
+expõe coleções protegidas e Version somente para mudanças aceitas. GetBonus soma
+até três equipadas aplicáveis; ApplyEffects recompõe da base, sem acumular consultas
+e sem alterar assets. Os atributos são Damage, MovementSpeed, AttackSpeed, Range,
+Area e BreathRecovery. Terreno pode ser Any, Land ou Water. Construtores rejeitam
+quantidade diferente de dez, IDs inválidos/duplicados e bônus inválidos.
+
+LakeRelics desbloqueia por tempo simulado ou XP da sessão, conecta o loadout ao
+PlayerController e WeaponRunner e traduz comandos da RelicLoadoutView. Movimento
+e recuperação usam terreno atual; dano/alcance/raio/cadência são compostos no
+disparo. Ataques já disparados preservam seu snapshot. Não há gravação em assets.
+
+RELÍQUIAS abre o painel durante Playing/Paused; pausar por abertura e retomar por
+fechamento preserva a pausa anterior. Equipar/remover exige painel visível em Paused.
+Reabrir painel aberto não perde propriedade da pausa. Seleção/fim oculta painel e
+botão; callbacks rejeitados não alteram estado. A view renderiza dez opções,
+condições, slots e comandos; rebind remove listeners antigos. Persistência dos
+desbloqueios/loadout entre sessões permanece na T059.
 
 ## RunLifecycle
 

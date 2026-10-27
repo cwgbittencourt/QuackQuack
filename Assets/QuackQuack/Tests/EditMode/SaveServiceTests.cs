@@ -4,13 +4,14 @@ using System.IO;
 using System.Reflection;
 using NUnit.Framework;
 using QuackQuack.Core.Run;
+using QuackQuack.Core.Progression;
 using QuackQuack.Systems.Run;
 
 namespace QuackQuack.Tests.EditMode
 {
     public class RelicLoadoutTests
     {
-        private object loadout;
+        private RelicLoadout loadout;
         private string[] ids;
         private float[] bonuses;
 
@@ -20,9 +21,7 @@ namespace QuackQuack.Tests.EditMode
             ids = new string[10];
             bonuses = new float[10];
             for (int i = 0; i < ids.Length; i++) { ids[i] = "relic-" + i; bonuses[i] = 0.1f; }
-            Type type = typeof(RunState).Assembly.GetType("QuackQuack.Core.Progression.RelicLoadout");
-            Assert.That(type, Is.Not.Null, "T052 pending: production RelicLoadout is missing (T048 red phase).");
-            loadout = SaveTestAccess.Create(type, new[] { typeof(string[]), typeof(float[]) }, ids, bonuses);
+            loadout = new RelicLoadout(ids, bonuses);
         }
 
         [Test]
@@ -111,18 +110,18 @@ namespace QuackQuack.Tests.EditMode
         public void DefinitionsAreCopiedAndLoadoutsAreIndependent()
         {
             Type type = loadout.GetType();
-            object other = SaveTestAccess.Create(type, new[] { typeof(string[]), typeof(float[]) }, ids, bonuses);
+            var other = new RelicLoadout(ids, bonuses);
             Command("Unlock", "relic-0");
             Command("Equip", "relic-0");
             ids[0] = "mutated";
             bonuses[0] = 100f;
             Assert.That(Apply(), Is.EqualTo(110f).Within(0.001f));
-            Assert.That(SaveTestAccess.Read<IReadOnlyCollection<string>>(other, "UnlockedIds"), Is.Empty);
+            Assert.That(other.UnlockedIds, Is.Empty);
         }
 
-        private bool Command(string name, string id) => (bool)SaveTestAccess.Call(loadout, name, new[] { typeof(string) }, id);
-        private float Apply() => (float)SaveTestAccess.Call(loadout, "ApplyEffects", new[] { typeof(float) }, 100f);
-        private IReadOnlyCollection<string> Ids(string name) => SaveTestAccess.Read<IReadOnlyCollection<string>>(loadout, name);
+        private bool Command(string name, string id) => name == "Unlock" ? loadout.Unlock(id) : name == "Equip" ? loadout.Equip(id) : loadout.Unequip(id);
+        private float Apply() => loadout.ApplyEffects(100f);
+        private IReadOnlyCollection<string> Ids(string name) => name == "UnlockedIds" ? loadout.UnlockedIds : loadout.EquippedIds;
     }
 
     public class SaveServiceTests

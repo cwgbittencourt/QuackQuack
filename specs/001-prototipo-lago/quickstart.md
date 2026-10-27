@@ -103,6 +103,26 @@ O menu `QuackQuack → Build T043 prototype build catalog` é uma ferramenta de
 manutenção que regrava o balanceamento inicial e reutiliza os assets existentes,
 preservando GUIDs. Ele não modifica cenas nem altera a seleção de cartas.
 
+### Relíquias disponíveis após T052
+
+- Em Lake, clicar em RELÍQUIAS no topo: a arena pausa. Os dez itens mostram efeito,
+  estado e condição de desbloqueio; até três podem ficar equipados.
+- Botas do Lago, Garras de Junco e Pena de Combate começam disponíveis. Sobreviver
+  15/30/45/60 segundos desbloqueia Pedra da Margem, Pérola do Lago, Apito Veloz e
+  Lente de Orvalho. Coletar 10/20/30 XP libera Anel de Ondas, Concha de Fôlego e Pena Leve.
+- Equipar aplica o bônus; REMOVER retira somente aquele bônus. Em três slots cheios,
+  outras opções ficam indisponíveis até remover uma equipada. VOLTAR retoma se o
+  próprio painel pausou o jogo; se já estava pausado, preserva a pausa.
+- Equipar Garras de Junco e comparar movimento em terra; Botas do Lago funciona
+  somente na água. Bônus de armas usam o terreno no disparo; projéteis já disparados
+  preservam os atributos aceitos naquele disparo. Concha aumenta a recuperação de Fôlego.
+- As dez definições e o catálogo estão em Content/Relics; todos os bônus iniciais
+  são 5%. Esses números não representam balanceamento aprovado. Desbloqueios são
+  desta sessão; salvamento entre sessões continua na T059.
+- O menu `QuackQuack → Build T052 relic loadout` é manutenção: gera assets e prefab
+  pelo Unity, preservando GUIDs existentes e atualizando somente a raiz Relics T052
+  na cena Lake. Não precisa executá-lo para jogar um clone normal.
+
 ### Marco 1 - Fundamentos
 
 - Abrir `Bootstrap`, iniciar `Lake` e mover o Pato com teclado, controle e toque.
