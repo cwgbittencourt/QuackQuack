@@ -205,6 +205,20 @@ Evidência automatizada: [relatório T057](test-report-t057.md). A captura em
 `Logs/t057-practice.png` mostra a geometria do salto na arena; não inclui o
 overlay OnGUI. Realizar playtest humano antes de aprovar percepção e justiça.
 
+## Resultado de domínio disponível após T058
+
+No Test Runner, execute `RunResultTests` e `RunResultStatisticsTests` em EditMode:
+os 48 casos verificam resultado único, os três finais, abandono parcial e os
+campos completos. A sessão recebe fatos aceitos e captura a build no encerramento;
+o resumo continua igual mesmo se a build/loadout original mudar depois.
+Consulte o [relatório T058](test-report-t058.md) e o contrato de resultado para a API.
+
+A T058 entrega o modelo e acumulador em Core. Ainda não há tela de resultado
+na arena; coleta dos eventos reais fica na T060, apresentação na T061 e save na T059.
+O produtor deve atribuir o último dano/derrota/recompensa antes da transição terminal,
+pois fatos posteriores são rejeitados. Consultar o resultado não credita carteira
+nem grava progresso.
+
 ## Evidencias a conservar
 
 - Relatorio do Test Runner para EditMode e PlayMode.

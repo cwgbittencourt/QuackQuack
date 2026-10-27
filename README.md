@@ -45,7 +45,7 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T044: seleção de cartas e progressão integrada à arena | Concluída |
 | T045: feedback pooled de evolução e recompensa rara | Concluída |
 | T046: testes do cronograma e pedido único do chefe | Concluída (aprovados com T051) |
-| T047: testes de resultado único e abandono parcial | Concluída (fase vermelha; implementação T058/T060) |
+| T047: testes de resultado único e abandono parcial | Concluída (aprovados com T058) |
 | T048: testes de relíquias e recuperação de save | Concluída (loadout aprovado com T052; save aguarda T059) |
 | T049: testes dos sinais visuais/sonoros do Sapo-Rei | Concluída (aprovados com T057) |
 | T050: definição de inimigos, papéis táticos, pool e identidade de telemetria | Concluída |
@@ -56,20 +56,23 @@ para vê-la. Capturas de playtest serão adicionadas com o aceite do primeiro MV
 | T055: cinco comportamentos táticos com scheduler central | Concluída |
 | T056: catálogo fechado do Lago, sete inimigos e cronograma autoral | Concluída |
 | T057: fases do Sapo-Rei, ataques sinalizados e arena isolada | Concluída |
+| T058: resultado imutável, estatísticas e recompensa parcial | Concluída |
 | Progressão, partida completa, multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T057 foram revisadas e concluídas; a próxima tarefa é **T058**.
+da arena. T022–T058 foram revisadas e concluídas; a próxima tarefa é **T059**.
 
-Validação T057: **349 testes EditMode aprovados e 29 falhas esperadas**: 18 de
-resultado (T047) e 11 de save (T048), cujas implementações continuam pendentes.
+Validação T058: **397 testes EditMode aprovados e 11 falhas esperadas** de save
+(T048), cuja implementação continua na T059. Os 48 testes de resultado passaram.
 PlayMode completo: **149 aprovados, sem falhas**. Os nove testes de sinais da T049
 passaram com o controlador real. A cena FrogKingPractice permite explorar as fases
 no Editor; a integração do chefe à partida e às armas continua na T060.
-Consulte o [relatório T057](specs/001-prototipo-lago/test-report-t057.md).
+O resumo de resultado agora captura estatísticas e build sem permitir alterações
+posteriores. Sua coleta na partida e apresentação na tela final continuam nas T060/T061.
+Consulte o [relatório T058](specs/001-prototipo-lago/test-report-t058.md).
 Os testes de build, ofertas e fluxo de XP das T033–T035 passaram.
 Consulte o [relatório T045](specs/001-prototipo-lago/test-report-t045.md).
 Esses testes não substituem playtest, builds ou medição em aparelhos reais.

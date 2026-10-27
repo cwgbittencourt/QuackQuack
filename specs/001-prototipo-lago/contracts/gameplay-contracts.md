@@ -670,29 +670,75 @@ Eventos: `RunStarted`, `RunPaused`, `UpgradeStarted`, `BossStarted`, `RunEnded`,
 Invariantes: transicoes seguem [data-model.md](../data-model.md); comandos invalidos nao alteram
 estado; `RunEnded` e `ResultsReady` ocorrem no maximo uma vez.
 
-## Resultado único (T047; implementação T058/T060)
+## Resultado único (T047; implementado na T058)
 
-Fronteira proposta no Core: `RunResultSession(RunState run, int earnedCoins,
+Fronteira no Core: `RunResultSession(RunState run, int earnedCoins,
 int victoryBonus, double abandonmentFactor)`, em QuackQuack.Core.Run. Uma sessão
 por partida recebe valores de recompensa já calculados/injetados; os números
 101 moedas, bônus 50 e fatores 0,5/0,25 dos testes são fixtures, não balanceamento
-aprovado. Composição com estatísticas finais pertence às T058/T060.
+aprovado. A sobrecarga com BuildState e RelicLoadout opcionais captura a build
+no encerramento. A coleta dos fatos reais da partida pertence à T060.
 
-`FinalizeResult()` retorna null enquanto não há Outcome terminal; depois cria
-um único RunResult e retorna a mesma instância em toda chamada posterior,
+`FinalizeResult()` retorna null enquanto não há Outcome terminal. RunResultSession
+assina Ended para congelar um único RunResult assim que a partida encerra;
+FinalizeResult retorna a mesma instância em toda chamada posterior,
 inclusive em Results. Consulta antecipada não consome a possibilidade de fechar.
 Outcome preserva Won/Lost/Abandoned; IsVictory somente é true para Won.
 DurationSeconds captura o tempo da partida encerrada. Coins no abandono é
 floor(earnedCoins * abandonmentFactor), sem bônus de vitória; Won recebe moedas
-ganhas e bônus. Os testes não fixam a política de moedas da derrota.
+ganhas e bônus. Lost preserva as moedas ganhas, sem bônus; a soma na vitória
+satura em int.MaxValue. O fator deve ser finito no intervalo [0,1], e moedas/bônus
+iniciais devem ser não negativos. Entradas inválidas falham no construtor.
 
 Abandono vindo de Playing, Paused, ChoosingUpgrade ou Boss jamais muda para
 vitória por callback tardio. Sessões, mesmo com seed igual, não compartilham
 resultado. A fronteira não grava saves ou credita carteira: entrega o resultado
 estável para o consumidor; idempotência de persistência fica na integração futura.
-Os demais campos de RunResult continuam no escopo T058. Reflexão temporária nos
-testes mantém a fase vermelha compilável, exigindo a implementação real no SetUp;
-migrar para chamadas tipadas ao implementar.
+RunResultTests usa chamadas tipadas desde a T058. A sessão implementa IDisposable:
+descarte antes do fim cancela coleta/finalização; depois do fim preserva o resultado.
+As assinaturas são removidas automaticamente quando o resultado é congelado.
+
+### Estatísticas e snapshot (T058)
+
+RunResult contém Seed, Outcome, IsVictory, DurationSeconds, BossReached/BossId,
+EnemiesDefeated, DefeatsByEnemy, DamageByWeapon, LongestStreak, Build, Synergies,
+EarnedCoins, VictoryBonus, Coins, Items, Records e Challenges. Todos os mapas,
+listas e seus valores são imutáveis e independentes dos objetos de gameplay.
+Mapas e sinergias possuem ordem ordinal determinística. Sem dados fornecidos,
+as coleções são vazias e as estatísticas são zero.
+
+RunBuildSnapshot copia armas/passivas com níveis, mapa de evoluções, histórico,
+recursos restantes e IDs das relíquias equipadas. Uma mudança posterior na build
+ou no loadout não altera o resultado, mesmo antes da primeira consulta da UI.
+
+RecordDefeat incrementa contagem por ID e sequência; BreakStreak encerra a sequência
+atual preservando o máximo. A composição determina quando interromper (por exemplo,
+ao aceitar dano no Pato); não há uma janela temporal implícita neste modelo.
+RecordWeaponDamage acumula dano efetivamente aplicado por ID de arma/origem.
+RecordBossReached recebe o ID do encontro atingido; BossReached também é marcado
+pela entrada em Boss. O relógio sozinho não deduz um chefe. Criar a sessão antes
+do início para capturar o histórico; criação tardia não reconstrói encontros passados.
+
+AddCoins e RecordItem somam recompensas já aceitas. IDs em branco, valores inválidos
+e somas com overflow são rejeitados sem mutação. RecordSynergy não aceita duplicatas.
+Os IDs são fornecidos pela composição com catálogo validado; Core não consulta assets.
+As chamadas de registro somente aceitam Playing/Boss; pausa, seleção, terminal e
+descarte não aceitam fatos de combate. Os produtores devem deduplicar seus eventos:
+o acumulador recebe cada fato aceito uma vez, sem armazenar um histórico de impactos.
+
+SetRecord recebe valor anterior e valor desta partida; IsNewRecord compara ambos.
+SetChallengeProgress recebe progresso anterior, atual e meta, expondo Gained e
+IsCompleted. Progresso deve ser não negativo, monotônico e limitado pela meta;
+baseline e meta não podem mudar na sessão. A avaliação de regras de recordes/desafios
+e o crédito persistido permanecem nas tarefas de integração/UI, sem thresholds
+duplicados neste modelo. Repetir o mesmo snapshot de progresso não soma de novo.
+
+Todos os fatos finais devem chegar antes da transição terminal. Em particular,
+a integração T060 precisa atribuir o último dano/derrota/recompensa antes de Won/Lost;
+eventos publicados depois do encerramento são rejeitados. Esta T058 não conecta
+automaticamente GameplayEventBus nem altera o controlador do chefe da T057.
+O fator de abandono modifica somente Coins; itens e estatísticas aceitas permanecem
+no resumo. O modelo não concede itens, moedas ou progresso persistido por consulta.
 
 ## SaveService
 
