@@ -130,18 +130,21 @@ namespace QuackQuack.Tests.PlayMode
     }
 
 #if UNITY_EDITOR
-    // Red phase of T070; no substitute build pipeline or implicit target switch.
+    // Calls the production pipeline without compiling players or switching targets.
     public class PlatformBuildConfigurationSmokeTests
     {
         [TestCase(BuildTarget.StandaloneWindows64)]
         [TestCase(BuildTarget.Android)]
         public void SharedBuildOptionsUseProductionScenesAndRequestedTarget(BuildTarget target)
         {
+            var activeTarget = EditorUserBuildSettings.activeBuildTarget;
+            var editorScenes = EditorBuildSettings.scenes.Select(s => s.path).ToArray();
             var create = RequireMethod("CreateOptions", typeof(BuildTarget), typeof(string));
             string output = Path.GetFullPath(Path.Combine(Application.temporaryCachePath,
                 "QuackQuack-T064-Build-" + Guid.NewGuid().ToString("N"), target == BuildTarget.Android ? "Smoke.apk" : "Smoke.exe"));
             var options = (BuildPlayerOptions)create.Invoke(null, new object[] { target, output });
             Assert.That(options.target, Is.EqualTo(target));
+            Assert.That(options.options, Is.EqualTo(BuildOptions.None), "Product builds must not launch a player or enable development/test options.");
             Assert.That(Path.GetFullPath(options.locationPathName), Is.EqualTo(output));
             Assert.That(options.scenes, Is.Not.Null.And.Not.Empty);
             Assert.That(options.scenes[0], Is.EqualTo("Assets/QuackQuack/Scenes/RunBootstrap.unity"));
@@ -156,6 +159,35 @@ namespace QuackQuack.Tests.PlayMode
             string otherOutput = Path.ChangeExtension(output, otherTarget == BuildTarget.Android ? ".apk" : ".exe");
             var other = (BuildPlayerOptions)create.Invoke(null, new object[] { otherTarget, otherOutput });
             CollectionAssert.AreEqual(options.scenes, other.scenes, "Both platforms must package the same gameplay scenes.");
+            Assert.That(options.scenes, Does.Not.Contain("Assets/QuackQuack/Scenes/Bootstrap.unity").And.Not.Contain("Assets/QuackQuack/Scenes/Lake.unity"));
+            options.scenes[0] = "Mutated caller copy";
+            Assert.That(other.scenes[0], Is.EqualTo("Assets/QuackQuack/Scenes/RunBootstrap.unity"));
+            Assert.That(EditorUserBuildSettings.activeBuildTarget, Is.EqualTo(activeTarget));
+            CollectionAssert.AreEqual(editorScenes, EditorBuildSettings.scenes.Select(s => s.path).ToArray());
+        }
+
+        [TestCase(null)]
+        [TestCase(" ")]
+        [TestCase("Invalid.zip")]
+        public void InvalidOutputPathsAreRejectedBeforeBuilding(string path)
+        {
+            var create = RequireMethod("CreateOptions", typeof(BuildTarget), typeof(string));
+            var exception = Assert.Throws<TargetInvocationException>(() => create.Invoke(null, new object[] { BuildTarget.StandaloneWindows64, path }));
+            Assert.That(exception.InnerException, Is.InstanceOf<ArgumentException>());
+        }
+
+        [TestCase(BuildTarget.WebGL)]
+        [TestCase(BuildTarget.StandaloneOSX)]
+        public void UnsupportedTargetsAreRejectedWithoutSwitchingPlatform(BuildTarget target)
+        {
+            var activeTarget = EditorUserBuildSettings.activeBuildTarget;
+            var create = RequireMethod("CreateOptions", typeof(BuildTarget), typeof(string));
+            var configure = RequireMethod("ConfigureTarget", typeof(BuildTarget));
+            var optionsError = Assert.Throws<TargetInvocationException>(() => create.Invoke(null, new object[] { target, "Invalid.exe" }));
+            var configureError = Assert.Throws<TargetInvocationException>(() => configure.Invoke(null, new object[] { target }));
+            Assert.That(optionsError.InnerException, Is.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(configureError.InnerException, Is.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(EditorUserBuildSettings.activeBuildTarget, Is.EqualTo(activeTarget));
         }
 
         [TestCase(BuildTarget.StandaloneWindows64)]

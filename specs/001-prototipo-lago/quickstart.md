@@ -329,8 +329,7 @@ Safe Area de aparelho ou aceite de legibilidade da T075.
 ## Smoke tests de build e inicialização (T064)
 
 No Test Runner PlayMode, executar PlatformBuildConfigurationSmokeTests e
-PlatformBuildSmokeTests. Os quatro casos de configuração devem falhar enquanto
-PrototypeBuildPipeline (T070) estiver ausente. Os dois de runtime verificam as
+PlatformBuildSmokeTests. Desde T070, os nove casos de configuração validam o pipeline de produção. Os dois de runtime verificam as
 cenas de produção e inicialização de RunBootstrap/LakeRun com save temporário.
 Passar no Editor não comprova inicialização no Windows Player ou no Android.
 
@@ -427,3 +426,27 @@ Logs/t069-hud-<largura>x<altura>.png na cópia de validação. RunSceneFlowTests
 a presença da mesma hierarquia no fluxo de produção, com save temporário isolado.
 Consulte o [relatório T069](test-report-t069.md); o aceite integral de UI/aparelhos
 continua na T075.
+
+## Builds de produto disponíveis após T070
+
+O menu **QuackQuack > Build prototype** contém Windows x64 e Android ARM64 APK.
+Selecione o alvo correspondente no Editor antes de executar. Para automatizar,
+use Unity 6000.4.3f1 em uma cópia isolada do projeto:
+
+~~~text
+-batchmode -quit -buildTarget Win64 -projectPath <copia> -executeMethod QuackQuack.Editor.PrototypeBuildPipeline.BuildWindows -logFile <windows-build.log>
+-batchmode -quit -buildTarget Android -projectPath <copia> -executeMethod QuackQuack.Editor.PrototypeBuildPipeline.BuildAndroid -logFile <android-build.log>
+~~~
+
+As saídas relativas à cópia são Builds/Windows/QuackQuack.exe e
+Builds/Android/QuackQuack.apk. Ambos empacotam somente RunBootstrap e LakeRun e usam
+IL2CPP; Android usa apenas ARM64. ConfigureTarget não troca o alvo ativo. A build
+Android gera APK, não App Bundle, e precisa de SDK/NDK/JDK e dependências Gradle.
+O comando registra PROTOTYPE_BUILD_OK somente após BuildResult.Succeeded; confira
+código de saída e log. Build/ConfigureTarget deixam as configurações aplicadas no
+projeto; nenhum desses comandos altera a lista global de cenas do Editor.
+
+O pipeline não instala nem inicia o jogo. Smoke tests de runtime usam as entradas
+separadas do Test Framework descritas acima, com save isolado. As configurações
+podem ser validadas por PlatformBuildConfigurationSmokeTests, sem compilar ou
+instalar players. Ver [relatório T070](test-report-t070.md) para resultados observados.

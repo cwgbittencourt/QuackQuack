@@ -62,19 +62,25 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T061: tela final, carteira, recordes/desafios e nova partida | Concluída |
 | T062: testes de paridade de teclado, controle e toque | Concluída (paridade sintética aprovada em T066) |
 | T063: testes de HUD nas quatro proporções e Safe Area | Concluída (matriz aprovada em T069) |
-| T064: smoke tests de build e inicialização Windows/Android | Concluída (contrato T070 em fase vermelha; test player Windows aprovado) |
+| T064: smoke tests de build e inicialização Windows/Android | Concluída (contrato aprovado em T070; test player Windows aprovado) |
 | T065: adaptador de controle para comandos comuns | Concluída |
 | T066: adaptador, joystick e botões móveis em prefab | Concluída |
 | T067: mapa comum e seleção de entrada nas cenas | Concluída |
 | T068: controlador de Safe Area com atualização automática | Concluída |
 | T069: HUD responsivo com CanvasScaler e Safe Area nas duas cenas | Concluída |
+| T070: pipeline compartilhado Windows x64 / Android ARM64 IL2CPP | Concluída |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T069 foram revisadas e concluídas; a próxima tarefa é **T070**.
+da arena. T022–T070 foram revisadas e concluídas; a próxima tarefa é **T071**.
+
+Validação T070: **237/237 na suíte PlayMode completa**, mais **9/9 contratos finais
+de configuração**. Pipeline comum usa RunBootstrap/LakeRun, IL2CPP e Android ARM64.
+As builds de produto Windows x64 e APK Android ARM64 compilaram com sucesso. Consulte o
+[relatório T070](specs/001-prototipo-lago/test-report-t070.md) para resultados e limites.
 
 Validação T069: **237 PlayMode: 233 aprovados, 4 falhas esperadas da T070, nenhum ignorado**.
 Os 15 casos de UI responsiva passaram. O HUD de Lake e LakeRun agora usa CanvasScaler

@@ -1222,3 +1222,24 @@ preservando objetos/referências existentes e GUIDs de cenas. Configure é reuti
 por GameplayHudSetup.Attach, para reconstruções não removerem o layout responsivo.
 Não é configuração das telas de cartas, loadout, resultados ou controles móveis;
 a revisão integral de UI e aparelho continua na matriz T075.
+
+## Pipeline de produto compartilhado (T070)
+
+PrototypeBuildPipeline.CreateOptions aceita somente StandaloneWindows64 e Android.
+Retorna lista nova contendo exatamente RunBootstrap e LakeRun, nessa ordem, nos
+dois alvos. Não inclui cenas de treino ou Test Runner, não altera EditorBuildSettings
+nem troca o alvo ativo. Exige caminho .exe no Windows ou .apk no Android, converte-o
+em absoluto e usa BuildOptions.None, sem autoexecução ou flags de teste/desenvolvimento.
+
+ConfigureTarget seleciona IL2CPP no grupo solicitado e AndroidArchitecture.ARM64
+exclusivo no Android. Não compila nem troca plataforma. Build(target, outputPath)
+valida alvo ativo, módulo e cenas, aplica a configuração, cria a pasta de saída e
+executa BuildPipeline.BuildPlayer. No Android seleciona APK (buildAppBundle=false).
+Falha/cancelamento gera BuildFailedException, impedindo sucesso silencioso em CI.
+Configurações de PlayerSettings aplicadas pelo comando Build permanecem no projeto;
+use cópia isolada para validação. Não modifica a lista global de cenas do Editor.
+
+BuildWindows e BuildAndroid são entradas públicas para menu e -executeMethod, com
+saídas Builds/Windows/QuackQuack.exe e Builds/Android/QuackQuack.apk. O alvo deve ser
+selecionado antes, pelo Editor ou -buildTarget. Não publicam, instalam ou iniciam
+players; artefatos e logs são regeneráveis e ignorados pelo Git.
