@@ -1318,3 +1318,41 @@ exporta QuackQuackTelemetry.csv no temporaryCachePath e registra o caminho.
 Não existe gravação automática nem alteração do save. Recorders/buffer têm custo
 de inicialização; o contrato sem alocação refere-se à coleta aquecida, não ao jogo
 inteiro, ao Editor, à exportação ou às ferramentas de profiling.
+
+## Validação de conteúdo no Editor (T073)
+
+ContentValidationWindow.ValidateProject varre Assets/QuackQuack por padrão, incluindo
+subassets ScriptableObject de .asset e .inputactions. Validate aceita um conjunto
+explícito para testes/ferramentas. Objetos repetidos são deduplicados; objetos
+nulos, escopo inexistente/vazio e arquivos ilegíveis geram diagnósticos. A ferramenta
+não salva, corrige ou modifica assets. O relatório fornece asset, caminho, código,
+mensagem e propriedade quando identificável, com ordenação estável.
+
+IDs ContentDefinition usam comparação ordinal e devem ser únicos entre todos os
+tipos no conjunto validado. Duplicatas são reportadas em cada asset envolvido;
+referências por ID devem ter destino único e do tipo correto. Armas/passivas têm
+vínculos recíprocos; armas resolvem seus IDs de passiva e resultado evolutivo;
+encontros resolvem IDs de EnemyDefinition. A exceção explícita é sapo-rei no encontro
+FrogKing: seu controlador externo é fornecido pelas configurações de partida.
+Combinações evolutivas base/passiva repetidas são reportadas mesmo com IDs distintos.
+
+Limites e referências obrigatórias usam os IsValid existentes de conteúdo,
+catálogos, configurações de inimigos/chefe/partida e CreateRules de desafios.
+A configuração de entrada requer seus assets e o mapa unificado Gameplay com
+Move/Quack/Pause; InputActionReference deve resolver asset e ação. Propriedades
+serializadas também são percorridas para valores não finitos e referências
+quebradas, inclusive opcionais. Referências vazias opcionais não são erros por si.
+Exceções de validação viram erros identificados por asset sem ocultar outros casos.
+
+Tipos sem validador de domínio registrado recebem UnsupportedType como aviso e
+continuam recebendo a checagem estrutural genérica. Atualmente são Renderer2DData
+e UniversalRenderPipelineAsset, configurações nativas do URP. Não há promessa de
+validar todos os limites internos desses tipos do pacote ou cenas/prefabs inteiros.
+IDs internos de desafios são validados por CreateRules dentro de seu catálogo;
+IDs globais desta ferramenta são os de ContentDefinition.
+
+O menu QuackQuack > Validate content abre relatório atualizável e permite selecionar
+os assets com problemas. ValidateForCI é entrada -executeMethod: registra problemas,
+lança BuildFailedException se houver erros e emite T073_CONTENT_VALIDATION_OK no
+sucesso. Avisos não bloqueiam. Não é um hook automático das builds T070 nem prova
+de gameplay, plataforma, desempenho ou aceite visual.

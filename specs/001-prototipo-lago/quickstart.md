@@ -517,3 +517,31 @@ pode ser executada em test player, junto com PlatformRuntimeSmoke. Os testes med
 alocação gerenciada somente no sampler aquecido, sem prometer zero GC no jogo.
 Resultados e limites estão no [relatório T072](test-report-t072.md); metas de FPS,
 GC total, memória e hardware continuam para T074/T075.
+
+## Validador de conteúdo disponível após T073
+
+Use **QuackQuack > Validate content** no Unity. A janela mostra quantos assets foram
+checados, erros e avisos. **Validar novamente** atualiza o relatório; **Selecionar**
+leva ao asset indicado. IDs duplicados, vínculos inválidos, limites e referências
+quebradas são diagnósticos de leitura: a ferramenta não corrige nem salva dados.
+
+Para execução em lote com Unity 6000.4.3f1:
+
+~~~text
+-batchmode -nographics -quit -projectPath <copia-ou-projeto> -executeMethod QuackQuack.Editor.ContentValidationWindow.ValidateForCI -logFile <content-validation.log>
+~~~
+
+Confira código de saída e T073_CONTENT_VALIDATION_OK. Erros lançam BuildFailedException;
+avisos não bloqueiam. O escopo padrão é Assets/QuackQuack, com subassets incluídos.
+No snapshot T073: 63 ScriptableObjects, zero erros e dois avisos UnsupportedType
+para as configurações nativas LakeRenderer2D/LakeURP. Esses assets recebem a checagem
+estrutural de referências quebradas e números finitos; os limites internos do URP
+continuam sob as ferramentas da engine.
+
+Os IDs de armas/passivas/inimigos precisam estar no conjunto validado e ter tipos
+corretos. Sapo-Rei é referência externa explícita do seu encontro. Os limites são
+os definidos nas classes de domínio e catálogos, não valores duplicados no Editor.
+Execute ContentValidationTests em EditMode para os casos válidos e inválidos;
+fixtures temporárias são criadas/removidas pelo AssetDatabase em pasta exclusiva.
+Ver [relatório T073](test-report-t073.md). A validação não inicia build nem substitui
+os testes de cena ou profiling da T074/T075.

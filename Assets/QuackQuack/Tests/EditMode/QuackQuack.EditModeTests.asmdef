@@ -5,7 +5,8 @@
     "QuackQuack.Core",
     "QuackQuack.Platform",
     "QuackQuack.Presentation",
-    "QuackQuack.Runtime"
+    "QuackQuack.Runtime",
+    "QuackQuack.Editor"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"
