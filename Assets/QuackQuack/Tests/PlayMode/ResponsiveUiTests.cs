@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using NUnit.Framework;
 using QuackQuack.Core.Run;
@@ -14,7 +15,7 @@ using Object = UnityEngine.Object;
 
 namespace QuackQuack.Tests.PlayMode
 {
-    // T068 covers the controller; authored HUD integration remains in T069.
+    // Uses the authored HUD and production SafeAreaController.
     public class ResponsiveUiTests
     {
         private GameplayHud hud;
@@ -95,6 +96,7 @@ namespace QuackQuack.Tests.PlayMode
             Canvas.ForceUpdateCanvases();
             AssertNormalizedSafeRoot(safeRoot);
             AssertEssentialsInside(safeArea);
+            CaptureViewport();
         }
 
         [UnityTest]
@@ -221,6 +223,27 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         private static Rect Insets(int width, int height) => new Rect(72, 32, width - 96, height - 80);
+
+        private void CaptureViewport()
+        {
+            var previous = RenderTexture.active;
+            var pixels = new Texture2D(target.width, target.height, TextureFormat.RGB24, false);
+            try
+            {
+                camera.Render();
+                RenderTexture.active = target;
+                pixels.ReadPixels(new Rect(0, 0, target.width, target.height), 0, 0);
+                pixels.Apply();
+                var directory = Path.GetFullPath(Path.Combine(Application.dataPath, "../../../Logs"));
+                Directory.CreateDirectory(directory);
+                File.WriteAllBytes(Path.Combine(directory, $"t069-hud-{target.width}x{target.height}.png"), pixels.EncodeToPNG());
+            }
+            finally
+            {
+                RenderTexture.active = previous;
+                Object.Destroy(pixels);
+            }
+        }
 
         private SafeAreaController CreateSafeController()
         {

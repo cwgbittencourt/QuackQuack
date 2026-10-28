@@ -1206,3 +1206,19 @@ mesmo sistema de coordenadas e cobrir o Canvas inteiro; subviewports não são s
 Dimensões não positivas, valores não finitos e áreas sem interseção útil são ignorados,
 conservando o último layout válido até a geometria se recuperar. Áreas parcialmente
 fora da tela são limitadas ao viewport. O caminho padrão não cria delegates por frame.
+
+## HUD responsivo (T069)
+
+Lake e LakeRun mantêm o GameplayHud no Canvas original, com seus bindings existentes.
+CanvasScaler usa ScaleWithScreenSize, referência 1920×1080 e MatchWidthOrHeight=1
+(altura), mantendo as dimensões autorais nas quatro proporções em paisagem.
+Player vitals ancora no canto superior esquerdo; Clock, no superior direito;
+Messages, no centro inferior. Os três painéis ficam sob HUD Safe Area, filho direto
+do Canvas, com SafeAreaController. As âncoras dos painéis passam a usar os limites
+seguros; backgrounds e avisos do mundo não são reposicionados pelo controlador.
+
+ResponsiveHudSetup.Build aplica essa configuração às duas cenas pelo Unity,
+preservando objetos/referências existentes e GUIDs de cenas. Configure é reutilizado
+por GameplayHudSetup.Attach, para reconstruções não removerem o layout responsivo.
+Não é configuração das telas de cartas, loadout, resultados ou controles móveis;
+a revisão integral de UI e aparelho continua na matriz T075.

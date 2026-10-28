@@ -313,14 +313,13 @@ confirma a projeção do Canvas antes de medir os oito elementos essenciais.
 Quatro casos verificam o viewport sem recortes. Sete verificam o controlador T068:
 normalização nas quatro proporções, mudança de resolução/recorte, idempotência,
 remoção de margens, geometria inválida, reativação e retorno às fontes Screen.
-Quatro continuam em fase vermelha para T069: CanvasScaler autoral 1920×1080 e
+Quatro verificam o CanvasScaler autoral 1920×1080 da T069 e a
 hierarquia segura com os oito elementos essenciais dentro dos recortes.
 Nenhum teste é ignorado por faltar implementação.
 
 Para usar SafeAreaController, coloque-o em um RectTransform filho direto de um
 Canvas de tela inteira e mova o conteúdo protegido para baixo dele. O componente
-lê Screen.safeArea e atualiza âncoras/offsets automaticamente. O HUD das cenas ainda
-será configurado na T069. SetViewportProvider permite fontes de teste; null restaura
+lê Screen.safeArea e atualiza âncoras/offsets automaticamente. O HUD de Lake e LakeRun já está configurado desde a T069. SetViewportProvider permite fontes de teste; null restaura
 Screen. Ver contrato e [relatório T068](test-report-t068.md).
 
 Depois de T068/T069, repetir a matriz e a suíte completa. Geometria do HUD e altura
@@ -413,3 +412,18 @@ menus, enquanto cliques e toque continuam disponíveis no gameplay. Assim, Sul
 não confirma acidentalmente um botão UI ao usar Quack. Perda de foco limpa entradas
 antigas e respeita a política de background do Input System; suspensão do app
 continua bloqueando entrada mesmo se a política permitir input em background.
+
+## HUD responsivo disponível após T069
+
+Lake e LakeRun já contêm CanvasScaler com referência 1920×1080 e correspondência
+pela altura. Vitals, relógio e mensagens ficam sob HUD Safe Area: o controlador
+reposiciona seus limites automaticamente, sem alterar as regras do jogo.
+O menu **QuackQuack > Build T069 responsive HUD** reaplica a configuração nas duas
+cenas existentes. Reconstruir o HUD por GameplayHudSetup também mantém esse layout.
+
+Execute ResponsiveUiTests para a matriz 16:9, 18:9, 19,5:9 e 4:3, com recortes
+assimétricos. Os quatro casos autorais geram capturas ignoradas
+Logs/t069-hud-<largura>x<altura>.png na cópia de validação. RunSceneFlowTests confere
+a presença da mesma hierarquia no fluxo de produção, com save temporário isolado.
+Consulte o [relatório T069](test-report-t069.md); o aceite integral de UI/aparelhos
+continua na T075.

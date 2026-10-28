@@ -61,19 +61,25 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T060: ondas, encontros 5/10/15, combate, três finais e save integrado | Concluída |
 | T061: tela final, carteira, recordes/desafios e nova partida | Concluída |
 | T062: testes de paridade de teclado, controle e toque | Concluída (paridade sintética aprovada em T066) |
-| T063: testes de HUD nas quatro proporções e Safe Area | Concluída (fase vermelha; T068/T069 pendentes) |
+| T063: testes de HUD nas quatro proporções e Safe Area | Concluída (matriz aprovada em T069) |
 | T064: smoke tests de build e inicialização Windows/Android | Concluída (contrato T070 em fase vermelha; test player Windows aprovado) |
 | T065: adaptador de controle para comandos comuns | Concluída |
 | T066: adaptador, joystick e botões móveis em prefab | Concluída |
 | T067: mapa comum e seleção de entrada nas cenas | Concluída |
 | T068: controlador de Safe Area com atualização automática | Concluída |
+| T069: HUD responsivo com CanvasScaler e Safe Area nas duas cenas | Concluída |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T068 foram revisadas e concluídas; a próxima tarefa é **T069**.
+da arena. T022–T069 foram revisadas e concluídas; a próxima tarefa é **T070**.
+
+Validação T069: **237 PlayMode: 233 aprovados, 4 falhas esperadas da T070, nenhum ignorado**.
+Os 15 casos de UI responsiva passaram. O HUD de Lake e LakeRun agora usa CanvasScaler
+1920×1080 e âncoras dentro da Safe Area, preservando suas referências.
+Consulte o [relatório T069](specs/001-prototipo-lago/test-report-t069.md).
 
 Validação T068: **237 PlayMode: 229 aprovados, 8 falhas esperadas, nenhum ignorado**.
 Os sete casos do controlador de Safe Area passaram: quatro proporções, mudanças de

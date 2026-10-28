@@ -43,6 +43,16 @@ namespace QuackQuack.Tests.PlayMode
             for (int i = 0; i < 240; i++) { director = Object.FindAnyObjectByType<RunDirector>(); if (director != null && director.Ready) break; yield return null; }
             Assert.That(director, Is.Not.Null); Assert.That(director.Ready, Is.True);
             Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("LakeRun")); Assert.That(GameBootstrap.Instance.ExternalClock, Is.True);
+            var hud = Object.FindAnyObjectByType<QuackQuack.Presentation.UI.GameplayHud>();
+            Assert.That(hud, Is.Not.Null);
+            var scaler = hud.GetComponent<UnityEngine.UI.CanvasScaler>();
+            Assert.That(scaler, Is.Not.Null);
+            Assert.That(scaler.referenceResolution, Is.EqualTo(new Vector2(1920, 1080)));
+            var safe = hud.GetComponentInChildren<QuackQuack.Presentation.UI.SafeAreaController>();
+            Assert.That(safe, Is.Not.Null, "Production LakeRun must retain the responsive HUD from Lake.");
+            Assert.That(safe.transform.Find("Player vitals"), Is.Not.Null);
+            Assert.That(safe.transform.Find("Clock"), Is.Not.Null);
+            Assert.That(safe.transform.Find("Messages"), Is.Not.Null);
             director.AutomaticTick = false; var run = GameBootstrap.Instance.Run;
             double before = run.ElapsedSeconds; yield return null; yield return null; Assert.That(run.ElapsedSeconds, Is.EqualTo(before));
             var relics = Object.FindAnyObjectByType<LakeRelics>(); relics.Show(true);

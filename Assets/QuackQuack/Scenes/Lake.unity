@@ -1799,7 +1799,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 325994589}
-  m_Father: {fileID: 1161900760}
+  m_Father: {fileID: 1538707295}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -2585,6 +2585,7 @@ GameObject:
   - component: {fileID: 1161900760}
   - component: {fileID: 1161900759}
   - component: {fileID: 1161900758}
+  - component: {fileID: 1161900761}
   m_Layer: 0
   m_Name: Gameplay HUD T031
   m_TagString: Untagged
@@ -2648,9 +2649,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1486666090}
-  - {fileID: 778174438}
-  - {fileID: 1852172360}
+  - {fileID: 1538707295}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2658,6 +2657,29 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1161900761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1161900757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
+  m_UiScaleMode: 1
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 1
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!1 &1188781196
 GameObject:
   m_ObjectHideFlags: 0
@@ -3324,6 +3346,7 @@ MonoBehaviour:
   rareRewardPrefab: {fileID: 7136467452485654054, guid: 42f3a7e61436f3241952caedeb96679f, type: 3}
   rareRewardSpawn: {fileID: 1682512341}
   rareRewardExperience: 40
+  trainingPickups: 1
 --- !u!4 &1430572155
 Transform:
   m_ObjectHideFlags: 0
@@ -3561,7 +3584,7 @@ RectTransform:
   - {fileID: 1188781197}
   - {fileID: 941708056}
   - {fileID: 188240439}
-  m_Father: {fileID: 1161900760}
+  m_Father: {fileID: 1538707295}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -3606,6 +3629,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1486666089}
   m_CullTransparentMesh: 1
+--- !u!1 &1538707294
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1538707295}
+  - component: {fileID: 1538707296}
+  m_Layer: 0
+  m_Name: HUD Safe Area
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1538707295
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1538707294}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1486666090}
+  - {fileID: 778174438}
+  - {fileID: 1852172360}
+  m_Father: {fileID: 1161900760}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1538707296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1538707294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70a055bc393e03f44b013648a8fbf315, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Presentation::QuackQuack.Presentation.UI.SafeAreaController
 --- !u!1 &1576483139
 GameObject:
   m_ObjectHideFlags: 0
@@ -4122,7 +4196,7 @@ RectTransform:
   m_Children:
   - {fileID: 319511732}
   - {fileID: 254303585}
-  m_Father: {fileID: 1161900760}
+  m_Father: {fileID: 1538707295}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}

@@ -55,6 +55,7 @@ namespace QuackQuack.Editor
             Assign(data, "terrainLabel", terrain); Assign(data, "quackLabel", ready);
             Assign(data, "timeLabel", time); Assign(data, "statusLabel", status);
             data.ApplyModifiedPropertiesWithoutUndo();
+            ResponsiveHudSetup.Configure(hud);
             var arena = Object.FindAnyObjectByType<LakeArenaController>();
             var arenaData = new SerializedObject(arena);
             Assign(arenaData, "hud", hud); arenaData.ApplyModifiedPropertiesWithoutUndo();
