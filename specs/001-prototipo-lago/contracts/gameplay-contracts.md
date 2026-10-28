@@ -969,3 +969,39 @@ JOGAR NOVAMENTE remove o bootstrap anterior, espera um frame e carrega RunBootst
 com nova ID e progresso salvo. Se o jogador sair com falha de armazenamento não
 resolvida, o resultado pendente não tem persistência garantida. Não há histórico
 integral de partidas em disco. Configurações não foram acrescentadas ao save.
+
+## Contrato de paridade de entrada (T062, fase vermelha)
+
+InputParityTests possui 15 casos PlayMode que executam adaptadores reais. Teclado
+usa KeyboardState (WASD, Space, Escape); controle usa GamepadState (leftStick,
+South para Quack, Start para pausa). Eventos passam por QueueStateEvent e Update.
+SetUp/TearDown preservam configuração de foco e dispositivos atuais; só os dispositivos
+sintéticos próprios são removidos, sem reset global do Input System.
+
+T065 deve fornecer GamepadInputAdapter e T066 MobileInputAdapter no namespace
+QuackQuack.Platform.Input, ambos IPlayerInput. A fixture instancia o tipo real por
+construtor público sem argumentos ou AddComponent para componente Unity. A ausência
+é falha explícita, nunca Ignore ou substituto de teste. O shim de reflexão deve ser
+substituído por chamadas tipadas quando as implementações existirem.
+
+O contrato de callbacks do toque é SetMove(Vector2), SetQuack(bool) e SetPause(bool).
+SetMove recebe o vetor normalizado do joystick; bool representa botão pressionado
+ou solto. Read consome bordas uma vez, preservando movimento enquanto mantido.
+Repetir true entre updates não cria nova borda; soltar e pressionar novamente cria.
+São pontos de entrada dos controles móveis futuros, não simulação de um Touchscreen
+nem validação de arraste, múltiplos dedos ou hit testing de UI. T066 deve ligar os
+controles de toque reais a esses callbacks; o mapa unificado permanece na T067.
+
+A sequência compara repouso, direções, diagonal, Quack, manutenção, soltura, nova
+ativação e pausa. Checkpoints do PlayerController real com seed 62 são comparados
+com o caminho real de teclado: velocidade no Rigidbody2D, terreno, Fôlego, vida,
+fase, relógio e número de eventos QuackActivated. Também há oráculos explícitos
+para velocidades autorais, consumo inicial, dois Quacks aceitos após cooldown,
+prioridade da pausa e parada. Cada fonte é testada após Won/Lost/Abandoned e Results.
+
+O passo do componente é controlado (ApplyCommand, FixedUpdate, Advance), sem esperar
+frames reais. A fixture posiciona o Pato em pontos iguais de terra/água longe de
+outras entidades. Não mede deslocamento/colisão, frame pacing, hardware, Safe Area
+ou equivalência ponta a ponta na cena publicada. Falhas por adaptadores ausentes
+confirmam apenas a descoberta dos casos: paridade dos três dispositivos continua
+pendente de T065/T066 e validação correspondente.

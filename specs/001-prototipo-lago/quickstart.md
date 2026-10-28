@@ -290,3 +290,17 @@ Execute ResultsContractTests, RunProgressionTests e ProgressSaveTests em EditMod
 ResultsViewTests e ResultsSceneFlowTests em PlayMode. Cobrem três finais, retry e
 reinício preservando saldo. Capturas Logs/t061-*.png são fixtures de UI a 1280×720,
 não aceite de gameplay, Safe Area ou plataformas. Ver [relatório T061](test-report-t061.md).
+
+## Testes de paridade disponíveis após T062
+
+No Test Runner PlayMode, filtrar InputParityTests. São 15 casos: cinco de teclado
+executáveis e dez para controle/toque que devem falhar explicitamente enquanto
+GamepadInputAdapter (T065) e MobileInputAdapter (T066) estiverem ausentes.
+Não ignorar esses casos nem interpretar a fase vermelha como aceite de US4.
+
+Os testes usam teclado/gamepad sintéticos e callbacks do futuro joystick/botões;
+não exigem dispositivos físicos. Comparam comandos e checkpoints do PlayerController
+real em passos controlados, incluindo pausa, terreno, Fôlego e os três finais.
+O contrato de callbacks e os limites constam em contracts/gameplay-contracts.md.
+Depois de T065/T066, repetir os 15 casos e a suíte completa. T063/T064 continuam
+responsáveis por UI responsiva e smoke tests de plataforma.
