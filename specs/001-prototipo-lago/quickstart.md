@@ -482,3 +482,38 @@ Para uma build de profiling, inclua-a como cena inicial de uma cópia de valida�
 use IL2CPP no Windows x64/Android ARM64 e preserve as cenas de produto do projeto.
 Execute PerformanceBenchmarkTests no PlayMode: geram capturas ignoradas
 Logs/t071-200.png e Logs/t071-400.png. Ver [relatório T071](test-report-t071.md).
+
+## Telemetria disponível após T072
+
+PerformanceBenchmark e LakeRun já têm PerformanceTelemetry ligado aos pools e ao
+scheduler quando a composição termina. Não é necessário reconstruir as cenas.
+O menu **QuackQuack > Build T072 performance telemetry** adiciona o componente às
+cenas existentes pelo Unity; os geradores de benchmark e LakeRun também o preservam.
+
+No Profiler, procure QuackQuack.EnemyScheduler.Advance e QuackQuack.Telemetry.Capture.
+O buffer registra frame time observado, tempo/quantidade de passos do scheduler,
+steering, leases ativos/capacidade/recusas por família, GC alocado, memória usada
+pelo Unity e heap GC usado. Contadores não disponíveis são -1 e têm seu bit ausente
+em available_mask: MainThread=1, GcAllocated=2, UnityUsedMemory=4, GcUsedMemory=8.
+Frame time observado não equivale a tempo de CPU; memória Unity não equivale a RSS.
+
+Após a janela desejada, pause o Editor e use o menu de contexto do componente
+**Export telemetry CSV to temporary cache**. O Console informa o caminho de
+QuackQuackTelemetry.csv. A exportação aloca e faz I/O, portanto execute fora da janela
+que pretende medir. Em player, uma ferramenta de validação pode chamar ExportCsv
+com caminho gravável; o jogo não exporta automaticamente nem toca no save pessoal.
+
+O buffer padrão retém 8192 amostras (cerca de 136 s a 60 quadros/s); ao preencher,
+substitui as mais antigas e incrementa Overwritten. Para outro tamanho, use o
+parâmetro capacity de Bind na composição. No benchmark, filtre warmup=0, seed,
+enemy_target e benchmark_tick. O driver para a coleta automática ao concluir.
+Contadores do Profiler podem refletir o quadro anterior, enquanto scheduler/pools
+são snapshots atuais; descarte as bordas ao comparar janelas de carga. As recusas
+dos pools auxiliares do benchmark são intencionais, uma por família por passo.
+
+Execute PerformanceTelemetryTests, PerformanceBenchmarkTests, PoolServiceTests,
+EnemyUpdateSchedulerTests e RunSceneFlowTests. A categoria PerformanceTelemetryRuntime
+pode ser executada em test player, junto com PlatformRuntimeSmoke. Os testes medem
+alocação gerenciada somente no sampler aquecido, sem prometer zero GC no jogo.
+Resultados e limites estão no [relatório T072](test-report-t072.md); metas de FPS,
+GC total, memória e hardware continuam para T074/T075.

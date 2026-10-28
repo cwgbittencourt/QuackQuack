@@ -53,6 +53,11 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(safe.transform.Find("Player vitals"), Is.Not.Null);
             Assert.That(safe.transform.Find("Clock"), Is.Not.Null);
             Assert.That(safe.transform.Find("Messages"), Is.Not.Null);
+            var telemetry = director.GetComponent<QuackQuack.Systems.Diagnostics.PerformanceTelemetry>();
+            Assert.That(telemetry, Is.Not.Null);
+            Assert.That(telemetry.Capture(0), Is.True, "LakeRun must bind its live pools and scheduler.");
+            Assert.That(telemetry.Latest.Enemies.Capacity, Is.GreaterThan(0));
+            Assert.That(telemetry.Latest.BenchmarkTick, Is.EqualTo(-1));
             director.AutomaticTick = false; var run = GameBootstrap.Instance.Run;
             double before = run.ElapsedSeconds; yield return null; yield return null; Assert.That(run.ElapsedSeconds, Is.EqualTo(before));
             var relics = Object.FindAnyObjectByType<LakeRelics>(); relics.Show(true);

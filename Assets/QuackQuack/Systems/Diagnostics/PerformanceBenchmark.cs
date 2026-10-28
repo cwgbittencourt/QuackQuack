@@ -113,6 +113,7 @@ namespace QuackQuack.Systems.Diagnostics
             scheduler.Initialize(run, director, pools, events, player, enemies.BehaviorSettings, definitions);
             AddEnemies(200);
             FillSaturation();
+            GetComponent<PerformanceTelemetry>()?.Bind(pools, scheduler, this);
             Ready = true;
             ShowStage("WARMUP / 200");
         }

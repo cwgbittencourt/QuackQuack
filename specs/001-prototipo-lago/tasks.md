@@ -177,7 +177,7 @@ diferenca de estado final e sem informacao essencial fora da Safe Area.
 **Purpose**: Desempenho, validacao integral e evidencias de aceite.
 
 - [x] T071 [P] Criar cenario deterministico de benchmark com 200/400 inimigos e saturacao de projeteis, pickups e VFX pooled em `Assets/QuackQuack/Scenes/PerformanceBenchmark.unity`
-- [ ] T072 Instrumentar frame time, scheduler de hordas, pools por familia, GC e memoria sem alocacao recorrente em `Assets/QuackQuack/Systems/Diagnostics/PerformanceTelemetry.cs`
+- [x] T072 Instrumentar frame time, scheduler de hordas, pools por familia, GC e memoria sem alocacao recorrente em `Assets/QuackQuack/Systems/Diagnostics/PerformanceTelemetry.cs`
 - [ ] T073 [P] Criar validador Editor para IDs unicos, referencias e limites dos ScriptableObjects em `Assets/QuackQuack/Editor/ContentValidationWindow.cs`
 - [ ] T074 Comparar o perfil com as metas; se houver violacao, corrigir e reperfilar, senao registrar aprovacao sem mudanca, sempre sem DOTS/ECS/Jobs/Burst em `Assets/QuackQuack/Systems/Spawning/SpawnDirector.cs`
 - [ ] T075 Executar toda a matriz de validacao e registrar resultados Windows/Android em `specs/001-prototipo-lago/validation-report.md`

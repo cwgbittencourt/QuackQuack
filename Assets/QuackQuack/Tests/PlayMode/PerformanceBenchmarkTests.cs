@@ -98,6 +98,10 @@ namespace QuackQuack.Tests.PlayMode
         public IEnumerator SceneRunsAutomaticallyOnFixedSteps()
         {
             yield return Load();
+            var telemetry = benchmark.GetComponent<PerformanceTelemetry>();
+            Assert.That(telemetry, Is.Not.Null);
+            telemetry.AutomaticSampling = false;
+            Assert.That(telemetry.Capture(0), Is.True);
             int before = benchmark.Tick;
             benchmark.AutomaticTick = true;
             Time.timeScale = 1;
@@ -105,6 +109,18 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(benchmark.Tick, Is.GreaterThan(before));
             Assert.That(benchmark.Director.ActiveCount, Is.EqualTo(200));
             AssertSaturated();
+            Assert.That(telemetry.Capture(20), Is.True);
+            var sample = telemetry.Latest;
+            Assert.That(sample.Seed, Is.EqualTo(71));
+            Assert.That(sample.BenchmarkTick, Is.EqualTo(benchmark.Tick));
+            Assert.That(sample.EnemyTarget, Is.EqualTo(200));
+            Assert.That(sample.Enemies.Active, Is.EqualTo(200));
+            Assert.That(sample.Enemies.Capacity, Is.EqualTo(400));
+            Assert.That(sample.Projectiles.Active, Is.EqualTo(512));
+            Assert.That(sample.Projectiles.Exhaustions, Is.GreaterThan(0));
+            Assert.That(sample.SchedulerSteps, Is.EqualTo(benchmark.Tick - before));
+            Assert.That(sample.SchedulerMilliseconds, Is.GreaterThanOrEqualTo(0));
+            Assert.That(sample.Steering, Is.InRange(0, 64));
             benchmark.AutomaticTick = false;
             Time.timeScale = 0;
         }

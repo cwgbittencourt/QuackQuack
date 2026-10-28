@@ -1272,3 +1272,49 @@ e uma janela de invulnerabilidade de benchmark, sem alterar seus dados autorais.
 Isso mantém a carga viva sem menus ou morte. Destroy libera director, upgrades,
 scheduler e pools. Counters/status identificam carga e ciclo, sem medir frame time,
 GC, memória ou estabelecer aceite de desempenho (T072/T074).
+
+## Instrumentação de desempenho (T072)
+
+PerformanceTelemetry.Bind recebe PoolService e EnemyUpdateScheduler vivos e um
+contexto opcional PerformanceBenchmark. Aloca um buffer circular fixo de 8192
+PerformanceSample por padrão (1–65536 configurável na ligação). LateUpdate captura
+uma amostra por quadro. Count/Written/Overwritten tornam explícita a retenção;
+TryGet(0) devolve a mais antiga ainda retida, como cópia de struct. Não há expansão
+ou formatação, LINQ, log ou I/O na captura. Benchmark completo deixa de ser amostrado
+automaticamente; warmup e seed/tick/carga aparecem nos registros do benchmark.
+
+FrameMilliseconds é Time.unscaledDeltaTime, duração de quadro observada; não é
+CPU puro. MainThreadMilliseconds vem do contador Main Thread em nanossegundos.
+GC Allocated In Frame, Total Used Memory e GC Used Memory vêm de ProfilerRecorder.
+AvailableCounters identifica quais recorders já entregaram amostras; -1 indica
+indisponível/sem amostra, nunca um zero fabricado. UnityUsedBytes é o contador de
+memória do Unity, não RSS do processo nem memória total do aparelho. Contadores
+nativos podem variar por alvo/build e refletem a última amostra concluída do
+Profiler; Frame é o quadro da captura, sem promessa de alinhamento exato com o
+snapshot corrente do scheduler/pools nas bordas de etapa.
+
+EnemyUpdateScheduler.Advance expõe o marcador QuackQuack.EnemyScheduler.Advance e
+acumula tempo Stopwatch e quantidade de passos efetivamente processados. O sampler
+registra os deltas desde a captura anterior, incluindo múltiplos passos por quadro,
+e o steering do último passo (zero quando não houve passo). Capturas consecutivas
+sem avanço não repetem tempo do scheduler. O marcador QuackQuack.Telemetry.Capture
+permite inspecionar o custo da própria coleta no Profiler.
+
+PoolService.GetMetrics retorna structs por família com leases ativos, capacidade
+pré-aquecida e aquisições recusadas por esgotamento acumuladas. Percorre pools,
+sem copiar listas ou varrer todos os atores; não altera aquisição/liberação.
+No benchmark T071, recusas adicionais são deliberadas para validar saturação;
+não devem ser interpretadas como regressões de gameplay sem esse contexto.
+
+Bind é operação de inicialização/religação. OnDisable/OnDestroy descartam recorders;
+OnEnable reabre e restabelece o baseline do scheduler, sem atribuir à retomada o
+tempo da janela desligada. Captura em componente desligado, fonte destruída ou
+pool descartado não grava. A ligação é feita pela composição, após os serviços
+estarem prontos, tanto em PerformanceBenchmark quanto em RunDirector.
+
+ExportCsv é explícito e fora da janela de medição: usa cultura invariável, escreve
+o buffer em ordem cronológica e pode alocar. O menu de contexto do componente
+exporta QuackQuackTelemetry.csv no temporaryCachePath e registra o caminho.
+Não existe gravação automática nem alteração do save. Recorders/buffer têm custo
+de inicialização; o contrato sem alocação refere-se à coleta aquecida, não ao jogo
+inteiro, ao Editor, à exportação ou às ferramentas de profiling.

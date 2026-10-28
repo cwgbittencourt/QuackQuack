@@ -6,6 +6,12 @@ using UnityEngine.Pool;
 namespace QuackQuack.Systems.Pooling
 {
     public enum PoolFamily { Enemy, Projectile, Pickup, Vfx }
+    public readonly struct PoolMetrics
+    {
+        public readonly int Active, Capacity;
+        public readonly long Exhaustions;
+        public PoolMetrics(int active, int capacity, long exhaustions) { Active = active; Capacity = capacity; Exhaustions = exhaustions; }
+    }
     public interface IPoolLifecycle
     {
         void OnAcquire();
@@ -21,6 +27,7 @@ namespace QuackQuack.Systems.Pooling
             public ObjectPool<Component> Pool;
             public PoolFamily Family;
             public Type Type;
+            public long Exhaustions;
             public readonly List<Component> Instances = new List<Component>();
         }
         private readonly Dictionary<string, Entry> entries = new Dictionary<string, Entry>();
@@ -62,7 +69,7 @@ namespace QuackQuack.Systems.Pooling
             if (disposed) throw new ObjectDisposedException(nameof(PoolService));
             if (!entries.TryGetValue(key, out var entry)) throw new KeyNotFoundException(key);
             if (entry.Type != typeof(T)) throw new InvalidOperationException("Pool type mismatch.");
-            if (entry.Pool.CountInactive == 0) return null;
+            if (entry.Pool.CountInactive == 0) { entry.Exhaustions++; return null; }
             var item = (T)entry.Pool.Get();
             active.Add(item);
             try
@@ -102,6 +109,18 @@ namespace QuackQuack.Systems.Pooling
 
         public bool IsActive(Component item, PoolFamily family) => !disposed && item != null &&
             active.Contains(item) && owners.TryGetValue(item, out var entry) && entry.Family == family;
+
+        public PoolMetrics GetMetrics(PoolFamily family)
+        {
+            if (family < PoolFamily.Enemy || family > PoolFamily.Vfx) throw new ArgumentOutOfRangeException(nameof(family));
+            int used = 0, capacity = 0; long exhausted = 0;
+            foreach (var entry in entries.Values)
+                if (entry.Family == family)
+                {
+                    used += entry.Pool.CountActive; capacity += entry.Instances.Count; exhausted += entry.Exhaustions;
+                }
+            return new PoolMetrics(used, capacity, exhausted);
+        }
 
         public void Dispose()
         {

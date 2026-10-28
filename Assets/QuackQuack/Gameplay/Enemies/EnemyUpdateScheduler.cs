@@ -8,11 +8,16 @@ using QuackQuack.Systems.Combat;
 using QuackQuack.Systems.Pooling;
 using QuackQuack.Systems.Spawning;
 using UnityEngine;
+using Unity.Profiling;
 
 namespace QuackQuack.Gameplay.Enemies
 {
     public sealed class EnemyUpdateScheduler:MonoBehaviour
     {
+        public const string ProfilerMarkerName = "QuackQuack.EnemyScheduler.Advance";
+        private static readonly ProfilerMarker AdvanceMarker = new ProfilerMarker(ProfilerMarkerName);
+        public double TotalAdvanceMilliseconds { get; private set; }
+        public long AdvanceCount { get; private set; }
         private struct Slot
         {
             public PooledEnemy Enemy;public long Lease;public Vector2 Heading,LockedPoint;
@@ -61,6 +66,8 @@ namespace QuackQuack.Gameplay.Enemies
             if(float.IsNaN(seconds)||float.IsInfinity(seconds)||seconds<0)throw new ArgumentOutOfRangeException(nameof(seconds));
             if(pools.IsDisposed||run.Outcome.HasValue||player==null){Clear();return;}
             if(!run.IsSimulating)return;
+            using var scope = AdvanceMarker.Auto();
+            long started = System.Diagnostics.Stopwatch.GetTimestamp();
             advancing=true;clock+=seconds;tick++;
             try
             {
@@ -90,7 +97,12 @@ namespace QuackQuack.Gameplay.Enemies
                     if(!run.IsSimulating||pools.IsDisposed)break;
                 }
             }
-            finally{advancing=false;}
+            finally
+            {
+                advancing=false;
+                TotalAdvanceMilliseconds += (System.Diagnostics.Stopwatch.GetTimestamp() - started) * (1000.0 / System.Diagnostics.Stopwatch.Frequency);
+                AdvanceCount++;
+            }
         }
         private void Step(ref Slot slot,float seconds)
         {

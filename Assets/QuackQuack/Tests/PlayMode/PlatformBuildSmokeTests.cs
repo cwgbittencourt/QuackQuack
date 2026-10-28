@@ -85,6 +85,10 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(player.State, Is.Not.Null);
             Assert.That(player.State.Health, Is.GreaterThan(0));
             Assert.That(Object.FindAnyObjectByType<GameplayHud>(), Is.Not.Null);
+            var telemetry = director.GetComponent<QuackQuack.Systems.Diagnostics.PerformanceTelemetry>();
+            Assert.That(telemetry, Is.Not.Null);
+            Assert.That(telemetry.Capture(0), Is.True, "Production telemetry must bind in the player too.");
+            Assert.That(telemetry.Latest.Enemies.Capacity, Is.GreaterThan(0));
             Assert.That(Camera.main, Is.Not.Null);
             Assert.That(director.BuildCatalog, Is.Not.Null);
             Assert.That(director.RunSettings, Is.Not.Null);

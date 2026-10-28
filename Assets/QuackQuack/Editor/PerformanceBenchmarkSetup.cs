@@ -19,6 +19,7 @@ namespace QuackQuack.Editor
             camera.backgroundColor = new Color(0.04f, 0.1f, 0.14f); camera.clearFlags = CameraClearFlags.SolidColor;
             var root = new GameObject("Deterministic benchmark T071");
             var benchmark = root.AddComponent<PerformanceBenchmark>();
+            root.AddComponent<PerformanceTelemetry>();
             var canvasRoot = new GameObject("Benchmark status", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
             canvasRoot.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             canvasRoot.GetComponent<Canvas>().sortingOrder = 1000;

@@ -150,6 +150,7 @@ namespace QuackQuack.Systems.Run
             if (pauseButton != null) pauseButton.onClick.AddListener(TogglePause);
             if (abandonButton != null) abandonButton.onClick.AddListener(Abandon);
             Ready = true;
+            GetComponent<QuackQuack.Systems.Diagnostics.PerformanceTelemetry>()?.Bind(pools, Scheduler);
             if (run.Phase == RunPhase.Preparing) run.TryTransition(RunPhase.Playing);
             PhaseChanged(run.Phase);
         }

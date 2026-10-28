@@ -70,13 +70,20 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T069: HUD responsivo com CanvasScaler e Safe Area nas duas cenas | Concluída |
 | T070: pipeline compartilhado Windows x64 / Android ARM64 IL2CPP | Concluída |
 | T071: cenário determinístico com 200/400 inimigos e pools saturados | Concluída |
+| T072: telemetria de quadros, scheduler, pools, GC e memória | Concluída |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T071 foram revisadas e concluídas; a próxima tarefa é **T072**.
+da arena. T022–T072 foram revisadas e concluídas; a próxima tarefa é **T073**.
+
+Validação T072: **251/251 PlayMode** e **8/8 em test player Windows x64 IL2CPP**.
+Telemetria ligada ao benchmark e LakeRun, com buffer fixo e exportação CSV explícita.
+O sampler aquecido registrou **0 bytes gerenciados em 2048 coletas**, no teste
+isolado; isso não aprova GC do jogo ou metas de FPS/memória. Consulte o
+[relatório T072](specs/001-prototipo-lago/test-report-t072.md).
 
 Validação T071: **245/245 PlayMode aprovados**. A cena PerformanceBenchmark executa
 cargas de 200/400 inimigos com seed 71, 512 projéteis, 512 pickups e 128 VFX pooled,
