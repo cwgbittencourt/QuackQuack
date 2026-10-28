@@ -304,3 +304,20 @@ real em passos controlados, incluindo pausa, terreno, Fôlego e os três finais.
 O contrato de callbacks e os limites constam em contracts/gameplay-contracts.md.
 Depois de T065/T066, repetir os 15 casos e a suíte completa. T063/T064 continuam
 responsáveis por UI responsiva e smoke tests de plataforma.
+
+## Testes de UI responsiva disponíveis após T063
+
+No Test Runner PlayMode, filtrar ResponsiveUiTests. Os 13 casos usam o HUD autoral
+em 1920×1080, 2160×1080, 2340×1080 e 1440×1080, com câmera/render target próprios.
+Não alteram a resolução do desktop nem gravam cenas. A fixture espera o layout e
+confirma a projeção do Canvas antes de medir os oito elementos essenciais.
+
+Quatro casos verificam o viewport sem recortes. Os outros nove são fase vermelha
+para T068/T069: exigem CanvasScaler autoral 1920×1080, SafeAreaController, margens
+assimétricas, reaplicação sem acúmulo, remoção de margens e atualização automática
+quando resolução ou recorte mudam. O contrato da fonte de viewport injetável está
+em contracts/gameplay-contracts.md. Nenhum teste é ignorado por faltar implementação.
+
+Depois de T068/T069, repetir a matriz e a suíte completa. Geometria do HUD e altura
+de texto não substituem inspeção humana de todas as telas, recortes Android reais,
+Safe Area de aparelho ou aceite de legibilidade da T075.

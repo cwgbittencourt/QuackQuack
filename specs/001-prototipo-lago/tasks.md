@@ -156,7 +156,7 @@ diferenca de estado final e sem informacao essencial fora da Safe Area.
 ### Tests for User Story 4
 
 - [x] T062 [P] [US4] Criar testes PlayMode comparando sequencias equivalentes de teclado, controle e toque em `Assets/QuackQuack/Tests/PlayMode/InputParityTests.cs`
-- [ ] T063 [P] [US4] Criar testes PlayMode para 16:9, 18:9, 19,5:9 e 4:3 com elementos essenciais dentro da Safe Area em `Assets/QuackQuack/Tests/PlayMode/ResponsiveUiTests.cs`
+- [x] T063 [P] [US4] Criar testes PlayMode para 16:9, 18:9, 19,5:9 e 4:3 com elementos essenciais dentro da Safe Area em `Assets/QuackQuack/Tests/PlayMode/ResponsiveUiTests.cs`
 - [ ] T064 [P] [US4] Criar smoke test de build e inicializacao Windows/Android em `Assets/QuackQuack/Tests/PlayMode/PlatformBuildSmokeTests.cs`
 
 ### Implementation for User Story 4

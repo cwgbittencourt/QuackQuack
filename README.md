@@ -61,13 +61,19 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T060: ondas, encontros 5/10/15, combate, três finais e save integrado | Concluída |
 | T061: tela final, carteira, recordes/desafios e nova partida | Concluída |
 | T062: testes de paridade de teclado, controle e toque | Concluída (fase vermelha; T065/T066 pendentes) |
+| T063: testes de HUD nas quatro proporções e Safe Area | Concluída (fase vermelha; T068/T069 pendentes) |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T062 foram revisadas e concluídas; a próxima tarefa é **T063**.
+da arena. T022–T063 foram revisadas e concluídas; a próxima tarefa é **T064**.
+
+Validação T063: **202 PlayMode: 183 aprovados, 19 falhas esperadas, nenhum ignorado**.
+Os quatro casos do HUD sem recortes passaram. Há nove falhas novas de T068/T069,
+além das dez de T065/T066 já registradas na T062. Não houve regressão nos casos
+antes aprovados. Consulte o [relatório T063](specs/001-prototipo-lago/test-report-t063.md).
 
 Validação T062: **189 PlayMode: 179 aprovados, 10 falhas esperadas, nenhum ignorado**.
 Os 174 testes anteriores passaram; os cinco novos casos de teclado passaram. Os dez

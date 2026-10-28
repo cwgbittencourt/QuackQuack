@@ -1005,3 +1005,43 @@ outras entidades. Não mede deslocamento/colisão, frame pacing, hardware, Safe 
 ou equivalência ponta a ponta na cena publicada. Falhas por adaptadores ausentes
 confirmam apenas a descoberta dos casos: paridade dos três dispositivos continua
 pendente de T065/T066 e validação correspondente.
+
+## Contrato de UI responsiva (T063, fase vermelha)
+
+ResponsiveUiTests exercita o HUD real de Bootstrap/Lake nas resoluções paisagem
+1920×1080 (16:9), 2160×1080 (18:9), 2340×1080 (19,5:9) e 1440×1080 (4:3).
+A fixture pausa o treino, desliga o binding e apresenta um snapshot com vida,
+Fôlego parcial, água, indisponibilidade do Quack, mensagem e tempo. Usa câmera
+própria e RenderTexture; não altera Screen.SetResolution ou arquivos de cena.
+Valida tamanho e projeção do Canvas antes de medir seus elementos em pixels.
+
+Os oito elementos essenciais do HUD são os bindings healthLabel, breathLabel,
+terrainLabel, quackLabel, statusLabel, timeLabel, healthFill e breathFill. Cada um
+deve estar ativo, com os quatro cantos dentro dos limites seguros (tolerância de
+0,5 pixel). Textos não podem ficar vazios ou exceder verticalmente sua caixa.
+O caso sem recortes serve de baseline do layout autoral. A composição responsiva
+exige CanvasScaler no Canvas real, ScaleWithScreenSize e referência 1920×1080;
+a fixture não acrescenta scaler para ocultar ausência da T069.
+
+T068 deve fornecer QuackQuack.Presentation.UI.SafeAreaController, MonoBehaviour no
+RectTransform que delimita o conteúdo seguro, filho do Canvas. O controlador tem
+SetViewportProvider(Func<Vector2>, Func<Rect>) para injetar tamanho e área segura;
+no jogo, o padrão usa os dados reais da tela. LateUpdate atualiza o retângulo
+quando tamanho ou Safe Area mudarem. O teste chama esse mesmo caminho e também
+aguarda frames para comprovar atualização automática. O shim por reflexão localiza
+o tipo real; ausência falha explicitamente e deve dar lugar a chamadas tipadas
+na implementação T068. Todos os elementos essenciais devem pertencer à hierarquia
+segura do controlador presente no HUD autoral (integração T068/T069).
+
+A matriz usa margens assimétricas de 72 px à esquerda, 24 à direita, 32 abaixo e
+48 acima, sem atribuí-las a um aparelho real. O retângulo normaliza os limites
+por tamanho total em anchorMin/anchorMax, com offsets zerados. Reaplicar não acumula
+margens; voltar ao viewport inteiro restaura anchors zero/um. A sequência dinâmica
+muda 16:9 para 19,5:9, troca o lado do recorte e altera só a Safe Area mantendo a
+resolução, antes de remover os recortes. Essas mudanças ocorrem pela fonte injetada,
+sem cálculo substituto de layout na fixture.
+
+Esta cobertura geométrica do HUD não representa aceite de legibilidade humana,
+matriz de todas as telas/modais, toque físico, recorte Android real ou desempenho.
+A rotação em paisagem é representada por mudança de lado do recorte; retrato não
+faz parte do produto. Aceite integral da interface permanece na validação T075.
