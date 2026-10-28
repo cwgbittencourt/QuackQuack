@@ -4,6 +4,7 @@ using QuackQuack.Core.Shared;
 using QuackQuack.Platform.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -19,10 +20,20 @@ namespace QuackQuack.Tests.PlayMode
         private MobileJoystick joystick;
         private MobileActionButton quack, pause;
         private RectTransform stick, knob;
+        private InputSettings.BackgroundBehavior background;
+#if UNITY_EDITOR
+        private InputSettings.EditorInputBehaviorInPlayMode editorInput;
+#endif
 
         [SetUp]
         public void SetUp()
         {
+            background = InputSystem.settings.backgroundBehavior;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+#if UNITY_EDITOR
+            editorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+#endif
             previousEventSystem = EventSystem.current;
             if (previousEventSystem != null) { previousEnabled = previousEventSystem.enabled; previousEventSystem.enabled = false; }
             eventObject = new GameObject("T066 events", typeof(EventSystem)); events = eventObject.GetComponent<EventSystem>();
@@ -41,6 +52,10 @@ namespace QuackQuack.Tests.PlayMode
         {
             Object.DestroyImmediate(root); Object.DestroyImmediate(eventObject);
             if (previousEventSystem != null) { previousEventSystem.enabled = previousEnabled; EventSystem.current = previousEventSystem; }
+            InputSystem.settings.backgroundBehavior = background;
+#if UNITY_EDITOR
+            InputSystem.settings.editorInputBehaviorInPlayMode = editorInput;
+#endif
         }
 
         [Test]

@@ -1,43 +1,43 @@
 using QuackQuack.Core.Shared;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace QuackQuack.Platform.Input
 {
     public sealed class MobileInputAdapter : MonoBehaviour, IPlayerInput
     {
-        private Vector2 move;
-        private bool quackHeld, pauseHeld, quackEdge, pauseEdge;
+        private MobileCommandDevice device;
+        private ActionPlayerInput actions;
+        internal long Activity => actions?.Activity ?? 0;
+        private void Awake() { device = MobileCommandDevice.Create(); actions = new ActionPlayerInput(InputSource.Touch, device); }
 
         private void Start() => UpgradeUiEventSystem.Ensure(transform);
         public void SetMove(Vector2 value)
         {
-            if (isActiveAndEnabled) move = new PlayerCommand(value).Move;
+            if (isActiveAndEnabled && device != null && device.added) InputState.Change(device.Move, new PlayerCommand(value).Move);
         }
         public void SetQuack(bool pressed)
         {
-            if (!isActiveAndEnabled) return;
-            quackEdge |= pressed && !quackHeld;
-            quackHeld = pressed;
+            if (isActiveAndEnabled && device != null && device.added) InputState.Change(device.Quack, pressed ? 1f : 0f);
         }
         public void SetPause(bool pressed)
         {
-            if (!isActiveAndEnabled) return;
-            pauseEdge |= pressed && !pauseHeld;
-            pauseHeld = pressed;
+            if (isActiveAndEnabled && device != null && device.added) InputState.Change(device.Pause, pressed ? 1f : 0f);
         }
-        public void CancelQuack() { quackHeld = quackEdge = false; }
-        public void CancelPause() { pauseHeld = pauseEdge = false; }
+        public void CancelQuack() { if (device != null && device.added) InputState.Change(device.Quack, 0f); actions?.CancelQuack(); }
+        public void CancelPause() { if (device != null && device.added) InputState.Change(device.Pause, 0f); actions?.CancelPause(); }
         public PlayerCommand Read()
         {
-            if (!isActiveAndEnabled) ResetInput();
-            var command = new PlayerCommand(move, quackEdge, pauseEdge, InputSource.Touch);
-            quackEdge = pauseEdge = false;
-            return command;
+            if (!isActiveAndEnabled || actions == null) return new PlayerCommand(Vector2.zero, source: InputSource.Touch);
+            return actions.Read();
         }
-        private void ResetInput() { move = Vector2.zero; CancelQuack(); CancelPause(); }
-        private void OnEnable() => ResetInput();
-        private void OnDisable() => ResetInput();
+        private void ResetInput() { if (device != null && device.added) InputState.Change(device.Move, Vector2.zero); CancelQuack(); CancelPause(); }
+        internal void SetContext(bool gameplay, bool pause) => actions?.SetContext(gameplay, pause);
+        private void OnEnable() { ResetInput(); actions?.SetContext(true, true); }
+        private void OnDisable() { ResetInput(); actions?.SetContext(false, false); }
         private void OnApplicationFocus(bool focused) { if (!focused) ResetInput(); }
         private void OnApplicationPause(bool paused) { if (paused) ResetInput(); }
+        private void OnDestroy() { actions?.Dispose(); if (device != null && device.added) InputSystem.RemoveDevice(device); }
     }
 }

@@ -65,24 +65,28 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T064: smoke tests de build e inicialização Windows/Android | Concluída (contrato T070 em fase vermelha; test player Windows aprovado) |
 | T065: adaptador de controle para comandos comuns | Concluída |
 | T066: adaptador, joystick e botões móveis em prefab | Concluída |
+| T067: mapa comum e seleção de entrada nas cenas | Concluída |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T066 foram revisadas e concluídas; a próxima tarefa é **T067**.
+da arena. T022–T067 foram revisadas e concluídas; a próxima tarefa é **T068**.
+
+Validação T067: **235 PlayMode: 222 aprovados, 13 falhas esperadas, nenhum ignorado**.
+Um asset Gameplay/Move/Quack/Pause atende teclado, controle e toque. As cenas usam
+seleção pela atividade mais recente, controles móveis quando há toque e bloqueio
+de gameplay nos menus. **9/9 testes passaram em test player Windows x64 IL2CPP**.
+Safe Area e pipeline de produto seguem pendentes. Consulte o [relatório T067](specs/001-prototipo-lago/test-report-t067.md).
 
 Validação T066: **227 PlayMode: 214 aprovados, 13 falhas esperadas, nenhum ignorado**.
 Os 15 casos de paridade passaram. Dez testes novos cobrem callbacks, posse dos dedos,
-cancelamento e Touchscreen sintético via raycast no prefab MobileControls. As cenas
-continuam usando teclado por padrão; seleção automática fica na T067 e Safe Area/
-pipeline de produto continuam pendentes. Consulte o [relatório T066](specs/001-prototipo-lago/test-report-t066.md).
+cancelamento e Touchscreen sintético via raycast no prefab MobileControls. A seleção automática chegou na T067; Safe Area e pipeline de produto continuam pendentes. Consulte o [relatório T066](specs/001-prototipo-lago/test-report-t066.md).
 
 Validação T065: **217 PlayMode: 199 aprovados, 18 falhas esperadas, nenhum ignorado**.
 Os cinco casos de paridade do controle e nove testes adicionais do adaptador passaram.
-Toque, Safe Area e pipeline de produto seguem pendentes. As cenas continuam usando
-teclado por padrão; a seleção unificada pertence à T067.
+Toque, Safe Area e pipeline de produto seguem pendentes. A seleção unificada chegou na T067.
 Consulte o [relatório T065](specs/001-prototipo-lago/test-report-t065.md).
 
 Validação T064: **208 PlayMode: 185 aprovados, 23 falhas esperadas, nenhum ignorado**.

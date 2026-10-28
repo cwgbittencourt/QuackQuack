@@ -8,7 +8,8 @@
     "Unity.RenderPipelines.Universal.Runtime",
     "Unity.RenderPipelines.Universal.2D.Runtime",
     "Unity.RenderPipelines.Core.Runtime",
-    "QuackQuack.Platform"
+    "QuackQuack.Platform",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [
     "Editor"

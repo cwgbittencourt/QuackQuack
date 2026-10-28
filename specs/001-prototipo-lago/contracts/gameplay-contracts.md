@@ -1142,3 +1142,47 @@ reflexão para adaptadores. MobileInputAdapterTests cobre callbacks, normalizaç
 posse dos dedos e ciclo de ativação. MobileTouchscreenTests instancia o prefab nativo e usa
 Touchscreen sintético com InputSystemUIInputModule e raycasts reais, verificando
 movimento/Quack/pausa simultâneos e soltura. Isso não aprova Android físico ou UX.
+
+## Ações e composição unificadas (T067)
+
+QuackQuackInput.inputactions é o único catálogo de bindings de gameplay. Possui
+Gameplay/Move (Value/Vector2), Quack e Pause (Button), com grupos/esquemas Keyboard,
+Gamepad e Touch. Os bindings autorais reproduzem T027/T065 e ligam Touch aos controles
+move/quack/pause de MobileCommandDevice. O dispositivo virtual é exclusivo de cada
+MobileInputAdapter; uGUI continua recebendo Touchscreen pelo InputSystemUIInputModule.
+Não é um gamepad falso e seus valores não acionam os bindings físicos de Gamepad.
+
+Resources/PlayerInput.asset (PlayerInputConfiguration) referencia o asset e prefab
+móvel. ActionPlayerInput clona o asset, filtra grupo e, no toque, dispositivo. Nenhum
+consumidor habilita/altera o asset autoral. Os três adaptadores delegam ao mesmo
+leitor de ações; não mantêm bindings duplicados em C#. MobileInputAdapter atualiza
+os controles virtuais por InputState.Change e continua fornecendo callbacks imediatos.
+Bordas, deadzone física, normalização, cancelamento e Dispose preservam seus contratos.
+
+UnifiedPlayerInput é a entrada padrão do PlayerController. Consome todas as fontes,
+escolhe a de atividade não neutra mais recente por sequência monotônica e conserva
+essa fonte ao soltar. Não soma vetores nem reaplica bordas de outra fonte. Instancia
+os controles móveis quando há Touchscreen ou plataforma móvel. A composição possui
+seus adaptadores, clones, controles e EventSystem criado por ela; Dispose não destrói
+EventSystem preexistente. O EventSystem criado é separado do prefab ocultável.
+
+A camada Gameplay traduz RunPhase em SetContext(gameplay, pause), sem expor estados
+de partida à Platform. Paused mantém só Pause; seleção/terminal/Results bloqueiam
+as ações de gameplay e ocultam os controles móveis. Ao reabilitar, direção mantida
+é bloqueada até neutralizar; botões não verificam estado inicial para fabricar
+nova ativação. Foco/suspensão e desativação limpam o contexto. Ações UI continuam
+independentes; esconder os controles não pode desligar o EventSystem do modal.
+
+UnifiedInputSetup.Build gera o JSON via InputActionAsset.ToJson e a configuração
+pelo Unity. Mantém arquivo de ações já existente para preservar autoria/IDs. O
+controle de Safe Area continua em T068/T069. Testes cobrem schema, clones, troca de
+fonte, bloqueio de menus, pausa/suspensão, isolamento do dispositivo virtual e
+integração do PlayerController real nas cenas, além das paridades anteriores.
+
+Na T067, UnifiedPlayerInput também controla sendNavigationEvents do EventSystem,
+preservando/restaurando o valor anterior. Navegação/Submit/Cancel ficam bloqueados
+no gameplay; ponteiros continuam funcionando. Na pausa/seleção/resultados, a
+navegação UI volta, impedindo que Sul usado como Quack submeta um botão selecionado.
+Foco respeita BackgroundBehavior: sempre limpa estado antigo, mas IgnoreFocus
+permite novas entradas em background. Suspensão do app é uma flag independente e
+não pode ser anulada por um evento de foco; bloqueia entrada e navegação até retomar.

@@ -353,19 +353,18 @@ deadzone configurada no Input System, preserva intensidade parcial e consome bor
 uma vez. Os testes usam gamepad sintético, incluindo reset e remoção/reconexão.
 
 GamepadInputAdapter implementa IPlayerInput e pode ser injetado em
-PlayerController.Initialize; quem o cria deve descartá-lo com Dispose. A cena atual
-continua escolhendo teclado por padrão. A seleção unificada de entrada pertence à
-T067; esta entrega não declara controle físico jogável nas cenas de produção nem
-aceite de todos os dispositivos. Ver [relatório T065](test-report-t065.md).
+PlayerController.Initialize; quem o cria deve descartá-lo com Dispose. Desde T067, as cenas usam UnifiedPlayerInput e selecionam a fonte mais recente.
+O aceite com dispositivos físicos continua pendente. Ver [relatório T065](test-report-t065.md).
 
 ## Controles móveis disponíveis após T066
 
 O prefab Assets/QuackQuack/Prefabs/Prototype/MobileControls.prefab contém joystick,
 QUACK e PAUSAR, ligados ao MobileInputAdapter. Pode ser instanciado para revisar
-os controles no Editor; ainda não é incluído automaticamente em RunBootstrap/Lake.
+os controles no Editor. Desde T067, a entrada padrão instancia o prefab quando
+há Touchscreen ou plataforma móvel, em Bootstrap/Lake e RunBootstrap/LakeRun.
 Injetar o adapter em PlayerController.Initialize permite consumir seus comandos.
-A seleção automática de entrada/mapa unificado permanece na T067; Safe Area e
-integração responsiva permanecem nas tarefas correspondentes.
+O mapa unificado está disponível desde T067; Safe Area e integração responsiva
+permanecem nas tarefas correspondentes.
 
 Arrastar a base move o knob; soltura retorna ao centro. Cada controle captura seu
 dedo, permitindo movimento e botões simultâneos. Cancelar, ocultar controles,
@@ -376,3 +375,34 @@ Execute InputParityTests, MobileInputAdapterTests e MobileTouchscreenTests em
 PlayMode. O último usa Touchscreen sintético e raycasts reais no prefab e gera a
 captura ignorada Logs/t066-controls.png. Os testes de eventos/Editor não representam
 aceite em aparelho Android. Ver [relatório T066](test-report-t066.md).
+
+## Entrada unificada disponível após T067
+
+QuackQuackInput.inputactions define o mapa Gameplay e as ações Move, Quack e Pause,
+com grupos/esquemas Keyboard, Gamepad e Touch. Teclado usa WASD/setas, Espaço e Esc;
+controle usa stick esquerdo, Sul e Start; toque usa o prefab móvel. A configuração
+Resources/PlayerInput.asset referencia esse asset e MobileControls.prefab. Não é
+necessário executar geradores em um clone normal.
+
+O Pato das cenas padrão usa UnifiedPlayerInput. A última atividade não neutra
+escolhe uma fonte; vetores não são somados, e um dispositivo mais antigo mantido
+não volta a mover sozinho quando a fonte recente é solta. Quack/Move são desativados
+na pausa; Pause continua disponível para retomar. Durante cartas e resultados,
+ações de gameplay são desativadas e controles móveis ocultos. Após menus/foco,
+movimento precisa voltar ao neutro; botões precisam de nova ativação.
+
+O EventSystem continua ativo com os controles móveis ocultos. A entrada UI do Input
+System permanece independente das ações de gameplay. O menu **QuackQuack > Build
+T067 unified input** cria os assets ausentes e reconecta a configuração, preservando
+bindings/IDs do asset existente. Os adaptadores usam clones em runtime.
+
+Execute UnifiedInputContractTests e UnifiedPlayerInputTests, além das fixtures de
+paridade e adaptadores. A categoria UnifiedInputRuntime também pode ser usada nos
+test players. Ver [relatório T067](test-report-t067.md) para evidências Windows e
+limites; Android físico, Safe Area e aceite integral continuam pendentes.
+
+Na composição T067, navegação/Submit/Cancel da UI ficam habilitados somente nos
+menus, enquanto cliques e toque continuam disponíveis no gameplay. Assim, Sul
+não confirma acidentalmente um botão UI ao usar Quack. Perda de foco limpa entradas
+antigas e respeita a política de background do Input System; suspensão do app
+continua bloqueando entrada mesmo se a política permitir input em background.

@@ -18,7 +18,7 @@ namespace QuackQuack.Gameplay.Player
         // Keep the serialized name; this list now accepts both land and water volumes.
         [SerializeField] private TerrainZone[] water;
         private IPlayerInput input;
-        private KeyboardInputAdapter ownedInput;
+        private UnifiedPlayerInput ownedInput;
         private RunState run;
         private GameplayEventBus events;
         private Rigidbody2D body;
@@ -55,11 +55,11 @@ namespace QuackQuack.Gameplay.Player
             if (State != null) return;
             var bootstrap = GameBootstrap.Instance;
             if (bootstrap == null) { Debug.LogError("PlayerController requires run services.", this); enabled = false; return; }
-            ownedInput = new KeyboardInputAdapter();
+            ownedInput = new UnifiedPlayerInput();
             Initialize(definition, ownedInput, bootstrap.Run, bootstrap.Events);
         }
 
-        // Injected input remains owned by the caller; only the default keyboard is disposed here.
+        // Injected input remains owned by the caller; only the default input composition is disposed here.
         public void Initialize(CharacterDefinition character, IPlayerInput playerInput, RunState runState, GameplayEventBus eventBus)
         {
             if (State != null) throw new System.InvalidOperationException("Player is already initialized.");
@@ -75,6 +75,7 @@ namespace QuackQuack.Gameplay.Player
             State = new PlayerState(character.Health, q.Capacity, q.LandRecovery, q.WaterRecovery);
             quack.Resolved += ForwardCombat;
             run.Changed += OnRunChanged;
+            RefreshInputContext();
         }
 
         private void Update()
@@ -186,6 +187,7 @@ namespace QuackQuack.Gameplay.Player
         private void ForwardCombat(CombatEvent value) => events.Publish(value);
         private void OnRunChanged(RunPhase phase)
         {
+            RefreshInputContext();
             if (!run.IsSimulating) ClearCommands();
             if (previousPhase == RunPhase.ChoosingUpgrade && run.IsSimulating)
             { input?.Read(); ClearCommands(); }
@@ -196,12 +198,17 @@ namespace QuackQuack.Gameplay.Player
             move = Vector2.zero; requestedQuack = false;
             if (body != null) body.linearVelocity = Vector2.zero;
         }
-        private void OnDisable() { ClearCommands(); }
+        private void RefreshInputContext() => ownedInput?.SetContext(isActiveAndEnabled && run != null && run.IsSimulating,
+            isActiveAndEnabled && run != null && run.Phase == RunPhase.Paused);
+        private void OnDisable() { ClearCommands(); ownedInput?.SetContext(false, false); }
         private void OnEnable()
         {
             // Discard edges accumulated by an adapter while gameplay was disabled.
             input?.Read();
+            RefreshInputContext();
         }
+        private void OnApplicationFocus(bool focused) => ownedInput?.SetFocused(focused);
+        private void OnApplicationPause(bool paused) => ownedInput?.SetApplicationPaused(paused);
         private void OnDestroy()
         {
             if (run != null) run.Changed -= OnRunChanged;
