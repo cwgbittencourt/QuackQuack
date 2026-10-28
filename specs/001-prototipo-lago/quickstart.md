@@ -450,3 +450,35 @@ O pipeline não instala nem inicia o jogo. Smoke tests de runtime usam as entrad
 separadas do Test Framework descritas acima, com save isolado. As configurações
 podem ser validadas por PlatformBuildConfigurationSmokeTests, sem compilar ou
 instalar players. Ver [relatório T070](test-report-t070.md) para resultados observados.
+
+## Cenário de benchmark disponível após T071
+
+Abra Assets/QuackQuack/Scenes/PerformanceBenchmark.unity e entre em Play. A cena
+é independente de GameBootstrap/RunDirector, não recebe input e não lê/grava save.
+Seed padrão: 71. O painel mostra a etapa, seed e tick; recarregue a cena para repetir.
+Com passo de simulação de 0,02 s, a sequência é:
+
+1. Pré-aquecimento dos pools e criação de 200 inimigos (40 de cada espécie comum).
+2. Warmup de 250 ticks (5 s simulados) com todos os pools auxiliares saturados.
+3. Carga de 200 até tick 1750 (30 s simulados após warmup).
+4. Carga de 400 (80 de cada espécie) até tick 3250; depois a cena conserva a carga
+   visível e encerra os passos do workload.
+
+Há 512 projéteis, 512 pickups e 128 anéis Quack, além de até 24 campos do scheduler.
+Cada pool auxiliar sofre tentativa adicional de aquisição para verificar esgotamento.
+Projéteis retornam após 1 s, efeitos após 0,5 s e 16 pickups são reciclados por tick.
+Todos os 400 inimigos já estão pré-aquecidos antes da primeira etapa. O scheduler
+de inimigos é o de produção, com steering budget 64 e as cinco definições autorais.
+O alvo é neutro, sem collider e protegido contra morte para não interromper a carga.
+
+É um cenário de saturação: projéteis são movidos diretamente pelo driver, sem o
+WeaponRunner nem resolução de dano; pickups exercitam o pool, sem conceder XP.
+Não substitui um replay de partida completa. A automação cobre estado e reutilização;
+FPS, GC, memória e hardware ainda dependem de T072/T074/T075.
+
+O menu **QuackQuack > Build T071 performance benchmark scene** recria a cena pelo
+Unity. A cena não entra na lista global de builds nem no pipeline de produto T070.
+Para uma build de profiling, inclua-a como cena inicial de uma cópia de validação;
+use IL2CPP no Windows x64/Android ARM64 e preserve as cenas de produto do projeto.
+Execute PerformanceBenchmarkTests no PlayMode: geram capturas ignoradas
+Logs/t071-200.png e Logs/t071-400.png. Ver [relatório T071](test-report-t071.md).

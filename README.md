@@ -69,13 +69,20 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T068: controlador de Safe Area com atualização automática | Concluída |
 | T069: HUD responsivo com CanvasScaler e Safe Area nas duas cenas | Concluída |
 | T070: pipeline compartilhado Windows x64 / Android ARM64 IL2CPP | Concluída |
+| T071: cenário determinístico com 200/400 inimigos e pools saturados | Concluída |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T070 foram revisadas e concluídas; a próxima tarefa é **T071**.
+da arena. T022–T071 foram revisadas e concluídas; a próxima tarefa é **T072**.
+
+Validação T071: **245/245 PlayMode aprovados**. A cena PerformanceBenchmark executa
+cargas de 200/400 inimigos com seed 71, 512 projéteis, 512 pickups e 128 VFX pooled,
+além dos campos do scheduler. Os testes verificam saturação, reciclagem, repetição
+e execução automática. Isso não aprova FPS/GC ou hardware; medição é T072/T074.
+Consulte o [relatório T071](specs/001-prototipo-lago/test-report-t071.md).
 
 Validação T070: **237/237 na suíte PlayMode completa**, mais **9/9 contratos finais
 de configuração**. Pipeline comum usa RunBootstrap/LakeRun, IL2CPP e Android ARM64.

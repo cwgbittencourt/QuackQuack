@@ -1243,3 +1243,32 @@ BuildWindows e BuildAndroid são entradas públicas para menu e -executeMethod, 
 saídas Builds/Windows/QuackQuack.exe e Builds/Android/QuackQuack.apk. O alvo deve ser
 selecionado antes, pelo Editor ou -buildTarget. Não publicam, instalam ou iniciam
 players; artefatos e logs são regeneráveis e ignorados pelo Git.
+
+## Cena de benchmark determinístico (T071)
+
+PerformanceBenchmark.unity é uma cena isolada, fora do pipeline de produto, sem
+GameBootstrap, RunDirector, entrada de usuário, JSON/save ou progressão persistida.
+PerformanceBenchmark usa seed serializada 71 e PRNG local xorshift, sem Unity.Random.
+Step avança 0,02 s por chamada; FixedUpdate o dirige automaticamente por padrão.
+AutomaticTick=false permite repetir o mesmo número de passos nos testes.
+
+PoolService pré-aquece 80 instâncias por espécie comum antes do primeiro passo.
+SpawnDirector cria 40 de cada espécie (200) e acrescenta mais 40 por espécie no tick
+1750 (400), com o mesmo catálogo e EnemyUpdateScheduler de produção. Warmup termina
+no tick 250; a execução termina no tick 3250. Step após o fim é idempotente. Não há
+spawn/despawn de inimigos durante cada janela; o benchmark não avalia recompensas.
+
+Pools auxiliares mantêm 512 WeaponProjectile, 512 ExperiencePickup e 128
+PooledQuackFeedback ativos após cada passo. O scheduler possui ainda seus pools de
+campos (8 por tipo especial). Tentativa extra em cada pool saturado deve retornar
+null. Projéteis retornam após 1 s, anéis após 0,5 s e 16 pickups por passo; readquirir
+sempre usa PoolService. Referências de VFX expiradas são limpas em uma passagem
+completa antes de readquirir, evitando alias entre leases no pool LIFO.
+
+A carga de projéteis é movimento direto centralizado com os componentes/visuais
+pooled; não executa padrões WeaponRunner ou resolução de dano. Pickups têm ciclo
+real de Initialize/Reset, sem conceder XP. O alvo neutro usa o Pato, collider desligado
+e uma janela de invulnerabilidade de benchmark, sem alterar seus dados autorais.
+Isso mantém a carga viva sem menus ou morte. Destroy libera director, upgrades,
+scheduler e pools. Counters/status identificam carga e ciclo, sem medir frame time,
+GC, memória ou estabelecer aceite de desempenho (T072/T074).
