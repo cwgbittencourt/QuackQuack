@@ -66,13 +66,19 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T065: adaptador de controle para comandos comuns | Concluída |
 | T066: adaptador, joystick e botões móveis em prefab | Concluída |
 | T067: mapa comum e seleção de entrada nas cenas | Concluída |
+| T068: controlador de Safe Area com atualização automática | Concluída |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T067 foram revisadas e concluídas; a próxima tarefa é **T068**.
+da arena. T022–T068 foram revisadas e concluídas; a próxima tarefa é **T069**.
+
+Validação T068: **237 PlayMode: 229 aprovados, 8 falhas esperadas, nenhum ignorado**.
+Os sete casos do controlador de Safe Area passaram: quatro proporções, mudanças de
+resolução/recorte, geometria indisponível e reativação. A integração do HUD autoral
+é T069; pipeline de produto é T070. Consulte o [relatório T068](specs/001-prototipo-lago/test-report-t068.md).
 
 Validação T067: **235 PlayMode: 222 aprovados, 13 falhas esperadas, nenhum ignorado**.
 Um asset Gameplay/Move/Quack/Pause atende teclado, controle e toque. As cenas usam

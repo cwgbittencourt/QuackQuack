@@ -164,7 +164,7 @@ diferenca de estado final e sem informacao essencial fora da Safe Area.
 - [x] T065 [P] [US4] Implementar adaptador de controle para `PlayerCommand` sem regras especificas de dispositivo em `Assets/QuackQuack/Platform/Input/GamepadInputAdapter.cs`
 - [x] T066 [P] [US4] Implementar joystick e botoes de Quack/pausa para `PlayerCommand` em `Assets/QuackQuack/Platform/Input/MobileInputAdapter.cs`
 - [x] T067 [US4] Criar mapa de acoes unificado Move/Quack/Pause para teclado, controle e toque em `Assets/QuackQuack/Platform/Input/QuackQuackInput.inputactions`
-- [ ] T068 [US4] Implementar controlador de Safe Area e atualizacao por orientacao/recorte em `Assets/QuackQuack/Presentation/UI/SafeAreaController.cs`
+- [x] T068 [US4] Implementar controlador de Safe Area e atualizacao por orientacao/recorte em `Assets/QuackQuack/Presentation/UI/SafeAreaController.cs`
 - [ ] T069 [US4] Configurar Canvas Scaler 1920x1080 e ancoras responsivas no HUD em `Assets/QuackQuack/Scenes/Lake.unity`
 - [ ] T070 [US4] Criar configuracoes de build compartilhadas para Windows x64 e Android ARM64 em `Assets/QuackQuack/Editor/PrototypeBuildPipeline.cs`
 

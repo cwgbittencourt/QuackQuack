@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -15,7 +14,7 @@ using Object = UnityEngine.Object;
 
 namespace QuackQuack.Tests.PlayMode
 {
-    // T063 specifies the red phase of T068/T069. No fake Safe Area implementation.
+    // T068 covers the controller; authored HUD integration remains in T069.
     public class ResponsiveUiTests
     {
         private GameplayHud hud;
@@ -84,8 +83,7 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(scaler, Is.Not.Null, "T069 pending: authored HUD needs CanvasScaler, not a test-created replacement.");
             Assert.That(scaler.uiScaleMode, Is.EqualTo(CanvasScaler.ScaleMode.ScaleWithScreenSize));
             Assert.That(scaler.referenceResolution, Is.EqualTo(new Vector2(1920, 1080)));
-            var type = SafeAreaType();
-            var controller = canvas.GetComponentInChildren(type, true);
+            var controller = canvas.GetComponentInChildren<SafeAreaController>(true);
             Assert.That(controller, Is.Not.Null, "T068/T069 pending: authored HUD must have a bound SafeAreaController.");
             var safeRoot = controller.GetComponent<RectTransform>();
             foreach (var essential in Essentials())
@@ -140,6 +138,59 @@ namespace QuackQuack.Tests.PlayMode
             AssertNormalizedSafeRoot(rect);
         }
 
+        [UnityTest]
+        public IEnumerator SafeAreaKeepsLastValidLayoutWhileScreenGeometryIsUnavailable()
+        {
+            yield return SetViewport(1920, 1080);
+            var controller = CreateSafeController();
+            var rect = controller.GetComponent<RectTransform>();
+            safeArea = Insets(1920, 1080);
+            SetProvider(controller);
+            var min = rect.anchorMin;
+            var max = rect.anchorMax;
+            foreach (var invalid in new[] { Vector2.zero, new Vector2(float.NaN, 1080), new Vector2(1920, float.PositiveInfinity) })
+            {
+                viewport = invalid;
+                yield return null; yield return null;
+                Assert.That(rect.anchorMin, Is.EqualTo(min));
+                Assert.That(rect.anchorMax, Is.EqualTo(max));
+            }
+            viewport = new Vector2(1920, 1080);
+            foreach (var invalid in new[] { Rect.zero, new Rect(float.NaN, 0, 100, 100), new Rect(2000, 0, 100, 100) })
+            {
+                safeArea = invalid;
+                yield return null; yield return null;
+                Assert.That(rect.anchorMin, Is.EqualTo(min));
+                Assert.That(rect.anchorMax, Is.EqualTo(max));
+            }
+            safeArea = new Rect(0, 0, 1920, 1080);
+            yield return null; yield return null;
+            AssertNormalizedSafeRoot(rect);
+        }
+
+        [UnityTest]
+        public IEnumerator SafeAreaClipsToViewportAndRefreshesWhenReenabled()
+        {
+            yield return SetViewport(1920, 1080);
+            var controller = CreateSafeController();
+            var rect = controller.GetComponent<RectTransform>();
+            safeArea = new Rect(-20, -10, 1960, 1100);
+            SetProvider(controller);
+            Assert.That(rect.anchorMin, Is.EqualTo(Vector2.zero));
+            Assert.That(rect.anchorMax, Is.EqualTo(Vector2.one));
+            controller.enabled = false;
+            safeArea = Insets(1920, 1080);
+            yield return null;
+            Assert.That(rect.anchorMin, Is.EqualTo(Vector2.zero));
+            controller.enabled = true;
+            AssertNormalizedSafeRoot(rect);
+            controller.SetViewportProvider(null, null);
+            var screenMin = new Vector2(Screen.safeArea.xMin / Screen.width, Screen.safeArea.yMin / Screen.height);
+            var screenMax = new Vector2(Screen.safeArea.xMax / Screen.width, Screen.safeArea.yMax / Screen.height);
+            Assert.That(Vector2.Distance(rect.anchorMin, screenMin), Is.LessThan(0.0001));
+            Assert.That(Vector2.Distance(rect.anchorMax, screenMax), Is.LessThan(0.0001));
+        }
+
         private static readonly Vector2Int[] Viewports = {
             new Vector2Int(1920, 1080), new Vector2Int(2160, 1080),
             new Vector2Int(2340, 1080), new Vector2Int(1440, 1080)
@@ -171,27 +222,16 @@ namespace QuackQuack.Tests.PlayMode
 
         private static Rect Insets(int width, int height) => new Rect(72, 32, width - 96, height - 80);
 
-        private static Type SafeAreaType()
+        private SafeAreaController CreateSafeController()
         {
-            var type = typeof(GameplayHud).Assembly.GetType("QuackQuack.Presentation.UI.SafeAreaController");
-            Assert.That(type, Is.Not.Null, "T068 pending: production SafeAreaController is missing (T063 red phase).");
-            Assert.That(typeof(MonoBehaviour).IsAssignableFrom(type), Is.True);
-            return type;
-        }
-
-        private Component CreateSafeController()
-        {
-            var type = SafeAreaType();
-            safeObject = new GameObject("T063 safe root", typeof(RectTransform));
+            safeObject = new GameObject("T068 safe root", typeof(RectTransform));
             safeObject.transform.SetParent(canvas.transform, false);
-            return safeObject.AddComponent(type);
+            return safeObject.AddComponent<SafeAreaController>();
         }
 
-        private void SetProvider(Component controller)
+        private void SetProvider(SafeAreaController controller)
         {
-            var method = controller.GetType().GetMethod("SetViewportProvider", new[] { typeof(Func<Vector2>), typeof(Func<Rect>) });
-            Assert.That(method, Is.Not.Null, "T068 needs SetViewportProvider(Func<Vector2>, Func<Rect>) for deterministic viewport/cutout input.");
-            method.Invoke(controller, new object[] { (Func<Vector2>)(() => viewport), (Func<Rect>)(() => safeArea) });
+            controller.SetViewportProvider(() => viewport, () => safeArea);
         }
 
         private void AssertNormalizedSafeRoot(RectTransform rect)

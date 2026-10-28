@@ -1186,3 +1186,23 @@ navegação UI volta, impedindo que Sul usado como Quack submeta um botão selec
 Foco respeita BackgroundBehavior: sempre limpa estado antigo, mas IgnoreFocus
 permite novas entradas em background. Suspensão do app é uma flag independente e
 não pode ser anulada por um evento de foco; bloqueia entrada e navegação até retomar.
+
+## SafeAreaController (T068)
+
+Componente de Presentation/UI em um RectTransform filho direto de Canvas que cobre
+a tela inteira. Os elementos protegidos devem ser descendentes desse contêiner;
+fundos podem continuar fora dele. A integração do HUD autoral é T069.
+
+Por padrão lê Screen.width/height e Screen.safeArea, em pixels com origem inferior
+esquerda. OnEnable e LateUpdate normalizam os limites em anchorMin/anchorMax e zeram
+offsetMin/offsetMax. Mudança de resolução ou de recorte invalida o cache, mesmo
+sem mudança de orientação declarada. Aplicações repetidas não acumulam margens;
+Safe Area completa restaura âncoras zero/um. Reativar força reaplicação.
+
+SetViewportProvider(Func<Vector2>, Func<Rect>) permite fornecer fontes determinísticas
+e aplica imediatamente. Cada argumento null restaura sua fonte Screen. O componente
+não impõe resolução/orientação nem altera o CanvasScaler. As fontes devem usar o
+mesmo sistema de coordenadas e cobrir o Canvas inteiro; subviewports não são suportados.
+Dimensões não positivas, valores não finitos e áreas sem interseção útil são ignorados,
+conservando o último layout válido até a geometria se recuperar. Áreas parcialmente
+fora da tela são limitadas ao viewport. O caminho padrão não cria delegates por frame.

@@ -305,16 +305,23 @@ responsáveis por UI responsiva e smoke tests de plataforma.
 
 ## Testes de UI responsiva disponíveis após T063
 
-No Test Runner PlayMode, filtrar ResponsiveUiTests. Os 13 casos usam o HUD autoral
+No Test Runner PlayMode, filtrar ResponsiveUiTests. Os 15 casos usam o HUD autoral
 em 1920×1080, 2160×1080, 2340×1080 e 1440×1080, com câmera/render target próprios.
 Não alteram a resolução do desktop nem gravam cenas. A fixture espera o layout e
 confirma a projeção do Canvas antes de medir os oito elementos essenciais.
 
-Quatro casos verificam o viewport sem recortes. Os outros nove são fase vermelha
-para T068/T069: exigem CanvasScaler autoral 1920×1080, SafeAreaController, margens
-assimétricas, reaplicação sem acúmulo, remoção de margens e atualização automática
-quando resolução ou recorte mudam. O contrato da fonte de viewport injetável está
-em contracts/gameplay-contracts.md. Nenhum teste é ignorado por faltar implementação.
+Quatro casos verificam o viewport sem recortes. Sete verificam o controlador T068:
+normalização nas quatro proporções, mudança de resolução/recorte, idempotência,
+remoção de margens, geometria inválida, reativação e retorno às fontes Screen.
+Quatro continuam em fase vermelha para T069: CanvasScaler autoral 1920×1080 e
+hierarquia segura com os oito elementos essenciais dentro dos recortes.
+Nenhum teste é ignorado por faltar implementação.
+
+Para usar SafeAreaController, coloque-o em um RectTransform filho direto de um
+Canvas de tela inteira e mova o conteúdo protegido para baixo dele. O componente
+lê Screen.safeArea e atualiza âncoras/offsets automaticamente. O HUD das cenas ainda
+será configurado na T069. SetViewportProvider permite fontes de teste; null restaura
+Screen. Ver contrato e [relatório T068](test-report-t068.md).
 
 Depois de T068/T069, repetir a matriz e a suíte completa. Geometria do HUD e altura
 de texto não substituem inspeção humana de todas as telas, recortes Android reais,
