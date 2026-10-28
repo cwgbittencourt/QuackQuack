@@ -1105,3 +1105,40 @@ de controle devem passar com as mesmas regras e checkpoints do teclado. A fixtur
 GamepadInputAdapterTests acrescenta nove casos com Input System sintético: deadzone,
 intensidade parcial/saturação, isolamento do teclado, remoção/reconexão, tap entre
 leituras, resets e descarte. Isso não aprova hardware físico, UI ou plataforma.
+
+## MobileInputAdapter e controles de toque (T066)
+
+MobileInputAdapter é MonoBehaviour/IPlayerInput. SetMove(Vector2), SetQuack(bool)
+e SetPause(bool) cumprem o contrato T062. O vetor passa pela normalização comum de
+PlayerCommand (incluindo valores não finitos); mantém magnitude parcial. Source é
+Touch. Read consome bordas uma vez, conserva movimento e recebe taps completos
+entre leituras. Manutenção do botão não repete a ativação. Não conhece vida,
+Fôlego, terreno, cooldown, partida ou plataforma de build.
+
+Desativação, perda de foco e suspensão limpam movimento, botões mantidos e bordas.
+Callbacks são ignorados enquanto o adaptador estiver desativado; Read retorna
+comando neutro. CancelQuack/CancelPause descartam também a borda ainda não lida,
+para cancelamento dos controles. A vida útil é a do GameObject, sem IDisposable.
+Start garante EventSystem/InputSystemUIInputModule somente se não houver um atual.
+
+MobileJoystick implementa os handlers uGUI de pointer down/drag/up, potencial de
+drag e cancel. Captura um pointerId por vez; outro dedo não move nem libera o stick.
+Converte posição local em vetor radial e limita o knob ao raio disponível, calculado
+da geometria de base/handle. O limiar de drag é desativado. Soltar/cancelar/desativar/
+perder foco/suspender retorna movimento e knob ao centro e libera a posse do dedo.
+MobileActionButton faz captura independente para Quack ou Pause. Dedos diferentes
+podem mover, usar Quack e pausar simultaneamente. Pointer up somente libera seu
+próprio dedo e conserva tap aceito; cancel/desativação descarta a borda pendente.
+
+MobileControlsSetup.Build gera MobileControls.prefab pelo Unity, preservando GUID
+em reconstruções. O prefab contém CanvasScaler 1920×1080, GraphicRaycaster, adapter,
+joystick/handle e botões com referências serializadas para o mesmo adapter.
+Labels/handle não interceptam raycasts; somente as superfícies dos controles o fazem.
+O prefab ainda não é instanciado nas cenas: a seleção/integração da entrada é T067,
+e Safe Area/responsividade das composições continuam em T068/T069.
+
+InputParityTests agora usa chamadas tipadas para as três fontes, sem shim de
+reflexão para adaptadores. MobileInputAdapterTests cobre callbacks, normalização,
+posse dos dedos e ciclo de ativação. MobileTouchscreenTests instancia o prefab nativo e usa
+Touchscreen sintético com InputSystemUIInputModule e raycasts reais, verificando
+movimento/Quack/pausa simultâneos e soltura. Isso não aprova Android físico ou UX.

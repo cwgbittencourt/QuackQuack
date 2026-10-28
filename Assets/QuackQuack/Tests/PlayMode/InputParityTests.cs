@@ -17,8 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace QuackQuack.Tests.PlayMode
 {
-    // T065 uses its typed production adapter. Reflection remains only for T066;
-    // it never substitutes an adapter or ignores a missing implementation.
+    // All three paths use their production adapters; no substitute input implementation.
     public class InputParityTests
     {
         private Keyboard keyboard, previousKeyboard;
@@ -192,31 +191,14 @@ namespace QuackQuack.Tests.PlayMode
             private readonly InputParityTests fixture;
             private readonly InputSource source;
             private readonly GameObject host;
-            private readonly MethodInfo setMove, setQuack, setPause;
             public Driver(InputParityTests fixture, InputSource source)
             {
                 this.fixture = fixture;
                 this.source = source;
                 if (source == InputSource.Keyboard) { Input = new KeyboardInputAdapter(); return; }
                 if (source == InputSource.Gamepad) { Input = new GamepadInputAdapter(); return; }
-                string typeName = "MobileInputAdapter";
-                var type = typeof(IPlayerInput).Assembly.GetType("QuackQuack.Platform.Input." + typeName);
-                Assert.That(type, Is.Not.Null, "T066 pending: production " + typeName + " is missing (T062 red phase).");
-                Assert.That(typeof(IPlayerInput).IsAssignableFrom(type), Is.True, typeName + " must implement IPlayerInput.");
-                // Check the callback contract before allocating a component, so a failing constructor leaks nothing.
-                if (source == InputSource.Touch)
-                {
-                    setMove = RequireMethod(type, "SetMove", typeof(Vector2));
-                    setQuack = RequireMethod(type, "SetQuack", typeof(bool));
-                    setPause = RequireMethod(type, "SetPause", typeof(bool));
-                }
-                if (typeof(Component).IsAssignableFrom(type))
-                {
-                    host = new GameObject("T062 input adapter");
-                    try { Input = (IPlayerInput)host.AddComponent(type); }
-                    catch { Object.DestroyImmediate(host); throw; }
-                }
-                else Input = (IPlayerInput)Activator.CreateInstance(type);
+                host = new GameObject("T066 input adapter");
+                Input = host.AddComponent<MobileInputAdapter>();
             }
             public PlayerCommand Read(Sample sample)
             {
@@ -240,9 +222,10 @@ namespace QuackQuack.Tests.PlayMode
                 }
                 else
                 {
-                    setMove.Invoke(Input, new object[] { sample.Move });
-                    setQuack.Invoke(Input, new object[] { sample.Quack });
-                    setPause.Invoke(Input, new object[] { sample.Pause });
+                    var mobile = (MobileInputAdapter)Input;
+                    mobile.SetMove(sample.Move);
+                    mobile.SetQuack(sample.Quack);
+                    mobile.SetPause(sample.Pause);
                 }
                 InputSystem.Update();
                 return Input.Read();
@@ -252,12 +235,7 @@ namespace QuackQuack.Tests.PlayMode
                 (Input as IDisposable)?.Dispose();
                 if (host != null) Object.DestroyImmediate(host);
             }
-            private static MethodInfo RequireMethod(Type type, string name, Type argument)
-            {
-                var method = type.GetMethod(name, new[] { argument });
-                Assert.That(method, Is.Not.Null, "T066 callback contract: " + name + "(" + argument.Name + ") is required.");
-                return method;
-            }
+
         }
 
         private sealed class World : IDisposable

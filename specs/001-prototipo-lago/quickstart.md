@@ -293,9 +293,8 @@ não aceite de gameplay, Safe Area ou plataformas. Ver [relatório T061](test-re
 
 ## Testes de paridade disponíveis após T062
 
-No Test Runner PlayMode, filtrar InputParityTests. São 15 casos. Após T065, dez casos de teclado/controle devem passar e os cinco de
-toque devem falhar explicitamente enquanto MobileInputAdapter (T066) estiver ausente.
-Não ignorar esses casos nem interpretar a fase vermelha como aceite de US4.
+No Test Runner PlayMode, filtrar InputParityTests. São 15 casos. Após T066, todos devem passar com os adaptadores reais das três entradas.
+Esses casos não substituem o aceite de entrada física e interface da US4.
 
 Os testes usam teclado/gamepad sintéticos e callbacks do futuro joystick/botões;
 não exigem dispositivos físicos. Comparam comandos e checkpoints do PlayerController
@@ -358,3 +357,22 @@ PlayerController.Initialize; quem o cria deve descartá-lo com Dispose. A cena a
 continua escolhendo teclado por padrão. A seleção unificada de entrada pertence à
 T067; esta entrega não declara controle físico jogável nas cenas de produção nem
 aceite de todos os dispositivos. Ver [relatório T065](test-report-t065.md).
+
+## Controles móveis disponíveis após T066
+
+O prefab Assets/QuackQuack/Prefabs/Prototype/MobileControls.prefab contém joystick,
+QUACK e PAUSAR, ligados ao MobileInputAdapter. Pode ser instanciado para revisar
+os controles no Editor; ainda não é incluído automaticamente em RunBootstrap/Lake.
+Injetar o adapter em PlayerController.Initialize permite consumir seus comandos.
+A seleção automática de entrada/mapa unificado permanece na T067; Safe Area e
+integração responsiva permanecem nas tarefas correspondentes.
+
+Arrastar a base move o knob; soltura retorna ao centro. Cada controle captura seu
+dedo, permitindo movimento e botões simultâneos. Cancelar, ocultar controles,
+perder foco ou suspender descarta entradas pendentes. O menu **QuackQuack > Build
+T066 mobile controls** é manutenção; os assets já estão versionados.
+
+Execute InputParityTests, MobileInputAdapterTests e MobileTouchscreenTests em
+PlayMode. O último usa Touchscreen sintético e raycasts reais no prefab e gera a
+captura ignorada Logs/t066-controls.png. Os testes de eventos/Editor não representam
+aceite em aparelho Android. Ver [relatório T066](test-report-t066.md).
