@@ -321,3 +321,28 @@ em contracts/gameplay-contracts.md. Nenhum teste é ignorado por faltar implemen
 Depois de T068/T069, repetir a matriz e a suíte completa. Geometria do HUD e altura
 de texto não substituem inspeção humana de todas as telas, recortes Android reais,
 Safe Area de aparelho ou aceite de legibilidade da T075.
+
+## Smoke tests de build e inicialização (T064)
+
+No Test Runner PlayMode, executar PlatformBuildConfigurationSmokeTests e
+PlatformBuildSmokeTests. Os quatro casos de configuração devem falhar enquanto
+PrototypeBuildPipeline (T070) estiver ausente. Os dois de runtime verificam as
+cenas de produção e inicialização de RunBootstrap/LakeRun com save temporário.
+Passar no Editor não comprova inicialização no Windows Player ou no Android.
+
+Para compilar e executar somente a fixture de runtime em test players, usar a
+mesma versão Unity e uma cópia isolada do projeto, com os módulos e toolchains do
+alvo instalados. Os players devem usar IL2CPP; Android deve estar configurado ARM64.
+Exemplos de argumentos para Unity.exe (aguardar o processo e conferir XML/ExitCode):
+
+~~~text
+-batchmode -projectPath <copia-isolada> -runTests -testPlatform StandaloneWindows64 -testCategory PlatformRuntimeSmoke -buildPlayerPath <pasta-de-build> -testResults <windows.xml> -logFile <windows.log>
+-batchmode -projectPath <copia-isolada> -runTests -testPlatform Android -testCategory PlatformRuntimeSmoke -buildPlayerPath <pasta-de-build> -testResults <android.xml> -logFile <android.log>
+~~~
+
+No Android, o segundo comando requer aparelho autorizado e conectado e constrói,
+instala e executa o test player nele. O Test Framework inclui sua própria cena de
+entrada; a ordem de cenas da build de produto é verificada pelo contrato da T070.
+Artefatos de build, XML e logs devem ficar nas pastas ignoradas. Não incluir -quit
+antes do término dos testes. Não transformar ausência de módulo/aparelho ou falha
+de build em teste aprovado. Ver [relatório T064](test-report-t064.md).

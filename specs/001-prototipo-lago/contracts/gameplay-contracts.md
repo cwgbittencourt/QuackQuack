@@ -1045,3 +1045,34 @@ Esta cobertura geométrica do HUD não representa aceite de legibilidade humana,
 matriz de todas as telas/modais, toque físico, recorte Android real ou desempenho.
 A rotação em paisagem é representada por mudança de lado do recorte; retrato não
 faz parte do produto. Aceite integral da interface permanece na validação T075.
+
+## Smoke de build e inicialização (T064)
+
+PlatformBuildSmokeTests é uma fixture PlayMode também compilada nos test players.
+A categoria PlatformRuntimeSmoke verifica versão Unity fixada, disponibilidade de
+RunBootstrap/LakeRun e carregamento explícito da entrada de produção. Aguarda até
+30 segundos reais pela prontidão do RunDirector, exige um bootstrap único, serviços
+de eventos/pool, simulação Playing, Pato vivo, HUD, câmera, catálogos e diretores.
+O relógio deve avançar em até dois segundos. No player, exige WindowsPlayer ou
+Android, processo 64-bit e compilação ENABLE_IL2CPP. Editor não substitui essa prova.
+
+Cada caso injeta save.json em diretório exclusivo sob Application.temporaryCachePath.
+O provider anterior é restaurado após unload, e a limpeza valida caminho absoluto,
+prefixo do cache e nome próprio antes de remover a pasta. O caso que somente
+consulta cenas não descarrega a cena do Test Runner. Não há acesso ao save pessoal.
+
+PlatformBuildConfigurationSmokeTests é compilada somente no Editor. Usa reflexão
+para exigir o tipo real QuackQuack.Editor.PrototypeBuildPipeline (T070), sem stub,
+Ignore ou troca implícita do alvo ativo. CreateOptions(BuildTarget, string) deve
+retornar BuildPlayerOptions para StandaloneWindows64 ou Android, respeitar o caminho
+de saída, incluir RunBootstrap primeiro e LakeRun, não repetir cenas nem incluir
+fixtures Practice/Test, e compartilhar a mesma lista de gameplay entre os alvos.
+ConfigureTarget(BuildTarget) deve selecionar IL2CPP; Android usa somente ARM64.
+O teste restaura backend e arquiteturas anteriores em finally. ConfigureTarget
+não deve iniciar build, instalar pacotes ou trocar o alvo ativo durante o teste.
+
+A fixture de runtime pode ser selecionada por -testCategory PlatformRuntimeSmoke
+com -testPlatform StandaloneWindows64 ou Android. O Unity Test Framework constrói
+e executa seu test player; esses artefatos incluem a cena inicial do Test Runner.
+A lista/entrada da build de produto é verificada separadamente pelo contrato T070.
+Isso não é aceite de release, gameplay, controles, Safe Area ou desempenho.

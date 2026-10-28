@@ -62,13 +62,20 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T061: tela final, carteira, recordes/desafios e nova partida | Concluída |
 | T062: testes de paridade de teclado, controle e toque | Concluída (fase vermelha; T065/T066 pendentes) |
 | T063: testes de HUD nas quatro proporções e Safe Area | Concluída (fase vermelha; T068/T069 pendentes) |
+| T064: smoke tests de build e inicialização Windows/Android | Concluída (contrato T070 em fase vermelha; test player Windows aprovado) |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T063 foram revisadas e concluídas; a próxima tarefa é **T064**.
+da arena. T022–T064 foram revisadas e concluídas; a próxima tarefa é **T065**.
+
+Validação T064: **208 PlayMode: 185 aprovados, 23 falhas esperadas, nenhum ignorado**.
+Os quatro novos casos de configuração aguardam a pipeline T070. Os dois casos de
+runtime também passaram em um **test player Windows x64 IL2CPP** compilado pelo
+Test Framework. Android não foi executado; a build de produto e o aceite de
+plataforma continuam pendentes. Consulte o [relatório T064](specs/001-prototipo-lago/test-report-t064.md).
 
 Validação T063: **202 PlayMode: 183 aprovados, 19 falhas esperadas, nenhum ignorado**.
 Os quatro casos do HUD sem recortes passaram. Há nove falhas novas de T068/T069,
@@ -129,8 +136,8 @@ Para **gerar uma build Android**, adicionar à instalação do Editor pelo Hub:
 
 Usar as ferramentas Android fornecidas pelo Hub para essa versão. O alvo configurado é ARM64/IL2CPP.
 Um aparelho Android real será necessário para o aceite de desempenho e interação móvel.
-O módulo Android ainda não estava instalado na máquina de origem durante esta entrega;
-nenhuma build Android foi validada.
+Na validação T064, os módulos Windows e Android estavam presentes na instalação.
+O test player Windows IL2CPP foi validado; nenhuma build Android foi validada.
 
 Não é necessário instalar URP, Input System, uGUI, Test Framework ou Memory Profiler manualmente.
 As dependências estão declaradas em `Packages/manifest.json` e fixadas em `Packages/packages-lock.json`.
