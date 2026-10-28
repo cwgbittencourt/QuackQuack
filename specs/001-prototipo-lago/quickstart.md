@@ -293,9 +293,8 @@ não aceite de gameplay, Safe Area ou plataformas. Ver [relatório T061](test-re
 
 ## Testes de paridade disponíveis após T062
 
-No Test Runner PlayMode, filtrar InputParityTests. São 15 casos: cinco de teclado
-executáveis e dez para controle/toque que devem falhar explicitamente enquanto
-GamepadInputAdapter (T065) e MobileInputAdapter (T066) estiverem ausentes.
+No Test Runner PlayMode, filtrar InputParityTests. São 15 casos. Após T065, dez casos de teclado/controle devem passar e os cinco de
+toque devem falhar explicitamente enquanto MobileInputAdapter (T066) estiver ausente.
 Não ignorar esses casos nem interpretar a fase vermelha como aceite de US4.
 
 Os testes usam teclado/gamepad sintéticos e callbacks do futuro joystick/botões;
@@ -346,3 +345,16 @@ entrada; a ordem de cenas da build de produto é verificada pelo contrato da T07
 Artefatos de build, XML e logs devem ficar nas pastas ignoradas. Não incluir -quit
 antes do término dos testes. Não transformar ausência de módulo/aparelho ou falha
 de build em teste aprovado. Ver [relatório T064](test-report-t064.md).
+
+## Adaptador de controle disponível após T065
+
+Execute InputParityTests e GamepadInputAdapterTests no Test Runner PlayMode.
+O adaptador usa stick esquerdo, botão Sul para Quack e Start para pausa; aplica a
+deadzone configurada no Input System, preserva intensidade parcial e consome bordas
+uma vez. Os testes usam gamepad sintético, incluindo reset e remoção/reconexão.
+
+GamepadInputAdapter implementa IPlayerInput e pode ser injetado em
+PlayerController.Initialize; quem o cria deve descartá-lo com Dispose. A cena atual
+continua escolhendo teclado por padrão. A seleção unificada de entrada pertence à
+T067; esta entrega não declara controle físico jogável nas cenas de produção nem
+aceite de todos os dispositivos. Ver [relatório T065](test-report-t065.md).

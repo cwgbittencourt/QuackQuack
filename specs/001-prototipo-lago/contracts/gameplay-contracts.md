@@ -1076,3 +1076,32 @@ com -testPlatform StandaloneWindows64 ou Android. O Unity Test Framework constr�
 e executa seu test player; esses artefatos incluem a cena inicial do Test Runner.
 A lista/entrada da build de produto é verificada separadamente pelo contrato T070.
 Isso não é aceite de release, gameplay, controles, Safe Area ou desempenho.
+
+## GamepadInputAdapter (T065)
+
+Classe selada em QuackQuack.Platform.Input, IPlayerInput e IDisposable, com construtor
+público sem argumentos. Possui três InputActions: Move (<Gamepad>/leftStick), Quack
+(<Gamepad>/buttonSouth) e Pause (<Gamepad>/start). Move usa a deadzone do stick no
+Input System e conserva intensidade analógica; PlayerCommand limita magnitude a um.
+Source é Gamepad. Nenhuma ação consulta ou modifica regras de combate/partida.
+
+Callbacks performed acumulam as bordas de Quack/pausa até Read, que as consome uma
+vez sem descartar movimento mantido. Segurar não repete; soltura rearma. Tap completo
+entre duas leituras continua sendo recebido. Remoção, desconexão, desativação e
+reset soft/hard de gamepad descartam bordas pendentes; o Input System reseta os
+valores dos controles. Um gamepad adicionado depois pode ser usado pelo adaptador.
+A limpeza de bordas é conservadora para qualquer gamepad; arbitragem multijogador
+não faz parte deste contrato.
+
+Dispose é idempotente, remove callbacks de ações/device change e libera InputActions.
+Read após Dispose lança ObjectDisposedException. O chamador que injeta o adaptador
+no PlayerController é responsável pelo Dispose. A seleção automática de dispositivo
+na cena/mapa unificado permanece na T067; PlayerController continua usando teclado
+por padrão. Não foi criado polling de gameplay ou Update específico de dispositivo.
+
+InputParityTests agora instancia GamepadInputAdapter diretamente, sem reflexão para
+controle; a reflexão permanece apenas para MobileInputAdapter (T066). Os cinco casos
+de controle devem passar com as mesmas regras e checkpoints do teclado. A fixture
+GamepadInputAdapterTests acrescenta nove casos com Input System sintético: deadzone,
+intensidade parcial/saturação, isolamento do teclado, remoção/reconexão, tap entre
+leituras, resets e descarte. Isso não aprova hardware físico, UI ou plataforma.

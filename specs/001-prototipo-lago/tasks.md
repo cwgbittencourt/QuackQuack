@@ -161,7 +161,7 @@ diferenca de estado final e sem informacao essencial fora da Safe Area.
 
 ### Implementation for User Story 4
 
-- [ ] T065 [P] [US4] Implementar adaptador de controle para `PlayerCommand` sem regras especificas de dispositivo em `Assets/QuackQuack/Platform/Input/GamepadInputAdapter.cs`
+- [x] T065 [P] [US4] Implementar adaptador de controle para `PlayerCommand` sem regras especificas de dispositivo em `Assets/QuackQuack/Platform/Input/GamepadInputAdapter.cs`
 - [ ] T066 [P] [US4] Implementar joystick e botoes de Quack/pausa para `PlayerCommand` em `Assets/QuackQuack/Platform/Input/MobileInputAdapter.cs`
 - [ ] T067 [US4] Criar mapa de acoes unificado Move/Quack/Pause para teclado, controle e toque em `Assets/QuackQuack/Platform/Input/QuackQuackInput.inputactions`
 - [ ] T068 [US4] Implementar controlador de Safe Area e atualizacao por orientacao/recorte em `Assets/QuackQuack/Presentation/UI/SafeAreaController.cs`

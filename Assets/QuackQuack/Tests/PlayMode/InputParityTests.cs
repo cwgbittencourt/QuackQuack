@@ -17,7 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace QuackQuack.Tests.PlayMode
 {
-    // T062 is the red phase for T065/T066. Reflection locates production adapters;
+    // T065 uses its typed production adapter. Reflection remains only for T066;
     // it never substitutes an adapter or ignores a missing implementation.
     public class InputParityTests
     {
@@ -198,9 +198,10 @@ namespace QuackQuack.Tests.PlayMode
                 this.fixture = fixture;
                 this.source = source;
                 if (source == InputSource.Keyboard) { Input = new KeyboardInputAdapter(); return; }
-                string typeName = source == InputSource.Gamepad ? "GamepadInputAdapter" : "MobileInputAdapter";
+                if (source == InputSource.Gamepad) { Input = new GamepadInputAdapter(); return; }
+                string typeName = "MobileInputAdapter";
                 var type = typeof(IPlayerInput).Assembly.GetType("QuackQuack.Platform.Input." + typeName);
-                Assert.That(type, Is.Not.Null, (source == InputSource.Gamepad ? "T065" : "T066") + " pending: production " + typeName + " is missing (T062 red phase).");
+                Assert.That(type, Is.Not.Null, "T066 pending: production " + typeName + " is missing (T062 red phase).");
                 Assert.That(typeof(IPlayerInput).IsAssignableFrom(type), Is.True, typeName + " must implement IPlayerInput.");
                 // Check the callback contract before allocating a component, so a failing constructor leaks nothing.
                 if (source == InputSource.Touch)

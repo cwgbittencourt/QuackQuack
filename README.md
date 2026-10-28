@@ -60,16 +60,23 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T059: save de relíquias versionado, gravação atômica e recuperação | Concluída |
 | T060: ondas, encontros 5/10/15, combate, três finais e save integrado | Concluída |
 | T061: tela final, carteira, recordes/desafios e nova partida | Concluída |
-| T062: testes de paridade de teclado, controle e toque | Concluída (fase vermelha; T065/T066 pendentes) |
+| T062: testes de paridade de teclado, controle e toque | Concluída (controle aprovado em T065; toque pendente T066) |
 | T063: testes de HUD nas quatro proporções e Safe Area | Concluída (fase vermelha; T068/T069 pendentes) |
 | T064: smoke tests de build e inicialização Windows/Android | Concluída (contrato T070 em fase vermelha; test player Windows aprovado) |
+| T065: adaptador de controle para comandos comuns | Concluída |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T064 foram revisadas e concluídas; a próxima tarefa é **T065**.
+da arena. T022–T065 foram revisadas e concluídas; a próxima tarefa é **T066**.
+
+Validação T065: **217 PlayMode: 199 aprovados, 18 falhas esperadas, nenhum ignorado**.
+Os cinco casos de paridade do controle e nove testes adicionais do adaptador passaram.
+Toque, Safe Area e pipeline de produto seguem pendentes. As cenas continuam usando
+teclado por padrão; a seleção unificada pertence à T067.
+Consulte o [relatório T065](specs/001-prototipo-lago/test-report-t065.md).
 
 Validação T064: **208 PlayMode: 185 aprovados, 23 falhas esperadas, nenhum ignorado**.
 Os quatro novos casos de configuração aguardam a pipeline T070. Os dois casos de
