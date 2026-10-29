@@ -30,15 +30,15 @@ namespace QuackQuack.Tests.PlayMode
         public IEnumerator RealButtonsPauseEquipRemoveAndResumeWithoutDuplicating()
         {
             var run=GameBootstrap.Instance.Run;
-            view.transform.Find("Open relics").GetComponent<Button>().onClick.Invoke();
+            view.transform.Find("UI Safe Area/Open relics").GetComponent<Button>().onClick.Invoke();
             Assert.That(run.Phase,Is.EqualTo(RunPhase.Paused)); Assert.That(view.IsVisible,Is.True);
             relics.Show(true); // Reopening an already open panel must retain pause ownership.
-            var toggle=view.transform.Find("Panel/Relic 2/Toggle").GetComponent<Button>();
+            var toggle=view.transform.Find("UI Safe Area/Panel/Reference content/Relic 2/Toggle").GetComponent<Button>();
             toggle.onClick.Invoke(); Assert.That(relics.Loadout.EquippedIds.Count,Is.EqualTo(1));
             Assert.That(relics.Loadout.ApplyEffects(100),Is.EqualTo(105).Within(0.001));
             toggle.onClick.Invoke(); Assert.That(relics.Loadout.EquippedIds,Is.Empty);
             Assert.That(relics.Loadout.ApplyEffects(100),Is.EqualTo(100));
-            view.transform.Find("Panel/Close").GetComponent<Button>().onClick.Invoke();
+            view.transform.Find("UI Safe Area/Panel/Reference content/Close").GetComponent<Button>().onClick.Invoke();
             Assert.That(run.Phase,Is.EqualTo(RunPhase.Playing)); Assert.That(view.IsVisible,Is.False);
             Assert.That(relics.Toggle("pena-de-combate"),Is.False);
             yield return null;

@@ -25,8 +25,9 @@ um resumo anonimizado revisado. Pedir autorização antes de gravar voz ou image
 | Convenção de configuração/combinação SC-003 (abaixo) confirmada | |
 | Defeitos conhecidos, critérios de interrupção e responsável pela revisão | |
 
-Na T075, VAL-UI-01/02/03 impedem acesso a relíquias e encobrem ações/relógio no
-Android. Uma coleta nessa build é exploratória e deve registrar o impedimento;
+Na rodada inicial da T075, VAL-UI-01/02/03 impediam acesso a relíquias e encobriam
+ações/relógio no Android. Consultar a retomada no relatório para a correção e a
+identidade da build revalidada. Uma coleta na build antiga é exploratória e deve registrar o impedimento;
 não aprovar experiência integral ignorando esses defeitos. Preparar o formulário
 não exige encerrar a T075, mas o aceite depende de sua revalidação.
 

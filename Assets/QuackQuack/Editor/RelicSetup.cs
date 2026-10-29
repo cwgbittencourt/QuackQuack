@@ -85,6 +85,7 @@ namespace QuackQuack.Editor
             s.FindProperty("close").objectReferenceValue=Button("Close",panel,new Vector2(0,-465),new Vector2(360,65),"VOLTAR");
             s.FindProperty("open").objectReferenceValue=Button("Open relics",root.transform,new Vector2(0,485),new Vector2(230,55),"RELÍQUIAS");
             s.ApplyModifiedPropertiesWithoutUndo(); panel.gameObject.SetActive(false);
+            IntegratedUiSetup.Configure(root);
             PrefabUtility.SaveAsPrefabAsset(root,PrefabPath); Object.DestroyImmediate(root);
         }
         private static RectTransform Rect(string name,Transform parent,Vector2 position,Vector2 size)

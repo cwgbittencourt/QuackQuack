@@ -46,7 +46,8 @@ namespace QuackQuack.Editor
             Set(view, "combat", p => p.objectReferenceValue = texts[0]); Set(view, "build", p => p.objectReferenceValue = texts[1]); Set(view, "rewards", p => p.objectReferenceValue = texts[2]);
             Set(view, "saveStatus", p => p.objectReferenceValue = status); Set(view, "retry", p => p.objectReferenceValue = retry); Set(view, "restart", p => p.objectReferenceValue = restart);
             Set(view, "scrolls", p => { p.arraySize = 3; for (int i = 0; i < 3; i++) p.GetArrayElementAtIndex(i).objectReferenceValue = scrolls[i]; });
-            panel.gameObject.SetActive(false); PrefabUtility.SaveAsPrefabAsset(root, PrefabPath); Object.DestroyImmediate(root);
+            panel.gameObject.SetActive(false); IntegratedUiSetup.Configure(root);
+            PrefabUtility.SaveAsPrefabAsset(root, PrefabPath); Object.DestroyImmediate(root);
             var scene = EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/LakeRun.unity"); Attach(); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
         }
         public static void Attach()

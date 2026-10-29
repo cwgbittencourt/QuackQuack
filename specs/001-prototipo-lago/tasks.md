@@ -181,7 +181,7 @@ diferenca de estado final e sem informacao essencial fora da Safe Area.
 - [x] T073 [P] Criar validador Editor para IDs unicos, referencias e limites dos ScriptableObjects em `Assets/QuackQuack/Editor/ContentValidationWindow.cs`
 - [x] T074 Comparar o perfil com as metas; se houver violacao, corrigir e reperfilar, senao registrar aprovacao sem mudanca, sempre sem DOTS/ECS/Jobs/Burst em `Assets/QuackQuack/Systems/Spawning/SpawnDirector.cs`
 - [ ] T075 Executar toda a matriz de validacao e registrar resultados Windows/Android em `specs/001-prototipo-lago/validation-report.md`
-  - Execução parcial registrada no relatório: testes aprovados, três falhas de UI no S23 e gates de hardware/uso real pendentes; manter aberta para correção e revalidação.
+  - Retomada: três falhas visuais, botão único PAUSAR/CONTINUAR e autorrotação de paisagem corrigidos e confirmados no S23. Manter aberta pelos gates de hardware/uso real ainda pendentes no relatório.
 - [x] T076 [P] Preparar formulario de playtest para SC-001 a SC-005 e captura de seeds/builds em `specs/001-prototipo-lago/playtest-form.md`
 - [x] T077 Atualizar instrucoes executaveis com comandos, aparelhos e resultados observados em `specs/001-prototipo-lago/quickstart.md`
 - [x] T078 Revisar o escopo e remover qualquer loja, anuncio, compra, bioma ou personagem extra em `specs/001-prototipo-lago/scope-audit.md`

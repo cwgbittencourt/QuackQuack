@@ -30,7 +30,11 @@ namespace QuackQuack.Editor
         {
             var group = TargetGroup(target);
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.FromBuildTargetGroup(group), ScriptingImplementation.IL2CPP);
-            if (target == BuildTarget.Android) PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            if (target == BuildTarget.Android)
+            {
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+                ProjectSetup.ConfigureLandscape();
+            }
         }
 
         // Select the platform in the Editor first, or pass -buildTarget in batch mode.

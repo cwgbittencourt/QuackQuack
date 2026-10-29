@@ -203,20 +203,37 @@ namespace QuackQuack.Tests.PlayMode
             var named = target == BuildTarget.Android ? NamedBuildTarget.Android : NamedBuildTarget.Standalone;
             var previousBackend = PlayerSettings.GetScriptingBackend(named);
             var previousArchitecture = PlayerSettings.Android.targetArchitectures;
+            var previousOrientation = PlayerSettings.defaultInterfaceOrientation;
+            bool portrait = PlayerSettings.allowedAutorotateToPortrait, upsideDown = PlayerSettings.allowedAutorotateToPortraitUpsideDown;
+            bool left = PlayerSettings.allowedAutorotateToLandscapeLeft, right = PlayerSettings.allowedAutorotateToLandscapeRight;
             try
             {
                 // An empty implementation must not pass just because this clone is already configured.
                 PlayerSettings.SetScriptingBackend(named, ScriptingImplementation.Mono2x);
-                if (target == BuildTarget.Android) PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7;
+                if (target == BuildTarget.Android)
+                {
+                    PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7;
+                    PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+                    PlayerSettings.allowedAutorotateToPortrait = PlayerSettings.allowedAutorotateToPortraitUpsideDown = true;
+                    PlayerSettings.allowedAutorotateToLandscapeLeft = PlayerSettings.allowedAutorotateToLandscapeRight = false;
+                }
                 configure.Invoke(null, new object[] { target });
                 Assert.That(PlayerSettings.GetScriptingBackend(named), Is.EqualTo(ScriptingImplementation.IL2CPP));
                 if (target == BuildTarget.Android)
+                {
                     Assert.That(PlayerSettings.Android.targetArchitectures, Is.EqualTo(AndroidArchitecture.ARM64));
+                    Assert.That(PlayerSettings.defaultInterfaceOrientation, Is.EqualTo(UIOrientation.AutoRotation));
+                    Assert.That(PlayerSettings.allowedAutorotateToPortrait || PlayerSettings.allowedAutorotateToPortraitUpsideDown, Is.False);
+                    Assert.That(PlayerSettings.allowedAutorotateToLandscapeLeft && PlayerSettings.allowedAutorotateToLandscapeRight, Is.True);
+                }
             }
             finally
             {
                 PlayerSettings.SetScriptingBackend(named, previousBackend);
                 PlayerSettings.Android.targetArchitectures = previousArchitecture;
+                PlayerSettings.defaultInterfaceOrientation = previousOrientation;
+                PlayerSettings.allowedAutorotateToPortrait = portrait; PlayerSettings.allowedAutorotateToPortraitUpsideDown = upsideDown;
+                PlayerSettings.allowedAutorotateToLandscapeLeft = left; PlayerSettings.allowedAutorotateToLandscapeRight = right;
             }
         }
 

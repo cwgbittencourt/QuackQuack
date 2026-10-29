@@ -97,6 +97,7 @@ namespace QuackQuack.Editor
             data.FindProperty("reroll").objectReferenceValue = Button("Reroll", panel, new Vector2(-210, -445), new Vector2(350, 62), "RERROLAR");
             data.FindProperty("skip").objectReferenceValue = Button("Skip", panel, new Vector2(210, -445), new Vector2(350, 62), "PULAR");
             data.ApplyModifiedPropertiesWithoutUndo(); panel.gameObject.SetActive(false);
+            IntegratedUiSetup.Configure(root);
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath); Object.DestroyImmediate(root);
         }
         private static void CardText(SerializedProperty entry, string field, string name, RectTransform parent, float y, float height, int size, Color color)

@@ -62,7 +62,7 @@ namespace QuackQuack.Tests.PlayMode
         {
             var input = root.GetComponent<MobileInputAdapter>();
             var joystick = root.GetComponentInChildren<MobileJoystick>();
-            var quack = root.transform.Find("QUACK"); var pause = root.transform.Find("PAUSAR");
+            var quack = root.transform.Find("UI Safe Area/QUACK"); var pause = root.transform.Find("UI Safe Area/PAUSAR");
             Assert.That(root.GetComponent<GraphicRaycaster>(), Is.Not.Null);
             Assert.That(root.GetComponent<CanvasScaler>().referenceResolution, Is.EqualTo(new Vector2(1920, 1080)));
             var center = Point(joystick.transform, Vector2.zero);

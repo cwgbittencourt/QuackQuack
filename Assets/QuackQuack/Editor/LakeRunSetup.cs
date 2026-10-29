@@ -59,6 +59,7 @@ namespace QuackQuack.Editor
             var scaler = controls.GetComponent<CanvasScaler>(); scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1920, 1080);
             var pause = Button(controls.transform, "PAUSAR", 160); var abandon = Button(controls.transform, "ABANDONAR", 100);
             Set(director, "pauseButton", p => p.objectReferenceValue = pause); Set(director, "abandonButton", p => p.objectReferenceValue = abandon);
+            IntegratedUiSetup.ConfigureRunControls(controls);
             if (AssetDatabase.LoadAssetAtPath<ResultsProgressionDefinition>(ResultsSetup.ProgressPath) != null) ResultsSetup.Attach();
             director.gameObject.AddComponent<QuackQuack.Systems.Diagnostics.PerformanceTelemetry>();
             EditorSceneManager.SaveScene(scene, "Assets/QuackQuack/Scenes/LakeRun.unity");

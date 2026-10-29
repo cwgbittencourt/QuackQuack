@@ -73,7 +73,7 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T072: telemetria de quadros, scheduler, pools, GC e memória | Concluída |
 | T073: validador Editor de IDs, referências e limites de conteúdo | Concluída |
 | T074: diagnóstico de contatos 2D e novo profiling Windows/S23 Ultra | Concluída no hardware medido |
-| T075: matriz integral Windows/Android | Parcial; falhas visuais Android registradas |
+| T075: matriz integral Windows/Android | Parcial; UI e rotação confirmadas no S23; demais gates pendentes |
 | T076: formulário de playtest SC-001 a SC-005 e rastreabilidade | Concluída; coleta ainda não realizada |
 | T077: comandos de validação, aparelhos e resultados no quickstart | Concluída |
 | T078: auditoria de escopo do protótipo | Concluída; nenhuma remoção necessária |
@@ -95,8 +95,11 @@ A execução da matriz e os gates ainda sem evidência estão no
 [relatório de validação T075](specs/001-prototipo-lago/validation-report.md).
 T075 permanece aberta até concluir as verificações obrigatórias de hardware e uso real.
 Nesta execução: **465 EditMode, 254 PlayMode e 30 testes em cada player IL2CPP**
-aprovados. No S23, o loadout não está acessível e os controles móveis encobrem
-ações de partida e relógio; a interface Android foi reprovada.
+aprovados na rodada inicial. As três falhas visuais encontradas no S23 foram
+corrigidas e confirmadas pelo usuário na retomada de 29/10. A nova matriz integrada
+passou junto aos 258 testes PlayMode; o usuário também confirmou a rotação e o
+layout nos dois lados de paisagem. Demais gates de hardware e uso real continuam
+descritos no relatório.
 
 O [formulário de playtest T076](specs/001-prototipo-lago/playtest-form.md) contém
 roteiro sem indução, fichas por participante/partida/morte, registro de seed e build

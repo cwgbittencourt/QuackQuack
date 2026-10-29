@@ -17,6 +17,7 @@ namespace QuackQuack.Platform.Input
         private MobileInputAdapter mobile;
         private bool gameplay = true, allowPause = true, suspended, disposed;
         private bool unfocused, applicationPaused;
+        private bool externalPauseButton;
         private bool IsSuspended => suspended || applicationPaused || (unfocused && InputSystem.settings.backgroundBehavior != InputSettings.BackgroundBehavior.IgnoreFocus);
         private long activity;
         public InputSource Source { get; private set; } = InputSource.Keyboard;
@@ -31,7 +32,15 @@ namespace QuackQuack.Platform.Input
                 ownedEvents = new GameObject("Player UI events"); UpgradeUiEventSystem.Ensure(ownedEvents.transform);
             }
             mobileRoot = UnityEngine.Object.Instantiate(PlayerInputConfiguration.Load().MobileControlsPrefab);
-            mobile = mobileRoot.GetComponent<MobileInputAdapter>(); ApplyContext();
+            mobile = mobileRoot.GetComponent<MobileInputAdapter>(); ApplyPauseButton(); ApplyContext();
+        }
+        public void SetExternalPauseButton(bool available)
+        { externalPauseButton = available; ApplyPauseButton(); }
+        private void ApplyPauseButton()
+        {
+            if (mobileRoot == null) return;
+            foreach (var button in mobileRoot.GetComponentsInChildren<MobileActionButton>(true))
+                if (button.Action == MobileAction.Pause) button.gameObject.SetActive(!externalPauseButton);
         }
         public PlayerCommand Read()
         {

@@ -148,6 +148,7 @@ namespace QuackQuack.Systems.Run
             weapons.AutomaticTick = false; weapons.Relics = relics; player.Relics = relics;
             events.Combat += OnCombat; run.Ended += OnEnded; run.Changed += PhaseChanged;
             if (pauseButton != null) pauseButton.onClick.AddListener(TogglePause);
+            player.SetExternalPauseButton(pauseButton != null);
             if (abandonButton != null) abandonButton.onClick.AddListener(Abandon);
             Ready = true;
             GetComponent<QuackQuack.Systems.Diagnostics.PerformanceTelemetry>()?.Bind(pools, Scheduler);

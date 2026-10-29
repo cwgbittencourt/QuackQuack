@@ -2,10 +2,13 @@
 
 ## Estado
 
-Validação parcial, com **interface Android reprovada**. A T075 permanece aberta
-pelas falhas reproduzidas abaixo e pelas linhas obrigatórias sem evidência.
+Validação parcial. As três falhas visuais Android observadas em 28/10 têm correção
+implementada e confirmada pelo usuário no S23 em 29/10. A orientação fixa também
+foi corrigida; o usuário confirmou rotação e layout corretos nos dois lados de
+paisagem, com autorrotação do Android habilitada. A T075 permanece aberta pelas linhas obrigatórias
+sem evidência e pelos critérios de experiência/hardware ainda pendentes.
 Testes automatizados não concedem aceite de gameplay, legibilidade, entrada física
-ou desempenho em outra classe de aparelho. Nenhuma execução automatizada ficou ativa.
+ou desempenho em outra classe de aparelho. Resultados de cada rodada estão separados abaixo.
 
 Base: commit `54b22ca`, Unity **6000.4.3f1**, seed de produção **42** e benchmark
 **71**. Execução local iniciada em 28/10/2026 (America/Sao_Paulo; XML em UTC).
@@ -24,6 +27,94 @@ Nenhuma alteração de regras ou de assets de produto nesta validação.
 - Build jogável isolada usa nome `QuackQuack T075` e pacote Android
   `com.cemggames.quackquack.validationt075`. Test players e builds de produto são
   evidências distintas. Logs, XML, capturas e binários permanecem locais ignorados.
+
+## Retomada em 29/10 — interface integrada
+
+Base anterior: `582d99d`. Cópia de execução: Temp/T078Validation, com o manifesto
+versionado. Nenhum gerador de gameplay completo foi executado para reconstruir a
+partida. IntegratedUiSetup atualizou somente quatro prefabs de UI e o Canvas de
+ações de LakeRun pelo Unity, preservando `.meta`/GUIDs dos assets existentes.
+Os geradores originais passam pela mesma configuração para manter a correção.
+
+Causas confirmadas: Relíquias usava posição vertical fixa em Canvas escalado pela
+largura; em ultrawide o botão saía do viewport. Canvas móvel e ações da partida
+usavam escalas/posições independentes e não compartilhavam margens seguras.
+
+- Canvas de controles, relíquias, cartas e resultados agora usa referência
+  1920×1080 com escala pela altura e SafeAreaController.
+- Relíquias fica ancorado no topo da área segura; ações da partida ficam abaixo
+  do relógio; joystick/Quack reservam espaço acima das mensagens inferiores.
+- Conteúdo de modais cabe na área segura com escala uniforme; seu fundo continua
+  cobrindo a área segura inteira e bloqueando cliques nas ações de combate.
+- Conforme solicitação do usuário, o botão amarelo de pausa não aparece na partida
+  integrada. O botão da partida alterna PAUSAR/CONTINUAR e executa TogglePause.
+  O prefab móvel mantém fallback para o treino isolado sem botão de partida.
+
+| Verificação nova | Resultado / alcance | Evidência local |
+|---|---|---|
+| Regressão antes da correção | 4/4 casos falharam: Relíquias fora dos limites em telas largas e pausa fora da área segura em 4:3 | TestResults/t075-ui-red.xml |
+| Matriz integrada | 4/4 aprovados na suíte final; quatro proporções, recorte à esquerda/direita, oito áreas de HUD/ações sem interseção, raycasts, relíquias/cartas/resultados | TestResults/t075-ui-playmode-verified.xml |
+| PlayMode completo com botão único e rotação corrigida | 258/258, zero falhas/ignorados | TestResults/t075-ui-playmode-verified.xml |
+| EditMode completo | 465/465, zero falhas/ignorados | TestResults/t075-ui-editmode.xml |
+| Conteúdo | 63 objetos, zero erros, dois avisos URP UnsupportedType já conhecidos | Logs/t075-ui-content.log |
+| Windows x64 IL2CPP, fontes finais | 34/34, incluindo os quatro casos novos de UI integrada | TestResults/t075-ui-windows-verified.xml |
+| Android ARM64 IL2CPP, fontes finais | 34/34, zero falhas ou ignorados, incluindo os quatro casos novos de UI integrada | TestResults/t075-ui-android-verified.xml |
+
+Primeiro APK corrigido instalado no S23: 35296020 bytes, SHA-256
+`BD152BAD358F94EA09EB7648AE449EE92C7671D18DB54CE249D0015D6208896B`, pacote
+com.cemggames.quackquack.validationt075, nome QuackQuack T075. O usuário confirmou:
+Relíquias e relógio visíveis, Quack sem cobrir Abandonar, botão único alternando
+PAUSAR/CONTINUAR e abertura/fechamento de Relíquias funcionando. Esse APK ainda
+estava preso em LandscapeLeft; não conta como teste aprovado da outra orientação.
+
+Foi acrescentada regressão à configuração Android: partindo de paisagem fixa e
+flags inválidas, exigir UIOrientation.AutoRotation, LandscapeLeft/Right permitidos
+e retrato nas duas posições proibido. Antes da correção: 8/9 casos de configuração
+passaram, um falhou com LandscapeLeft no lugar de AutoRotation
+(TestResults/t075-rotation-red.xml). ProjectSetup.ConfigureLandscape é reutilizado
+pelo pipeline Android, e o ProjectSettings.asset versionado foi gerado pelo Unity;
+seu diff é somente defaultScreenOrientation 3→4. O app continua respeitando o
+bloqueio de rotação do sistema; conferir com a autorrotação do Android habilitada.
+O ensaio com flags inicialmente inválidas também detectou a proteção do Unity
+que reativa uma orientação quando todas são desabilitadas. O configurador habilita
+primeiro os dois lados de paisagem e só então desabilita retrato. A tentativa
+intermediária está em t075-ui-playmode-rotation.xml (257/258); a reexecução final
+tem artefato próprio, sem substituir esse histórico.
+
+APK final de produto: **35294360 bytes**, SHA-256
+`4763CD1A98A7BE921A277BE617F93D87A6D0C5B0141A973B33A7900862F08FFF`, em
+Temp/T078Validation/Builds/Android/QuackQuack.apk. O manifesto Gradle gerado contém
+`android:screenOrientation="userLandscape"`. A segunda instalação via ADB foi
+aprovada pelo usuário: “Sim, tudo correto nos dois lados”, incluindo Relíquias,
+relógio, Quack e PAUSAR/CONTINUAR visíveis sem sobreposição. O botão amarelo não
+aparece na partida integrada. O fitter final usa Min com dois argumentos, sem
+criar um array params a cada atualização do modal.
+
+**Estado atual dos gates:** VAL-UI-01/02/03 resolvidos no S23 e rotação horizontal
+resolvida. A geometria e os raycasts dos quatro layouts são aprovados pela nova
+matriz, sem conceder aceite global SC-008 para todos os estados/menus reais.
+Ainda faltam navegação física integral por controle/teclado/toque, partida real
+de 15 minutos, operação offline explicitamente observada, coleta SC-001 a SC-005
+e hardware Android intermediário/de entrada. As evidências antigas abaixo não
+devem ser interpretadas como reprovação da nova build nem como aceite desses gates.
+
+IntegratedUiLayoutTests carrega RunBootstrap/LakeRun reais com Touchscreen sintético
+e save temporário exclusivo, sem AssetDatabase. Render targets de 1920×1080,
+2160×1080, 2340×1080 e 1440×1080 dão o viewport efetivo aos Canvas; o teste verifica
+essa projeção antes de medir os cantos. Insets alternam 72/24 px nos lados e
+32/48 px abaixo/acima. Renderiza 32 capturas por execução (quatro telas, duas
+orientações de recorte, quatro proporções) em Logs/t075-ui-*.png no Editor.
+São insets injetados, não promessa de outro aparelho físico.
+Capturas representativas de gameplay, relíquias, cartas e abandono foram inspecionadas
+sem cortes aparentes; a avaliação física do novo APK fica registrada separadamente.
+
+Para repetir: categoria IntegratedUiRuntime ou filtro IntegratedUiLayoutTests em
+PlayMode/player; para reparo de assets, menu **QuackQuack > Repair integrated
+gameplay UI**, preferencialmente na cópia, revisando o diff gerado. A execução não
+altera regras de combate, catálogos ou resultado. O perfil T074 continua histórico;
+esta rodada não equivale a nova medição de FPS/GC do produto completo.
+
+As seções seguintes preservam a execução anterior de 28/10 e seus artefatos.
 
 ## Execuções automatizadas
 

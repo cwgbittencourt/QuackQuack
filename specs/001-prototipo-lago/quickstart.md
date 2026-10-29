@@ -7,6 +7,13 @@ contratos de [contracts/gameplay-contracts.md](contracts/gameplay-contracts.md).
 
 ## Estado observado e limites (T077, 29/10/2026)
 
+**Retomada T075 em 29/10:** as três falhas visuais abaixo descrevem o APK antigo.
+O layout integrado foi corrigido e confirmado no S23, com botão único da partida
+alternando PAUSAR/CONTINUAR. A rotação foi confirmada nas duas posições horizontais,
+com autorrotação do Android habilitada. A rodada final passou 465/465 EditMode,
+258/258 PlayMode e 34/34 testes em cada player IL2CPP Windows e Android.
+A matriz de UI e os snapshots estão na seção de retomada do [relatório](validation-report.md).
+
 Esta revisão documenta as execuções de 28/10/2026; não representa nova medição.
 Base de gameplay T074: `54b22ca`; validação T075 e fixture portátil: `21c29b7`;
 formulário T076: `5a53065`. Consulte o histórico antes de comparar uma nova build.
@@ -142,7 +149,7 @@ Os comandos compilam, iniciam e, no Android, instalam o **test player** na cópi
 configurada. Exigem módulos/licença e aparelho; não são a build de produto.
 
 ```powershell
-$filter = 'PlatformBuildSmokeTests;PerformanceTelemetryTests;ResultsSceneFlowTests;InputParityTests;FrameLimitUsesNominalOrOptionalLowRate'
+$filter = 'PlatformBuildSmokeTests;PerformanceTelemetryTests;ResultsSceneFlowTests;InputParityTests;FrameLimitUsesNominalOrOptionalLowRate;IntegratedUiLayoutTests'
 foreach ($target in @(
     @{ Name = 'windows'; Build = 'Win64'; Platform = 'StandaloneWindows64' },
     @{ Name = 'android'; Build = 'Android'; Platform = 'Android' }
@@ -199,7 +206,8 @@ Conferir a partida com teclado (WASD/setas, Espaço, Esc), controle (stick esque
 Sul/A/Cross, Start) e toque simultâneo. Revisar cartas, relíquias e resultados,
 incluindo reabertura do aplicativo. Repetir HUD e modais em 16:9, 18:9, 19,5:9 e
 4:3 e recortes reais, sem inferir legibilidade das asserções geométricas do HUD.
-Na build atual Android, reproduzir e registrar VAL-UI-01/02/03, não aprovar a tela.
+Na nova build Android, confirmar a correção de VAL-UI-01/02/03 e a rotação entre
+as duas posições de paisagem, sem aprovar gates ainda sem evidência.
 Para uma nova rodada de experiência, usar [playtest-form.md](playtest-form.md).
 
 ## Validacao automatizada
@@ -556,7 +564,9 @@ modelo não informado e navegação completa de menus ainda pendente. Ver
 ## Controles móveis disponíveis após T066
 
 O prefab Assets/QuackQuack/Prefabs/Prototype/MobileControls.prefab contém joystick,
-QUACK e PAUSAR, ligados ao MobileInputAdapter. Pode ser instanciado para revisar
+QUACK e uma pausa de fallback, ligados ao MobileInputAdapter. Na partida integrada,
+o fallback amarelo fica oculto e o botão da partida alterna PAUSAR/CONTINUAR.
+Pode ser instanciado para revisar
 os controles no Editor. Desde T067, a entrada padrão instancia o prefab quando
 há Touchscreen ou plataforma móvel, em Bootstrap/Lake e RunBootstrap/LakeRun.
 Injetar o adapter em PlayerController.Initialize permite consumir seus comandos.

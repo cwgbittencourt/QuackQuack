@@ -8,6 +8,7 @@ namespace QuackQuack.Platform.Input
     {
         [SerializeField] private MobileInputAdapter input;
         [SerializeField] private MobileAction action;
+        public MobileAction Action => action;
         private int? pointer;
         public void Configure(MobileInputAdapter adapter, MobileAction value) { Cancel(); input = adapter; action = value; }
         public void OnPointerDown(PointerEventData data)

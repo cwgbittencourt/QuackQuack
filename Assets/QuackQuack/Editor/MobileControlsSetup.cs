@@ -29,6 +29,7 @@ namespace QuackQuack.Editor
                 Label("MOVER", stick, new Vector2(0, 170), new Vector2(260, 40));
                 ActionButton("QUACK", root.transform, new Vector2(1, 0), new Vector2(-180, 150), new Vector2(240, 180), input, MobileAction.Quack);
                 ActionButton("PAUSAR", root.transform, Vector2.one, new Vector2(-180, -80), new Vector2(240, 90), input, MobileAction.Pause);
+                IntegratedUiSetup.Configure(root);
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
                 AssetDatabase.SaveAssets();
             }

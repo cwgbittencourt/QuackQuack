@@ -1367,3 +1367,30 @@ Não há alteração global da matriz de colisões. Novos usos de layer 10 devem
 respeitar esta reserva para XP. GameBootstrap define Application.targetFrameRate
 em 60, ou 30 com limitTo30Fps no Inspector; isso é um alvo, não garantia de FPS.
 Profiling e limites de aceite: test-report-t074.md e quickstart.md.
+
+### Composição integrada de UI (retomada T075)
+
+Controles móveis, ações da partida, relíquias, cartas e resultados compartilham
+referência 1920×1080, escala pela altura e filhos protegidos por SafeAreaController.
+ReferencePanelFit reduz uniformemente o conteúdo autoral do modal para o espaço
+seguro disponível; o painel de fundo permanece esticado e bloqueia raycasts.
+Não muda regras ou conteúdo da partida. IntegratedUiSetup atualiza os assets pelo
+Unity e também é chamado pelos geradores de manutenção correspondentes.
+
+Quando RunDirector dispõe do botão de pausa da partida, PlayerController encaminha
+SetExternalPauseButton à entrada unificada. O controle amarelo de pausa do prefab
+móvel fica oculto; a ação da partida alterna PAUSAR/CONTINUAR conforme a fase.
+O estado é lembrado mesmo quando o Touchscreen só aparece depois da composição.
+Sem ação externa, o prefab de treino mantém sua pausa de fallback. Teclado/Esc e
+controle/Start continuam usando o mesmo comando e estado de partida.
+
+IntegratedUiLayoutTests cobre quatro proporções, ambos os lados de insets,
+não sobreposição e raycasts de ações essenciais, abertura/fechamento de relíquias,
+cartas e resultado, além do botão único em Playing/Paused. A categoria é
+IntegratedUiRuntime. Não substitui revisão física ou aceite de SC-006 a SC-008.
+
+ProjectSetup.ConfigureLandscape e o pipeline Android configuram autorrotação com
+somente LandscapeLeft/LandscapeRight permitidos. Retrato e retrato invertido ficam
+desabilitados. A configuração inicial fixa LandscapeLeft foi substituída; o teste
+de configuração restaura todas as flags anteriores ao terminar. Bloqueio de rotação
+do sistema continua sendo respeitado, sem alterar preferências do aparelho.

@@ -40,6 +40,8 @@ namespace QuackQuack.Gameplay.Player
         }
         public string Status { get; private set; } = "Explore o lago e experimente o Quack.";
         public CharacterDefinition Definition => definition;
+        public void SetExternalPauseButton(bool available)
+        { if (input is UnifiedPlayerInput unified) unified.SetExternalPauseButton(available); }
         public bool QuackReady => CanSimulate && simulationSeconds >= nextQuack && State.Breath.Current > 0;
 
         private void Awake()
