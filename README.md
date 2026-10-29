@@ -74,6 +74,7 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T073: validador Editor de IDs, referências e limites de conteúdo | Concluída |
 | T074: diagnóstico de contatos 2D e novo profiling Windows/S23 Ultra | Concluída no hardware medido |
 | T075: matriz integral Windows/Android | Parcial; falhas visuais Android registradas |
+| T076: formulário de playtest SC-001 a SC-005 e rastreabilidade | Concluída; coleta ainda não realizada |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
@@ -94,6 +95,10 @@ T075 permanece aberta até concluir as verificações obrigatórias de hardware 
 Nesta execução: **465 EditMode, 254 PlayMode e 30 testes em cada player IL2CPP**
 aprovados. No S23, o loadout não está acessível e os controles móveis encobrem
 ações de partida e relógio; a interface Android foi reprovada.
+
+O [formulário de playtest T076](specs/001-prototipo-lago/playtest-form.md) contém
+roteiro sem indução, fichas por participante/partida/morte, registro de seed e build
+e consolidação dos cinco critérios. Sua preparação não aprova os SC nem encerra a T075.
 
 Validação T073: **465/465 EditMode aprovados**. O menu **QuackQuack > Validate content**
 e a entrada de CI verificam os ScriptableObjects sem alterá-los. Varredura atual:
