@@ -184,7 +184,7 @@ diferenca de estado final e sem informacao essencial fora da Safe Area.
   - Execução parcial registrada no relatório: testes aprovados, três falhas de UI no S23 e gates de hardware/uso real pendentes; manter aberta para correção e revalidação.
 - [x] T076 [P] Preparar formulario de playtest para SC-001 a SC-005 e captura de seeds/builds em `specs/001-prototipo-lago/playtest-form.md`
 - [x] T077 Atualizar instrucoes executaveis com comandos, aparelhos e resultados observados em `specs/001-prototipo-lago/quickstart.md`
-- [ ] T078 Revisar o escopo e remover qualquer loja, anuncio, compra, bioma ou personagem extra em `specs/001-prototipo-lago/scope-audit.md`
+- [x] T078 Revisar o escopo e remover qualquer loja, anuncio, compra, bioma ou personagem extra em `specs/001-prototipo-lago/scope-audit.md`
 
 ---
 

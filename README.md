@@ -76,6 +76,7 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T075: matriz integral Windows/Android | Parcial; falhas visuais Android registradas |
 | T076: formulário de playtest SC-001 a SC-005 e rastreabilidade | Concluída; coleta ainda não realizada |
 | T077: comandos de validação, aparelhos e resultados no quickstart | Concluída |
+| T078: auditoria de escopo do protótipo | Concluída; nenhuma remoção necessária |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
@@ -104,6 +105,11 @@ e consolidação dos cinco critérios. Sua preparação não aprova os SC nem en
 O [quickstart T077](specs/001-prototipo-lago/quickstart.md) reúne a preparação de
 cópias isoladas, comandos PowerShell/ADB, testes, builds e profiling, com aparelhos,
 resultados observados e limites do aceite.
+
+A [auditoria T078](specs/001-prototipo-lago/scope-audit.md) confirmou Lago/Pato e
+os catálogos previstos, sem loja, anúncios, compras ou conteúdo extra a remover.
+Foram aprovados 465 testes EditMode e a validação de conteúdo em cópia nova.
+Esse resultado não encerra a matriz T075 nem as falhas visuais Android.
 
 Validação T073: **465/465 EditMode aprovados**. O menu **QuackQuack > Validate content**
 e a entrada de CI verificam os ScriptableObjects sem alterá-los. Varredura atual:
