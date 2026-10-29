@@ -73,6 +73,7 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T072: telemetria de quadros, scheduler, pools, GC e memória | Concluída |
 | T073: validador Editor de IDs, referências e limites de conteúdo | Concluída |
 | T074: diagnóstico de contatos 2D e novo profiling Windows/S23 Ultra | Concluída no hardware medido |
+| T075: matriz integral Windows/Android | Parcial; falhas visuais Android registradas |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
@@ -86,6 +87,13 @@ Com 400 inimigos e alvo 60, foram medidos 59,86 FPS no Windows e 59,93 FPS no
 S23 Ultra, com p95 de aproximadamente 16,67 ms e zero GC.Alloc nas fases finais.
 Hardware, perdas de foco, correção e limites de aceite estão no
 [relatório T074](specs/001-prototipo-lago/test-report-t074.md).
+
+A execução da matriz e os gates ainda sem evidência estão no
+[relatório de validação T075](specs/001-prototipo-lago/validation-report.md).
+T075 permanece aberta até concluir as verificações obrigatórias de hardware e uso real.
+Nesta execução: **465 EditMode, 254 PlayMode e 30 testes em cada player IL2CPP**
+aprovados. No S23, o loadout não está acessível e os controles móveis encobrem
+ações de partida e relógio; a interface Android foi reprovada.
 
 Validação T073: **465/465 EditMode aprovados**. O menu **QuackQuack > Validate content**
 e a entrada de CI verificam os ScriptableObjects sem alterá-los. Varredura atual:

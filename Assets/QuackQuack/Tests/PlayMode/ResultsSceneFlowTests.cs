@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,6 +14,7 @@ using UnityEngine.UI;
 using Object = UnityEngine.Object;
 namespace QuackQuack.Tests.PlayMode
 {
+    [Category("ResultsRuntime")]
     public class ResultsSceneFlowTests
     {
         private string directory, path;
@@ -24,7 +24,7 @@ namespace QuackQuack.Tests.PlayMode
         [UnitySetUp] public IEnumerator SetUp()
         {
             if (GameBootstrap.Instance != null) Object.Destroy(GameBootstrap.Instance.gameObject); yield return null;
-            directory = Path.Combine(Path.GetTempPath(), "QuackQuack-T061Scene-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(directory); path = Path.Combine(directory, "save.json");
+            directory = Path.Combine(Application.temporaryCachePath, "QuackQuack-T061Scene-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(directory); path = Path.Combine(directory, "save.json");
             previousPath = RunDirector.SavePathProvider; RunDirector.SavePathProvider = () => path;
             yield return SceneManager.LoadSceneAsync("RunBootstrap");
             for (int i = 0; i < 240; i++) { director = Object.FindAnyObjectByType<RunDirector>(); if (director != null && director.Ready) break; yield return null; }
@@ -35,10 +35,13 @@ namespace QuackQuack.Tests.PlayMode
         {
             var live = Object.FindAnyObjectByType<RunDirector>(); if (live != null) live.TryAbandon();
             if (GameBootstrap.Instance != null) Object.Destroy(GameBootstrap.Instance.gameObject);
-            yield return SceneManager.LoadSceneAsync("Bootstrap"); yield return null;
-            if (GameBootstrap.Instance != null) Object.Destroy(GameBootstrap.Instance.gameObject); yield return null;
+            yield return null;
+            var scene = SceneManager.GetActiveScene();
+            SceneManager.SetActiveScene(SceneManager.CreateScene("After results validation"));
+            if (scene.IsValid() && scene.isLoaded) yield return SceneManager.UnloadSceneAsync(scene);
+            yield return null;
             RunDirector.SavePathProvider = previousPath;
-            string resolved = Path.GetFullPath(directory), temp = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            string resolved = Path.GetFullPath(directory), temp = Path.GetFullPath(Application.temporaryCachePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
             Assert.That(resolved.StartsWith(temp, StringComparison.OrdinalIgnoreCase), Is.True); Assert.That(Path.GetFileName(resolved), Does.StartWith("QuackQuack-T061Scene-"));
             if (Directory.Exists(resolved)) Directory.Delete(resolved, true);
         }
@@ -81,11 +84,23 @@ namespace QuackQuack.Tests.PlayMode
         [UnityTest] public IEnumerator FailedSaveRemainsReviewableAndRetryCommitsOnce()
         {
             EarnTwoCoins(); director.Persist();
-            using (var locked = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            // An open handle does not reliably block replacement on Android.
+            // Obstruct only this fixture's destination, preserving its previous file.
+            string held = path + ".fixture-held";
+            Assert.That(Path.GetDirectoryName(Path.GetFullPath(path)), Is.EqualTo(Path.GetFullPath(directory)));
+            Assert.That(Path.GetDirectoryName(Path.GetFullPath(held)), Is.EqualTo(Path.GetFullPath(directory)));
+            File.Move(path, held);
+            try
             {
+                Directory.CreateDirectory(path);
                 director.TryAbandon(); yield return null;
                 Assert.That(bridge.View.SaveText, Does.Contain("não salvo")); Assert.That(bridge.View.CanRetry, Is.True); Assert.That(bridge.View.CanRestart, Is.True);
                 Assert.That(Service().Load().Data.Progress.Runs, Is.Zero);
+            }
+            finally
+            {
+                if (Directory.Exists(path)) Directory.Delete(path, false);
+                File.Move(held, path);
             }
             bridge.Retry(); bridge.Retry(); Assert.That(bridge.View.SaveText, Is.EqualTo("Progresso salvo"));
             Assert.That(Service().Load().Data.Progress.Coins, Is.EqualTo(1)); Assert.That(Service().Load().Data.Progress.Runs, Is.EqualTo(1));
@@ -101,4 +116,3 @@ namespace QuackQuack.Tests.PlayMode
         }
     }
 }
-#endif
