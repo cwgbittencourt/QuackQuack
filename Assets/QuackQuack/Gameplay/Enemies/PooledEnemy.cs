@@ -22,6 +22,8 @@ namespace QuackQuack.Gameplay.Enemies
         private Action<EnemyReward> rewardSink;
         private Rigidbody2D body;
         private CircleCollider2D shape;
+        private LayerMask originalExcludedLayers;
+        private bool contactFilterOverridden;
         public Rigidbody2D Body=>body;
         public CircleCollider2D Shape=>shape;
         public EnemyState State { get; } = new EnemyState();
@@ -36,6 +38,16 @@ namespace QuackQuack.Gameplay.Enemies
             DamageMultiplier = damageMultiplier; return true;
         }
         public bool IsReady => acquired && owner != null && !owner.IsDisposed && State.IsActive;
+
+        // Enemy/enemy and enemy/XP pairs do not drive gameplay. Keep physical player
+        // and terrain contacts, and keep this collider visible to combat queries.
+        public void SuppressUnneededContacts()
+        {
+            if (!IsReady) throw new InvalidOperationException("An active enemy lease is required.");
+            if (!contactFilterOverridden) originalExcludedLayers = shape.excludeLayers;
+            shape.excludeLayers |= (1 << 9) | (1 << QuackQuack.Gameplay.Pickups.ExperiencePickup.PhysicsLayer);
+            contactFilterOverridden = true;
+        }
 
         private void Awake() { body = GetComponent<Rigidbody2D>(); shape=GetComponent<CircleCollider2D>(); body.gravityScale = 0; body.freezeRotation=true; }
 
@@ -107,6 +119,8 @@ namespace QuackQuack.Gameplay.Enemies
         public void OnRelease() { acquired = false; }
         public void ResetState()
         {
+            if (contactFilterOverridden && shape != null) shape.excludeLayers = originalExcludedLayers;
+            contactFilterOverridden = false;
             if (State.IsActive) State.Reset(State.LeaseId);
             acquired = false; lease = 0; owner = null; run = null; events = null; rewardSink = null; DamageMultiplier = 1;
             Definition = null; Target = null;

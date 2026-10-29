@@ -90,6 +90,7 @@ namespace QuackQuack.Systems.Spawning
                     if(slot<0) { ReducedCount+=item.Remaining; Remove(index); continue; }
                     var enemy=PooledEnemy.SpawnPrepared(pools,definitions[item.Request.EnemyId],run,events,target,position,reward);
                     if(enemy==null) { ReducedCount+=item.Remaining; Remove(index); continue; }
+                    enemy.SuppressUnneededContacts();
                     active[slot]=new Lease{Enemy=enemy,Id=enemy.LeaseId}; spawned++; SpawnedCount++;
                     item.Remaining--;
                     if(item.Remaining==0) Remove(index); else pending[index]=item;

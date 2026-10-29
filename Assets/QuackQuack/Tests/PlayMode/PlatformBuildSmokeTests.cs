@@ -74,6 +74,7 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("LakeRun"));
             var bootstrap = GameBootstrap.Instance;
             Assert.That(bootstrap, Is.Not.Null);
+            Assert.That(Application.targetFrameRate, Is.EqualTo(60), "Production bootstrap must request the nominal frame rate.");
             Assert.That(Object.FindObjectsByType<GameBootstrap>(FindObjectsSortMode.None).Length, Is.EqualTo(1));
             Assert.That(bootstrap.Events, Is.Not.Null);
             Assert.That(bootstrap.Pools, Is.Not.Null);

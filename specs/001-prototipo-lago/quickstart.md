@@ -545,3 +545,37 @@ Execute ContentValidationTests em EditMode para os casos válidos e inválidos;
 fixtures temporárias são criadas/removidas pelo AssetDatabase em pasta exclusiva.
 Ver [relatório T073](test-report-t073.md). A validação não inicia build nem substitui
 os testes de cena ou profiling da T074/T075.
+
+## Profiling T074
+
+Use uma cópia isolada do projeto, sem `.git`, contendo Assets, Packages e
+ProjectSettings. O helper recusa a raiz Git porque altera configurações locais
+para Development IL2CPP e identidade exclusiva do APK. Não copie configurações
+ou a cena temporária de volta ao projeto principal.
+
+```powershell
+$unity = 'C:/Program Files/Unity/Hub/Editor/6000.4.3f1/Editor/Unity.exe'
+$copy = Join-Path $PWD 'Temp/T033Validation'
+& $unity -batchmode -quit -projectPath $copy -buildTarget Win64 -executeMethod QuackQuack.Editor.PerformanceProfileBuild.BuildWindows -logFile "$PWD/Logs/profile-build.log"
+& "$copy/Builds/T074Windows/QuackQuackProfile.exe" -screen-width 1280 -screen-height 720 -screen-fullscreen 0 -profileOutput "$PWD/TestResults/profile.csv" -logFile "$PWD/Logs/profile-player.log"
+python specs/001-prototipo-lago/tools/profile_summary.py TestResults/profile.csv
+```
+
+Execute o player visível, com foco, sem compilação concorrente. Alvo padrão 60;
+`-profileTargetFps 120` permite diagnóstico de throughput. Para Android, use
+`-buildTarget Android` e `QuackQuack.Editor.PerformanceProfileBuild.BuildAndroid`.
+Instale `Builds/T074Android/QuackQuackProfile.apk` com ADB e inicie o pacote
+`com.cemggames.quackquack.profilet074`. O aplicativo termina após exportar.
+Copie de `/sdcard/Android/data/com.cemggames.quackquack.profilet074/cache/`
+o arquivo `T074-profile.csv` e seus sufixos `.json`, `.gpu.csv`, `.markers.csv`.
+Confira BuildGuid e TargetFrameRate para evitar analisar uma captura antiga.
+
+O helper gera T074Profile.unity pelo Unity somente na cópia. Não modifica a lista
+produtiva de cenas. PerformanceProfileCapture pré-aloca buffers de 8192 entradas,
+registra frame timings e probes nativos de Physics2D/render/GPU e exporta ao final.
+Os probes acrescentam memória e custo de instrumentação. Valores indisponíveis
+não representam custo zero; as unidades dos probes constam nos metadados.
+O analisador stdlib rejeita CSV incompleto ou buffer sobrescrito, verifica carga
+saturada, recorta bordas e calcula média/percentis; não concede aceite automático.
+Preserve apenas o relatório revisado no Git, sem CSVs, logs e builds regeneráveis.
+Veja [resultados e limitações T074](test-report-t074.md).

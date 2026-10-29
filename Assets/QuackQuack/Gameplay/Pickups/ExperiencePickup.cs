@@ -12,6 +12,7 @@ namespace QuackQuack.Gameplay.Pickups
     [RequireComponent(typeof(CircleCollider2D))]
     public sealed class ExperiencePickup : MonoBehaviour, IPoolLifecycle
     {
+        public const int PhysicsLayer = 10;
         private PoolService pools;
         private UpgradeSystem upgrades;
         private int amount;
@@ -22,7 +23,7 @@ namespace QuackQuack.Gameplay.Pickups
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetIds() { nextRareId = 0; }
 
-        private void Awake() => GetComponent<CircleCollider2D>().isTrigger = true;
+        private void Awake() { gameObject.layer = PhysicsLayer; GetComponent<CircleCollider2D>().isTrigger = true; }
 
         public void Initialize(PoolService owner, UpgradeSystem progression, int experienceAmount)
         {

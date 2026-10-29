@@ -10,6 +10,24 @@ namespace QuackQuack.Tests.PlayMode
 {
     public class BootstrapTests
     {
+        [TestCase(false, 60)]
+        [TestCase(true, 30)]
+        [Category("FrameRateRuntime")]
+        public void FrameLimitUsesNominalOrOptionalLowRate(bool lowRate, int expected)
+        {
+            int previous = Application.targetFrameRate;
+            if (GameBootstrap.Instance != null) Object.DestroyImmediate(GameBootstrap.Instance.gameObject);
+            var root = new GameObject("Frame limit fixture"); root.SetActive(false);
+            try
+            {
+                var bootstrap = root.AddComponent<GameBootstrap>();
+                typeof(GameBootstrap).GetField("limitTo30Fps", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(bootstrap, lowRate);
+                root.SetActive(true);
+                Assert.That(Application.targetFrameRate, Is.EqualTo(expected));
+            }
+            finally { Object.DestroyImmediate(root); Application.targetFrameRate = previous; }
+        }
+
         [UnityTest]
         public IEnumerator BootstrapLoadsLakeWithServicesAndStableSeed()
         {

@@ -72,13 +72,20 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T071: cenário determinístico com 200/400 inimigos e pools saturados | Concluída |
 | T072: telemetria de quadros, scheduler, pools, GC e memória | Concluída |
 | T073: validador Editor de IDs, referências e limites de conteúdo | Concluída |
+| T074: diagnóstico de contatos 2D e novo profiling Windows/S23 Ultra | Concluída no hardware medido |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
 Alguns scripts de gameplay de T022 em diante já foram iniciados e fazem parte deste snapshot para
 preservar o trabalho e as dependências dos testes. A presença desses arquivos **não significa que
 as respectivas tarefas estejam concluídas**: faltam revisão, integração, dados autorais e montagem
-da arena. T022–T073 foram revisadas e concluídas; a próxima tarefa é **T074**.
+da arena. T022–T074 foram revisadas e concluídas; a próxima tarefa é **T075**.
+
+Validação T074: **254/254 PlayMode** e **4/4 no player Windows IL2CPP**.
+Com 400 inimigos e alvo 60, foram medidos 59,86 FPS no Windows e 59,93 FPS no
+S23 Ultra, com p95 de aproximadamente 16,67 ms e zero GC.Alloc nas fases finais.
+Hardware, perdas de foco, correção e limites de aceite estão no
+[relatório T074](specs/001-prototipo-lago/test-report-t074.md).
 
 Validação T073: **465/465 EditMode aprovados**. O menu **QuackQuack > Validate content**
 e a entrada de CI verificam os ScriptableObjects sem alterá-los. Varredura atual:

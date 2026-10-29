@@ -57,6 +57,26 @@ namespace QuackQuack.Tests.PlayMode
             new SpawnRequest(id,"wave",enemy,quantity,region,5,priority,deadline);
 
         [Test]
+        public void SpawnFiltersUnusedContactsButKeepsCombatQueriesAndRestoresAuthoredMaskOnRelease()
+        {
+            var prepared = PooledEnemy.Spawn(pools, definitions[0], run, events, target.transform, Vector2.one, rewards.Add);
+            prepared.Shape.excludeLayers = 1 << 6;
+            prepared.Despawn(prepared.LeaseId);
+            var director = Director(); director.TryEnqueue(Request(1)); director.Process(0, visible);
+            Assert.That(director.TryGetActive(0, out var enemy, out long lease), Is.True);
+            enemy.gameObject.layer = 9;
+            Assert.That((enemy.Shape.excludeLayers.value & (1 << 9)) != 0, Is.True);
+            Assert.That((enemy.Shape.excludeLayers.value & (1 << QuackQuack.Gameplay.Pickups.ExperiencePickup.PhysicsLayer)) != 0, Is.True);
+            Assert.That((enemy.Shape.excludeLayers.value & 1), Is.Zero, "Keep physical collisions with the player on Default.");
+            Assert.That((enemy.Shape.excludeLayers.value & (1 << 8)), Is.Zero);
+            Assert.That((enemy.Shape.excludeLayers.value & (1 << 6)) != 0, Is.True);
+            Physics2D.SyncTransforms();
+            Assert.That(Physics2D.OverlapCircle(enemy.Body.position, 0.1f, 1 << 9), Is.EqualTo(enemy.Shape));
+            Assert.That(enemy.Despawn(lease), Is.True);
+            Assert.That(enemy.Shape.excludeLayers.value, Is.EqualTo(1 << 6));
+        }
+
+        [Test]
         public void ActiveLimitReducesBatchWithoutCreatingOutsidePool()
         {
             var director=Director();int before=Object.FindObjectsByType<PooledEnemy>(FindObjectsInactive.Include,FindObjectsSortMode.None).Length;

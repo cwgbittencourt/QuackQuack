@@ -12,6 +12,7 @@ namespace QuackQuack.Systems.Run
         [SerializeField] private int seed = 42;
         [SerializeField] private bool loadLake = true;
         [SerializeField] private string lakeScene = "Lake";
+        [SerializeField] private bool limitTo30Fps;
         public bool ExternalClock { get; set; }
         public static GameBootstrap Instance { get; private set; }
         public RunState Run { get; private set; }
@@ -23,6 +24,7 @@ namespace QuackQuack.Systems.Run
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            Application.targetFrameRate = limitTo30Fps ? 30 : 60;
             DontDestroyOnLoad(gameObject);
             Events = new GameplayEventBus();
             Pools = new PoolService();

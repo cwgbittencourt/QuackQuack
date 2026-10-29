@@ -1356,3 +1356,14 @@ os assets com problemas. ValidateForCI é entrada -executeMethod: registra probl
 lança BuildFailedException se houver erros e emite T073_CONTENT_VALIDATION_OK no
 sucesso. Avisos não bloqueiam. Não é um hook automático das builds T070 nem prova
 de gameplay, plataforma, desempenho ou aceite visual.
+
+### Contatos e cadência após T074
+
+ExperiencePickup configura layer 10 no Awake; jogador permanece 0, inimigos 9 e
+terreno 8. SpawnDirector chama SuppressUnneededContacts em cada lease preparado:
+exclui pares com layers 9/10, preserva contatos físicos com jogador/terreno e
+consultas de combate. PooledEnemy restaura excludeLayers autoral no ResetState.
+Não há alteração global da matriz de colisões. Novos usos de layer 10 devem
+respeitar esta reserva para XP. GameBootstrap define Application.targetFrameRate
+em 60, ou 30 com limitTo30Fps no Inspector; isso é um alvo, não garantia de FPS.
+Profiling e limites de aceite: test-report-t074.md e quickstart.md.
