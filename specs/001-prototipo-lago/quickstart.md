@@ -5,13 +5,202 @@
 Validar o vertical slice contra [spec.md](spec.md), os estados de [data-model.md](data-model.md) e os
 contratos de [contracts/gameplay-contracts.md](contracts/gameplay-contracts.md).
 
+## Estado observado e limites (T077, 29/10/2026)
+
+Esta revisão documenta as execuções de 28/10/2026; não representa nova medição.
+Base de gameplay T074: `54b22ca`; validação T075 e fixture portátil: `21c29b7`;
+formulário T076: `5a53065`. Consulte o histórico antes de comparar uma nova build.
+
+| Ambiente ou verificação | Resultado observado |
+|---|---|
+| Editor Unity 6000.4.3f1 | 465/465 EditMode e 254/254 PlayMode |
+| Players IL2CPP Windows x64 e Android ARM64 | 30/30 em cada plataforma, seleção de runtime abaixo |
+| Conteúdo | 63 ScriptableObjects, zero erros, dois avisos UnsupportedType do URP |
+| Windows 11, Ryzen 7 5800X3D, RTX 4070 Ti, aproximadamente 64 GB RAM | Build de produto compilada/iniciada; movimento, Quack e pausa físicos confirmados com teclado e controle (modelo não informado) |
+| S23 Ultra SM-S918B, Android 17/API 37, Adreno 740/Vulkan, 11044 MB RAM | Build ARM64 instalada/iniciada; joystick + Quack simultâneos e pausa/retomada confirmados por toque |
+| UI Android de produto | **Reprovada**: Relíquias ausente; Quack encobre Pausar/Abandonar; pausa móvel encobre relógio |
+| Benchmark, 400 inimigos, alvo 60 | Windows: 59,86 FPS, p95 16,668 ms; S23: 59,93 FPS, p95 16,673 ms; zero GC.Alloc nas fases finais |
+
+O benchmark usou seed 71, Windows 1280×720/D3D12 e S23 3088×1440/Vulkan.
+Windows registrou duas perdas de foco; p99 foi 17,095 ms no Windows e 16,760 ms no
+S23. Não significa todos os frames abaixo de 16,6667 ms. Memória inclui probes e
+Development; não há orçamento quantitativo de memória aprovado. S23 é flagship,
+não evidência de aparelho intermediário/de entrada.
+
+GameBootstrap solicita 60 FPS por padrão; `limitTo30Fps` no Inspector seleciona
+30 na composição. É configuração autoral, sem menu de preferência do jogador,
+e define um alvo, não uma garantia de desempenho.
+
+Fontes e identidades dos artefatos: [perfil T074](test-report-t074.md) e
+[matriz T075](validation-report.md). T075 continua aberta: corrigir as três falhas,
+revisar todos os menus nas quatro proporções/recortes e entradas, executar partida
+real de 15 minutos e medir as classes de Android restantes. O
+[formulário T076](playtest-form.md) está pronto; SC-001 a SC-005 ainda não têm coleta.
+
 ## Pre-requisitos
 
 - Unity Hub com Unity 6000.4.3f1, Windows Build Support e Android Build Support.
 - Android SDK, NDK e OpenJDK instalados pelo Unity Hub.
-- Um computador Windows x64, um celular Android intermediario e, quando disponivel, um de entrada.
-- Projeto aberto pela pasta raiz `QuackQuack` depois que os arquivos Unity forem gerados na fase de
-  implementacao.
+- PowerShell 7 no Windows x64; Python 3 para resumir capturas de profiling.
+- Licença Unity disponível no usuário que executa os comandos. Para IL2CPP Windows,
+  toolchain C++ e Windows SDK compatíveis com o módulo instalado.
+- Android conectado por cabo de dados, depuração USB e autorização RSA no aparelho.
+  Para fechar as metas, também são necessários Android intermediário e de entrada.
+- Clone com Assets, Packages e ProjectSettings completos, incluindo os `.meta`.
+  Os assets/cenas já estão versionados; não executar geradores para apenas jogar.
+
+## Caminho executável de validação
+
+Os blocos PowerShell desta seção são sequenciais, na mesma sessão, iniciada na
+raiz do clone. Escolha uma pasta nova para cada rodada; não reutilize binários ou
+XML antigos como evidência de uma execução atual. Feche o Editor dessa cópia antes
+dos comandos em lote e espere cada processo terminar. Não rode duas instâncias
+Unity sobre o mesmo projeto. Não use `-nographics` para inspeção visual ou profiling.
+
+### 1. Criar cópia isolada e definir ferramentas
+
+O exemplo não depende de Temp/T033Validation nem do helper local T075LocalBuild,
+que não são distribuídos pelo Git. Copia fontes e `.meta`, sem Library ou `.git`.
+
+```powershell
+$repo = (Get-Location).Path
+$unity = 'C:/Program Files/Unity/Hub/Editor/6000.4.3f1/Editor/Unity.exe'
+$adb = 'C:/Program Files/Unity/Hub/Editor/6000.4.3f1/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb.exe'
+$copy = Join-Path $repo 'Temp/T077Validation'
+$logs = Join-Path $repo 'Logs/T077'
+$results = Join-Path $repo 'TestResults/T077'
+if (!(Test-Path -LiteralPath $unity)) { throw 'Ajuste o caminho do Unity 6000.4.3f1 instalado.' }
+if (!(Test-Path -LiteralPath 'ProjectSettings/ProjectVersion.txt')) { throw 'Execute na raiz do projeto.' }
+if ((Get-Content -LiteralPath 'ProjectSettings/ProjectVersion.txt' -Raw) -notmatch '(?m)^m_EditorVersion: 6000\.4\.3f1\s*$') { throw 'Versão do projeto diferente de 6000.4.3f1.' }
+foreach ($path in @($copy, $logs, $results)) {
+    if (Test-Path -LiteralPath $path) { throw "Escolha caminhos novos para cópia, logs e resultados; já existe: $path" }
+}
+New-Item -ItemType Directory -Force -Path $copy, $logs, $results | Out-Null
+foreach ($folder in @('Assets', 'Packages', 'ProjectSettings')) {
+    & robocopy (Join-Path $repo $folder) (Join-Path $copy $folder) /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NJH /NJS
+    if ($LASTEXITCODE -ge 8) { throw "Falha ao copiar $folder (robocopy $LASTEXITCODE)." }
+}
+function Invoke-ValidationUnity {
+    param([string[]]$UnityArguments)
+    $quoted = @($UnityArguments | ForEach-Object {
+        if ($_.Contains('"')) { throw 'Passe argumentos sem aspas embutidas.' }
+        '"' + $_ + '"'
+    })
+    $process = Start-Process -FilePath $unity -ArgumentList $quoted -WindowStyle Hidden -PassThru
+    $process.WaitForExit()
+    if ($process.ExitCode -ne 0) { throw "Unity terminou com código $($process.ExitCode); consulte o log." }
+}
+```
+
+Abra **essa cópia** pelo Hub em Unity 6000.4.3f1 e aguarde os pacotes/importação.
+Em Player Settings, configure **Product Name = QuackQuack Validation T077** e
+**Android Application Identifier = com.cemggames.quackquack.validationt077**.
+Configure Scripting Backend IL2CPP no Windows/Android e Target Architectures
+somente ARM64 no Android. Salve as configurações e feche o Editor da cópia.
+O pipeline de produto também aplica backend/arquitetura; os test players precisam
+desses valores já configurados. Nome/pacote exclusivos isolam o save do jogo normal.
+Não copiar ProjectSettings modificados, cenas temporárias ou saves de volta ao clone.
+
+### 2. Executar suítes do Editor e validador
+
+```powershell
+Invoke-ValidationUnity @('-batchmode', '-projectPath', $copy, '-buildTarget', 'Win64', '-runTests', '-testPlatform', 'EditMode', '-testResults', (Join-Path $results 'editmode.xml'), '-logFile', (Join-Path $logs 'editmode.log'))
+Invoke-ValidationUnity @('-batchmode', '-projectPath', $copy, '-buildTarget', 'Win64', '-runTests', '-testPlatform', 'PlayMode', '-testResults', (Join-Path $results 'playmode.xml'), '-logFile', (Join-Path $logs 'playmode.log'))
+Invoke-ValidationUnity @('-batchmode', '-quit', '-projectPath', $copy, '-buildTarget', 'Win64', '-executeMethod', 'QuackQuack.Editor.ContentValidationWindow.ValidateForCI', '-logFile', (Join-Path $logs 'content.log'))
+if (!(Select-String -LiteralPath (Join-Path $logs 'content.log') -Pattern 'T073_CONTENT_VALIDATION_OK' -Quiet)) { throw 'Validador sem marcador de sucesso.' }
+```
+
+Não adicionar `-quit` aos testes: o Test Framework encerra o Editor ao concluir.
+Código zero e marcador do validador devem acompanhar os XML; ausência de saída,
+teste ignorado, contagem zero, falha de licença ou de compilação não é aprovação.
+
+### 3. Conectar e identificar o Android
+
+Ative depuração USB no aparelho e autorize este computador no diálogo exibido.
+O roteiro requer **um único aparelho autorizado** no ADB para não deixar ambígua
+a escolha automática do Test Framework. `unauthorized`/`offline` impedem prosseguir.
+Se o Windows não detectar o aparelho, conferir cabo de dados e driver USB apropriado
+antes de repetir; isso não é falha nem sucesso do jogo.
+
+```powershell
+if (!(Test-Path -LiteralPath $adb)) { throw 'Instale Android Build Support ou ajuste o caminho do ADB.' }
+& $adb devices -l
+$devices = @(& $adb devices | Where-Object { $_ -match '^\S+\s+device\s*$' })
+if ($devices.Count -ne 1) { throw 'Conecte exatamente um Android autorizado para esta execução.' }
+$device = ($devices[0] -split '\s+')[0]
+& $adb -s $device shell getprop ro.product.model
+& $adb -s $device shell getprop ro.build.version.release
+& $adb -s $device shell getprop ro.build.version.sdk
+```
+
+Manter conectado e desbloqueado durante implantação/testes. Registrar modelo,
+SO/API, entrada e condições na matriz; não publicar o serial do aparelho.
+
+### 4. Executar a mesma seleção nos players IL2CPP
+
+Os comandos compilam, iniciam e, no Android, instalam o **test player** na cópia
+configurada. Exigem módulos/licença e aparelho; não são a build de produto.
+
+```powershell
+$filter = 'PlatformBuildSmokeTests;PerformanceTelemetryTests;ResultsSceneFlowTests;InputParityTests;FrameLimitUsesNominalOrOptionalLowRate'
+foreach ($target in @(
+    @{ Name = 'windows'; Build = 'Win64'; Platform = 'StandaloneWindows64' },
+    @{ Name = 'android'; Build = 'Android'; Platform = 'Android' }
+)) {
+    Invoke-ValidationUnity @('-batchmode', '-projectPath', $copy, '-buildTarget', $target.Build, '-runTests', '-testPlatform', $target.Platform, '-testFilter', $filter, '-playerHeartbeatTimeout', '120', '-buildPlayerPath', (Join-Path $copy "Builds/T077Tests/$($target.Name)"), '-testResults', (Join-Path $results "$($target.Name)-runtime.xml"), '-logFile', (Join-Path $logs "$($target.Name)-runtime.log"))
+}
+foreach ($name in @('editmode', 'playmode', 'windows-runtime', 'android-runtime')) {
+    [xml]$xml = Get-Content -LiteralPath (Join-Path $results "$name.xml") -Raw
+    $run = $xml.'test-run'
+    if ($run.result -ne 'Passed' -or [int]$run.total -le 0 -or [int]$run.failed -ne 0 -or [int]$run.skipped -ne 0) {
+        throw "Revisar execução $name e seu XML."
+    }
+    [pscustomobject]@{ Suite = $name; Total = $run.total; Passed = $run.passed; Failed = $run.failed; Skipped = $run.skipped }
+}
+```
+
+Na T075 essa seleção teve 30 casos em cada player: 15 de paridade sintética, cinco
+de resultados/save, seis de telemetria, dois smoke e dois de alvo 60/30. O teste
+de erro de save usa obstrução temporária do caminho próprio: bloquear um arquivo
+aberto não induziu a mesma falha no Android. Não restaurar a fixture antiga nem
+ignorar o caso para obter resultado verde.
+
+### 5. Compilar, identificar e abrir o produto
+
+Usar a cópia com nome/pacote de validação, não uma cópia já alterada pelo helper
+de profiling. Os métodos abaixo existem no repositório e produzem somente
+RunBootstrap/LakeRun, BuildOptions.None, Windows x64/Android ARM64 IL2CPP.
+
+```powershell
+Invoke-ValidationUnity @('-batchmode', '-quit', '-projectPath', $copy, '-buildTarget', 'Win64', '-executeMethod', 'QuackQuack.Editor.PrototypeBuildPipeline.BuildWindows', '-logFile', (Join-Path $logs 'windows-product.log'))
+Invoke-ValidationUnity @('-batchmode', '-quit', '-projectPath', $copy, '-buildTarget', 'Android', '-executeMethod', 'QuackQuack.Editor.PrototypeBuildPipeline.BuildAndroid', '-logFile', (Join-Path $logs 'android-product.log'))
+foreach ($name in @('windows', 'android')) {
+    if (!(Select-String -LiteralPath (Join-Path $logs "$name-product.log") -Pattern 'PROTOTYPE_BUILD_OK' -Quiet)) { throw "Build $name sem marcador de sucesso." }
+}
+$windowsExe = Join-Path $copy 'Builds/Windows/QuackQuack.exe'
+$apk = Join-Path $copy 'Builds/Android/QuackQuack.apk'
+Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $copy 'Builds/Windows/GameAssembly.dll'), $apk
+git -C $repo rev-parse HEAD
+& $windowsExe -screen-width 1280 -screen-height 720 -screen-fullscreen 0 -logFile (Join-Path $logs 'windows-player.log') | Out-Host
+# Feche a janela Windows após a inspeção para continuar este bloco.
+& $adb -s $device install -r $apk
+if ($LASTEXITCODE -ne 0) { throw 'Falha ao instalar APK; não registrar execução como aprovada.' }
+& $adb -s $device shell monkey -p com.cemggames.quackquack.validationt077 -c android.intent.category.LAUNCHER 1
+if ($LASTEXITCODE -ne 0) { throw 'Falha ao iniciar o pacote de validação.' }
+```
+
+`install -r` preserva os dados desse pacote; registrar o perfil de save usado.
+Os hashes novos não devem coincidir obrigatoriamente com os da T075, que usou outro
+nome/pacote. Anotar commit, hash, seed e tipo de build por rodada. Não iniciar o
+produto com identidade pessoal esperando o isolamento automático dos testes:
+somente as fixtures injetam SavePathProvider temporário.
+
+Conferir a partida com teclado (WASD/setas, Espaço, Esc), controle (stick esquerdo,
+Sul/A/Cross, Start) e toque simultâneo. Revisar cartas, relíquias e resultados,
+incluindo reabertura do aplicativo. Repetir HUD e modais em 16:9, 18:9, 19,5:9 e
+4:3 e recortes reais, sem inferir legibilidade das asserções geométricas do HUD.
+Na build atual Android, reproduzir e registrar VAL-UI-01/02/03, não aprovar a tela.
+Para uma nova rodada de experiência, usar [playtest-form.md](playtest-form.md).
 
 ## Validacao automatizada
 
@@ -20,8 +209,9 @@ contratos de [contracts/gameplay-contracts.md](contracts/gameplay-contracts.md).
    passam sem dependencia de cena.
 3. Executar todos os testes PlayMode.
 4. Confirmar entrada equivalente, pools, spawns, UI/Safe Area, chefe e tela final.
-5. Executar o cenario de benchmark com seed fixa para 200 e 400 inimigos e exportar os dados do
-   Profiler e Memory Profiler.
+5. Executar o cenario de benchmark com seed fixa para 200 e 400 inimigos e exportar
+   telemetria/timings/probes conforme Profiling T074. Snapshots do Memory Profiler,
+   se coletados em uma rodada adicional, devem ser identificados separadamente.
 
 Resultado esperado: zero falhas; zero alocacao recorrente atribuida a spawn, projetil, pickup ou VFX
 durante a janela estavel; nenhuma instancia ativa simultaneamente no pool.
@@ -296,7 +486,7 @@ não aceite de gameplay, Safe Area ou plataformas. Ver [relatório T061](test-re
 No Test Runner PlayMode, filtrar InputParityTests. São 15 casos. Após T066, todos devem passar com os adaptadores reais das três entradas.
 Esses casos não substituem o aceite de entrada física e interface da US4.
 
-Os testes usam teclado/gamepad sintéticos e callbacks do futuro joystick/botões;
+Os testes usam teclado/gamepad sintéticos e callbacks dos adaptadores móveis de produção;
 não exigem dispositivos físicos. Comparam comandos e checkpoints do PlayerController
 real em passos controlados, incluindo pausa, terreno, Fôlego e os três finais.
 O contrato de callbacks e os limites constam em contracts/gameplay-contracts.md.
@@ -359,7 +549,9 @@ uma vez. Os testes usam gamepad sintético, incluindo reset e remoção/reconex�
 
 GamepadInputAdapter implementa IPlayerInput e pode ser injetado em
 PlayerController.Initialize; quem o cria deve descartá-lo com Dispose. Desde T067, as cenas usam UnifiedPlayerInput e selecionam a fonte mais recente.
-O aceite com dispositivos físicos continua pendente. Ver [relatório T065](test-report-t065.md).
+Na T075, comandos básicos com controle físico foram confirmados pelo usuário;
+modelo não informado e navegação completa de menus ainda pendente. Ver
+[relatório T065](test-report-t065.md) e [matriz T075](validation-report.md).
 
 ## Controles móveis disponíveis após T066
 
@@ -368,8 +560,9 @@ QUACK e PAUSAR, ligados ao MobileInputAdapter. Pode ser instanciado para revisar
 os controles no Editor. Desde T067, a entrada padrão instancia o prefab quando
 há Touchscreen ou plataforma móvel, em Bootstrap/Lake e RunBootstrap/LakeRun.
 Injetar o adapter em PlayerController.Initialize permite consumir seus comandos.
-O mapa unificado está disponível desde T067; Safe Area e integração responsiva
-permanecem nas tarefas correspondentes.
+O mapa unificado está disponível desde T067 e o HUD tem Safe Area desde T069.
+A composição completa com controles móveis foi reprovada no S23 na T075;
+os testes isolados de HUD/prefab não cobrem as sobreposições entre eles.
 
 Arrastar a base move o knob; soltura retorna ao centro. Cada controle captura seu
 dedo, permitindo movimento e botões simultâneos. Cancelar, ocultar controles,
@@ -404,7 +597,8 @@ bindings/IDs do asset existente. Os adaptadores usam clones em runtime.
 Execute UnifiedInputContractTests e UnifiedPlayerInputTests, além das fixtures de
 paridade e adaptadores. A categoria UnifiedInputRuntime também pode ser usada nos
 test players. Ver [relatório T067](test-report-t067.md) para evidências Windows e
-limites; Android físico, Safe Area e aceite integral continuam pendentes.
+limites. A T075 confirmou comandos básicos em Android real; Safe Area e composição
+integral ainda não têm aceite, e três falhas visuais foram registradas.
 
 Na composição T067, navegação/Submit/Cancel da UI ficam habilitados somente nos
 menus, enquanto cliques e toque continuam disponíveis no gameplay. Assim, Sul
@@ -474,7 +668,8 @@ O alvo é neutro, sem collider e protegido contra morte para não interromper a 
 É um cenário de saturação: projéteis são movidos diretamente pelo driver, sem o
 WeaponRunner nem resolução de dano; pickups exercitam o pool, sem conceder XP.
 Não substitui um replay de partida completa. A automação cobre estado e reutilização;
-FPS, GC, memória e hardware ainda dependem de T072/T074/T075.
+FPS, GC e memória tiveram capturas reais na T074; o aceite de outras classes de
+aparelho e da partida completa continua na T075.
 
 O menu **QuackQuack > Build T071 performance benchmark scene** recria a cena pelo
 Unity. A cena não entra na lista global de builds nem no pipeline de produto T070.
@@ -515,8 +710,9 @@ Execute PerformanceTelemetryTests, PerformanceBenchmarkTests, PoolServiceTests,
 EnemyUpdateSchedulerTests e RunSceneFlowTests. A categoria PerformanceTelemetryRuntime
 pode ser executada em test player, junto com PlatformRuntimeSmoke. Os testes medem
 alocação gerenciada somente no sampler aquecido, sem prometer zero GC no jogo.
-Resultados e limites estão no [relatório T072](test-report-t072.md); metas de FPS,
-GC total, memória e hardware continuam para T074/T075.
+Resultados do sampler estão no [relatório T072](test-report-t072.md). Medições
+reais de FPS/GC/memória estão no [relatório T074](test-report-t074.md), com seus
+limites; não encerram o aceite de hardware e experiência da T075.
 
 ## Validador de conteúdo disponível após T073
 
@@ -548,27 +744,54 @@ os testes de cena ou profiling da T074/T075.
 
 ## Profiling T074
 
-Use uma cópia isolada do projeto, sem `.git`, contendo Assets, Packages e
-ProjectSettings. O helper recusa a raiz Git porque altera configurações locais
-para Development IL2CPP e identidade exclusiva do APK. Não copie configurações
-ou a cena temporária de volta ao projeto principal.
+O código abaixo cria **outra cópia nova**, `Temp/T077Profile`, reservada só para
+profiling. Mantenha `$repo`, `$unity`, `$adb`, `$device`, `$logs`, `$results` e a
+função Invoke-ValidationUnity definidos no roteiro anterior; não redefina `$copy`.
+O helper recusa `.git` (pasta ou arquivo) e altera configurações locais para
+Development IL2CPP, frame timings e identidade exclusiva do APK. Não copiar
+configurações ou a cena temporária de volta ao clone nem ao projeto de produto.
 
 ```powershell
-$unity = 'C:/Program Files/Unity/Hub/Editor/6000.4.3f1/Editor/Unity.exe'
-$copy = Join-Path $PWD 'Temp/T033Validation'
-& $unity -batchmode -quit -projectPath $copy -buildTarget Win64 -executeMethod QuackQuack.Editor.PerformanceProfileBuild.BuildWindows -logFile "$PWD/Logs/profile-build.log"
-& "$copy/Builds/T074Windows/QuackQuackProfile.exe" -screen-width 1280 -screen-height 720 -screen-fullscreen 0 -profileOutput "$PWD/TestResults/profile.csv" -logFile "$PWD/Logs/profile-player.log"
-python specs/001-prototipo-lago/tools/profile_summary.py TestResults/profile.csv
+$profileCopy = Join-Path $repo 'Temp/T077Profile'
+if (Test-Path -LiteralPath $profileCopy) { throw 'Escolha uma pasta nova para profiling.' }
+New-Item -ItemType Directory -Path $profileCopy | Out-Null
+foreach ($folder in @('Assets', 'Packages', 'ProjectSettings')) {
+    & robocopy (Join-Path $repo $folder) (Join-Path $profileCopy $folder) /E /COPY:DAT /R:1 /W:1 /NFL /NDL /NJH /NJS
+    if ($LASTEXITCODE -ge 8) { throw "Falha ao copiar $folder para profiling." }
+}
+Invoke-ValidationUnity @('-batchmode', '-quit', '-projectPath', $profileCopy, '-buildTarget', 'Win64', '-executeMethod', 'QuackQuack.Editor.PerformanceProfileBuild.BuildWindows', '-logFile', (Join-Path $logs 'windows-profile-build.log'))
+$windowsCapture = Join-Path $results 'windows-profile.csv'
+& (Join-Path $profileCopy 'Builds/T074Windows/QuackQuackProfile.exe') -screen-width 1280 -screen-height 720 -screen-fullscreen 0 -profileOutput $windowsCapture -logFile (Join-Path $logs 'windows-profile-player.log') | Out-Host
+# Aguardar T074_PROFILE_COMPLETE e encerramento do player antes de compilar Android.
+Invoke-ValidationUnity @('-batchmode', '-quit', '-projectPath', $profileCopy, '-buildTarget', 'Android', '-executeMethod', 'QuackQuack.Editor.PerformanceProfileBuild.BuildAndroid', '-logFile', (Join-Path $logs 'android-profile-build.log'))
+& $adb -s $device install -r (Join-Path $profileCopy 'Builds/T074Android/QuackQuackProfile.apk')
+if ($LASTEXITCODE -ne 0) { throw 'Falha ao instalar o APK de profiling.' }
+& $adb -s $device shell monkey -p com.cemggames.quackquack.profilet074 -c android.intent.category.LAUNCHER 1
+if ($LASTEXITCODE -ne 0) { throw 'Falha ao iniciar o profiling.' }
 ```
 
 Execute o player visível, com foco, sem compilação concorrente. Alvo padrão 60;
-`-profileTargetFps 120` permite diagnóstico de throughput. Para Android, use
-`-buildTarget Android` e `QuackQuack.Editor.PerformanceProfileBuild.BuildAndroid`.
-Instale `Builds/T074Android/QuackQuackProfile.apk` com ADB e inicie o pacote
-`com.cemggames.quackquack.profilet074`. O aplicativo termina após exportar.
-Copie de `/sdcard/Android/data/com.cemggames.quackquack.profilet074/cache/`
-o arquivo `T074-profile.csv` e seus sufixos `.json`, `.gpu.csv`, `.markers.csv`.
-Confira BuildGuid e TargetFrameRate para evitar analisar uma captura antiga.
+`-profileTargetFps 120` no Windows permite diagnóstico de throughput. No Android,
+o padrão do helper também é 60. O benchmark dura aproximadamente 65 s simulados;
+aguarde o aplicativo terminar e confirmar a exportação no log do seu processo.
+Não confundir interrupção/crash com término bem-sucedido. Só depois copie:
+
+```powershell
+$remote = '/sdcard/Android/data/com.cemggames.quackquack.profilet074/cache/T074-profile.csv'
+$androidCapture = Join-Path $results 'android-profile.csv'
+foreach ($suffix in @('', '.json', '.gpu.csv', '.markers.csv')) {
+    & $adb -s $device pull ($remote + $suffix) ($androidCapture + $suffix)
+    if ($LASTEXITCODE -ne 0) { throw "Falha ao copiar captura $suffix." }
+}
+python (Join-Path $repo 'specs/001-prototipo-lago/tools/profile_summary.py') $windowsCapture $androidCapture
+if ($LASTEXITCODE -ne 0) { throw 'Captura inválida ou incompleta; consultar diagnóstico.' }
+```
+
+Antes de resumir, conferir nos dois `.csv.json` Unity, BuildGuid, TargetFrameRate,
+resolução, API gráfica, Samples, Overwritten e FocusLosses. Android mantém o cache
+entre instalações; timestamps e BuildGuid devem corresponder à rodada recém-executada.
+Instalação/abertura sozinhas não provam nova captura. Preservar CSVs com seus três
+arquivos auxiliares, hash do APK/player e log de encerramento como evidência local.
 
 O helper gera T074Profile.unity pelo Unity somente na cópia. Não modifica a lista
 produtiva de cenas. PerformanceProfileCapture pré-aloca buffers de 8192 entradas,

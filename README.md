@@ -75,6 +75,7 @@ Arte e áudio são temporários. Capturas de playtest serão adicionadas com o a
 | T074: diagnóstico de contatos 2D e novo profiling Windows/S23 Ultra | Concluída no hardware medido |
 | T075: matriz integral Windows/Android | Parcial; falhas visuais Android registradas |
 | T076: formulário de playtest SC-001 a SC-005 e rastreabilidade | Concluída; coleta ainda não realizada |
+| T077: comandos de validação, aparelhos e resultados no quickstart | Concluída |
 | Multiplataforma e desempenho | Planejados |
 
 A fonte de verdade do progresso é [tasks.md](specs/001-prototipo-lago/tasks.md).
@@ -99,6 +100,10 @@ ações de partida e relógio; a interface Android foi reprovada.
 O [formulário de playtest T076](specs/001-prototipo-lago/playtest-form.md) contém
 roteiro sem indução, fichas por participante/partida/morte, registro de seed e build
 e consolidação dos cinco critérios. Sua preparação não aprova os SC nem encerra a T075.
+
+O [quickstart T077](specs/001-prototipo-lago/quickstart.md) reúne a preparação de
+cópias isoladas, comandos PowerShell/ADB, testes, builds e profiling, com aparelhos,
+resultados observados e limites do aceite.
 
 Validação T073: **465/465 EditMode aprovados**. O menu **QuackQuack > Validate content**
 e a entrada de CI verificam os ScriptableObjects sem alterá-los. Varredura atual:
