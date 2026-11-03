@@ -1,7 +1,7 @@
 # Tasks: Polimento e confiabilidade do Lago
 
 **Input**: [spec](spec.md), [plan](plan.md), [research](research.md), [data-model](data-model.md), [contracts](contracts/gameplay-contracts.md), [decisions](decisions.md).
-**Status**: T001 concluída; T002–T053 pendentes. IDs locais desta feature 002; não continuam nem substituem T001–T078 da feature 001.
+**Status**: T001–T002 concluídas; T003–T053 pendentes. IDs locais desta feature 002; não continuam nem substituem T001–T078 da feature 001.
 **Tests**: exigidos por FR-018/constituição. Testes de regra não aprovam gameplay, entrada física ou desempenho.
 **Execution**: uma task por solicitação ou somente intervalo explícito. Validar, atualizar checkbox e commitar incremento lógico; parar para revisão/publicação. Se faltar hardware/aceite, registrar pendência sem marcar a validação concluída. Nenhuma task autoriza ampliar escopo.
 
@@ -15,7 +15,7 @@ Objetivo: preservar baseline, workspace e referência antes de modificar gamepla
 
 Objetivo: viabilizar diagnóstico reproduzível sem alterar regras. Não recriar engine, pools ou infraestrutura já existentes.
 
-- [ ] T002 Preparar captura opt-in de posições/contatos/penetrações/leases e seed em `Assets/QuackQuack/Systems/Diagnostics/ArenaPressureDiagnostics.cs` e fixture auxiliar de `Assets/QuackQuack/Tests/PlayMode/ArenaContainmentTests.cs`, sem logs/alocações no combate normal; documentar ativação em `specs/002-polimento-lago/arena-diagnosis.md` (FR-016/018; depende T001).
+- [x] T002 Preparar captura opt-in de posições/contatos/penetrações/leases e seed em `Assets/QuackQuack/Systems/Diagnostics/ArenaPressureDiagnostics.cs` e fixture auxiliar de `Assets/QuackQuack/Tests/PlayMode/ArenaContainmentTests.cs`, sem logs/alocações no combate normal; documentar ativação em `specs/002-polimento-lago/arena-diagnosis.md` (FR-016/018; depende T001).
 
 ## Phase 3: US1 — Permanecer na arena (P1, MVP)
 
