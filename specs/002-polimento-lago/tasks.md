@@ -1,7 +1,7 @@
 # Tasks: Polimento e confiabilidade do Lago
 
 **Input**: [spec](spec.md), [plan](plan.md), [research](research.md), [data-model](data-model.md), [contracts](contracts/gameplay-contracts.md), [decisions](decisions.md).
-**Status**: planejadas, nenhuma executada. IDs locais desta feature 002; não continuam nem substituem T001–T078 da feature 001.
+**Status**: T001 concluída; T002–T053 pendentes. IDs locais desta feature 002; não continuam nem substituem T001–T078 da feature 001.
 **Tests**: exigidos por FR-018/constituição. Testes de regra não aprovam gameplay, entrada física ou desempenho.
 **Execution**: uma task por solicitação ou somente intervalo explícito. Validar, atualizar checkbox e commitar incremento lógico; parar para revisão/publicação. Se faltar hardware/aceite, registrar pendência sem marcar a validação concluída. Nenhuma task autoriza ampliar escopo.
 
@@ -9,7 +9,7 @@
 
 Objetivo: preservar baseline, workspace e referência antes de modificar gameplay.
 
-- [ ] T001 Registrar baseline de commit, versões, catálogos, testes e limitações/hardware em `specs/002-polimento-lago/baseline.md`, usando cópia completa isolada conforme `specs/002-polimento-lago/quickstart.md`; medir baseline 200/400 sem inventar resultados e manter T075 antiga aberta (FR-018).
+- [x] T001 Registrar baseline de commit, versões, catálogos, testes e limitações/hardware em `specs/002-polimento-lago/baseline.md`, usando cópia completa isolada conforme `specs/002-polimento-lago/quickstart.md`; medir baseline 200/400 sem inventar resultados e manter T075 antiga aberta (FR-018).
 
 ## Phase 2: Foundational
 
