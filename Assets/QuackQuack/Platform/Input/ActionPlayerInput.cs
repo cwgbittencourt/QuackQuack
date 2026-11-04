@@ -63,7 +63,11 @@ namespace QuackQuack.Platform.Input
             bool relevant = device != null ? changed == device : source == InputSource.Gamepad ? changed is Gamepad : changed is Keyboard;
             if (relevant && (change == InputDeviceChange.Removed || change == InputDeviceChange.Disconnected ||
                 change == InputDeviceChange.Disabled || change == InputDeviceChange.SoftReset || change == InputDeviceChange.HardReset))
+            {
                 quackEdge = pauseEdge = relicsEdge = false;
+                // Another older held device must not silently resume after the active one disappears.
+                waitForNeutral = true;
+            }
         }
         public void Dispose()
         {

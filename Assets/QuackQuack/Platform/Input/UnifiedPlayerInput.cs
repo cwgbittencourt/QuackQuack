@@ -21,8 +21,30 @@ namespace QuackQuack.Platform.Input
         private bool IsSuspended => suspended || applicationPaused || (unfocused && InputSystem.settings.backgroundBehavior != InputSettings.BackgroundBehavior.IgnoreFocus);
         private long activity;
         public InputSource Source { get; private set; } = InputSource.Keyboard;
+        public bool ControllerAvailable { get; private set; }
         public MobileInputAdapter Mobile => mobile;
-        public UnifiedPlayerInput() => EnsureMobile();
+        public UnifiedPlayerInput()
+        {
+            ControllerAvailable = HasEnabledController();
+            EnsureMobile();
+            InputSystem.onDeviceChange += OnDeviceChange;
+        }
+        private static bool HasEnabledController()
+        {
+            foreach (var pad in Gamepad.all) if (pad.added && pad.enabled) return true;
+            return false;
+        }
+        private void OnDeviceChange(InputDevice device, InputDeviceChange change)
+        {
+            if (disposed || !(device is Gamepad)) return;
+            if (change != InputDeviceChange.Added && change != InputDeviceChange.Removed &&
+                change != InputDeviceChange.Disconnected && change != InputDeviceChange.Reconnected &&
+                change != InputDeviceChange.Enabled && change != InputDeviceChange.Disabled) return;
+            bool available = HasEnabledController();
+            if (available == ControllerAvailable) return;
+            ControllerAvailable = available;
+            ApplyContext(); // Preserve gameplay/modal/pause state; availability never changes Source history.
+        }
         private void EnsureMobile()
         {
             if (mobile != null || (!Application.isMobilePlatform && Touchscreen.current == null)) return;
@@ -78,8 +100,10 @@ namespace QuackQuack.Platform.Input
             keyboard.SetContext(play, pause); gamepad.SetContext(play, pause);
             if (mobile != null)
             {
-                mobileRoot.SetActive(play || pause);
-                mobile.SetContext(play, pause);
+                // OnDisable/OnEnable resets the old touch gesture. The menu EventSystem is separate.
+                bool touchPlay = play && !ControllerAvailable, touchPause = pause && !ControllerAvailable;
+                mobileRoot.SetActive(touchPlay || touchPause);
+                mobile.SetContext(touchPlay, touchPause);
             }
         }
         private void ApplyNavigationContext()
@@ -97,6 +121,7 @@ namespace QuackQuack.Platform.Input
         public void Dispose()
         {
             if (disposed) return; disposed = true;
+            InputSystem.onDeviceChange -= OnDeviceChange;
             keyboard.Dispose(); gamepad.Dispose();
             if (navigationEvents != null) navigationEvents.sendNavigationEvents = previousNavigation;
             if (mobileRoot != null) { mobileRoot.SetActive(false); UnityEngine.Object.Destroy(mobileRoot); }

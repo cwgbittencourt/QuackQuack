@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using QuackQuack.Core.Combat;
@@ -21,6 +22,7 @@ namespace QuackQuack.Tests.PlayMode
     [Category("UnifiedInputRuntime")]
     public class UnifiedPlayerInputTests
     {
+        private readonly List<Gamepad> disabledOriginalPads = new List<Gamepad>();
         private Keyboard keyboard, previousKeyboard;
         private Gamepad gamepad, previousGamepad;
         private Touchscreen touchscreen, previousTouchscreen;
@@ -39,6 +41,9 @@ namespace QuackQuack.Tests.PlayMode
             InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
 #endif
             previousKeyboard = Keyboard.current; previousGamepad = Gamepad.current; previousTouchscreen = Touchscreen.current;
+            disabledOriginalPads.Clear();
+            foreach (var original in Gamepad.all) if (original.enabled) disabledOriginalPads.Add(original);
+            foreach (var original in disabledOriginalPads) InputSystem.DisableDevice(original);
             keyboard = InputSystem.AddDevice<Keyboard>(); gamepad = InputSystem.AddDevice<Gamepad>();
         }
         [UnityTearDown] public IEnumerator TearDown()
@@ -55,6 +60,7 @@ namespace QuackQuack.Tests.PlayMode
             if (keyboard != null && keyboard.added) InputSystem.RemoveDevice(keyboard);
             if (gamepad != null && gamepad.added) InputSystem.RemoveDevice(gamepad);
             if (touchscreen != null && touchscreen.added) InputSystem.RemoveDevice(touchscreen);
+            foreach (var original in disabledOriginalPads) if (original.added) InputSystem.EnableDevice(original);
             if (previousKeyboard != null && previousKeyboard.added) previousKeyboard.MakeCurrent();
             if (previousGamepad != null && previousGamepad.added) previousGamepad.MakeCurrent();
             if (previousTouchscreen != null && previousTouchscreen.added) previousTouchscreen.MakeCurrent();
@@ -102,6 +108,7 @@ namespace QuackQuack.Tests.PlayMode
 
         [Test] public void TouchUsesAuthoredActionsWithoutBecomingAPhysicalGamepad()
         {
+            if (gamepad.added) InputSystem.RemoveDevice(gamepad); // Touch-only scenario.
             touchscreen = InputSystem.AddDevice<Touchscreen>(); input = new UnifiedPlayerInput();
             Assert.That(input.Mobile, Is.Not.Null);
             input.Read(); input.Mobile.SetMove(new Vector2(0.3f, 0.4f)); input.Mobile.SetQuack(true);
@@ -151,6 +158,7 @@ namespace QuackQuack.Tests.PlayMode
 
         [UnityTest] public IEnumerator DefaultSceneCreatesTouchControlsAndHidesThemDuringSelection()
         {
+            InputSystem.RemoveDevice(gamepad); // Touch-only scenario.
             touchscreen = InputSystem.AddDevice<Touchscreen>(); yield return LoadLake();
             var player = Object.FindAnyObjectByType<PlayerController>(); var owned = (UnifiedPlayerInput)InputOf(player);
             Assert.That(owned.Mobile, Is.Not.Null);

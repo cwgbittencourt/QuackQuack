@@ -87,7 +87,7 @@ namespace QuackQuack.Tests.PlayMode
         private static void Neutral(PlayerCommand command)
         {
             Assert.That(command.Move, Is.EqualTo(Vector2.zero));
-            Assert.That(command.QuackPressed || command.PausePressed, Is.False, "A lifecycle change must not replay a command edge.");
+            Assert.That(command.QuackPressed || command.PausePressed || command.RelicsPressed, Is.False, "A lifecycle change must not replay a command edge.");
         }
         private GameObject Stick => input.Mobile.GetComponentInChildren<MobileJoystick>(true).gameObject;
         private GameObject Quack
@@ -246,6 +246,65 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(input.Read().QuackPressed, Is.True); Assert.That(input.Read().QuackPressed, Is.False);
         }
 
+        [Test]
+        public void AvailabilityChangesDoNotOverwriteLastActivityHistory()
+        {
+            Compose(); Assert.That(input.ControllerAvailable, Is.False);
+            input.Mobile.SetMove(Vector2.left); Assert.That(Pump().Source, Is.EqualTo(InputSource.Touch));
+            var pad = AddPad(); Pump();
+            Assert.That(input.ControllerAvailable, Is.True); Assert.That(input.Source, Is.EqualTo(InputSource.Touch));
+            TouchVisibility(false);
+            Lose(pad, "Removed"); Neutral(Pump());
+            Assert.That(input.ControllerAvailable, Is.False); Assert.That(input.Source, Is.EqualTo(InputSource.Touch));
+            TouchVisibility(true);
+        }
+
+        [TestCase("Removed")] [TestCase("Disabled")]
+        public void LosingActivePadCannotResumeAnOlderHeldPad(string loss)
+        {
+            Compose(); var older = AddPad(); var active = AddPad();
+            Pad(older, new GamepadState { leftStick = Vector2.up * 0.5f }); Assert.That(input.Read().Move.y, Is.GreaterThan(0));
+            Pad(active, new GamepadState { leftStick = Vector2.right }.WithButton(GamepadButton.South)
+                .WithButton(GamepadButton.Start).WithButton(GamepadButton.Select));
+            Assert.That(input.Read().Move.x, Is.GreaterThan(0.9f));
+            Lose(active, loss); Neutral(Pump());
+            Assert.That(input.ControllerAvailable, Is.True); TouchVisibility(false);
+            Pad(older, new GamepadState()); Neutral(input.Read());
+            Pad(older, new GamepadState { leftStick = Vector2.up }.WithButton(GamepadButton.South));
+            var fresh = input.Read(); Assert.That(fresh.Move, Is.EqualTo(Vector2.up)); Assert.That(fresh.QuackPressed, Is.True);
+            Assert.That(fresh.PausePressed || fresh.RelicsPressed, Is.False);
+        }
+
+        [Test]
+        public void TouchComposedAfterControllerConnectionStartsHiddenAndRestoresCleanly()
+        {
+            var initialTouch = created.Find(d => d is Touchscreen); InputSystem.RemoveDevice(initialTouch);
+            input = new UnifiedPlayerInput();
+            if (!Application.isMobilePlatform && Touchscreen.current == null) Assert.That(input.Mobile, Is.Null);
+            var pad = AddPad(); created.Add(InputSystem.AddDevice<Touchscreen>()); Pump();
+            Assert.That(input.Mobile, Is.Not.Null); Assert.That(input.ControllerAvailable, Is.True); TouchVisibility(false);
+            Lose(pad, "Removed"); Neutral(Pump()); TouchVisibility(true);
+        }
+
+        [Test]
+        public void HotplugDuringSuspensionDoesNotRestoreTouchUntilSuspensionEnds()
+        {
+            Compose(); input.SetSuspended(true); TouchVisibility(false);
+            var pad = AddPad(); Pump(); Assert.That(input.ControllerAvailable, Is.True);
+            Lose(pad, "Removed"); Neutral(Pump());
+            Assert.That(input.ControllerAvailable, Is.False); TouchVisibility(false);
+            input.SetSuspended(false); Neutral(Pump()); TouchVisibility(true);
+        }
+
+        [Test]
+        public void SteadyAvailabilityReadsAllocateNoManagedBytesAfterWarmup()
+        {
+            Compose(); for (int i = 0; i < 64; i++) input.Read();
+            GC.GetAllocatedBytesForCurrentThread(); long before = GC.GetAllocatedBytesForCurrentThread();
+            for (int i = 0; i < 100; i++) input.Read();
+            long bytes = GC.GetAllocatedBytesForCurrentThread() - before;
+            Assert.That(bytes, Is.Zero, "Availability must not allocate collections or rescan with LINQ on every read.");
+        }
         [UnityTest]
         public IEnumerator DisposedConsumerDoesNotReactToFurtherHotplug()
         {

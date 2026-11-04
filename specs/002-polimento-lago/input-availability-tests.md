@@ -1,4 +1,6 @@
-# Regressões de disponibilidade de controle — T008
+# Disponibilidade de controle — T008/T011
+
+Estado atual: T011 concluída; as 15 falhas de disponibilidade da T008 foram corrigidas. As seções anteriores à T011 preservam o histórico de regressões antes da correção.
 
 **Data**: 04/11/2026. **Base**: 16978fa (T007).
 **Escopo**: testes antes da implementação FR-013; nenhuma correção de runtime nesta task.
@@ -113,3 +115,75 @@ os positivos. T009/T010 permanecem pendentes; esta task não autoriza avançar n
 Não houve nova execução Android, teste físico de hotplug, validação de foco real,
 profiling ou suíte EditMode completa. T014 permanece responsável pelo aceite físico de
 Xbox/PlayStation/genérico nos dispositivos/contextos reais; T075 antiga não muda de estado.
+## T011 — Disponibilidade independente e restauração segura (04/11/2026)
+
+A implementação adiciona ControllerAvailable em UnifiedPlayerInput como estado separado
+de Source (histórico da última atividade). Considera qualquer Gamepad adicionado e
+habilitado, inclusive sem atividade. Calcula na composição e atualiza nos eventos
+Added/Removed/Disconnected/Reconnected/Enabled/Disabled; não faz LINQ/coleções novas ou
+varredura dos controles a cada Read. Dispose remove a assinatura de eventos.
+
+ApplyContext combina a disponibilidade com as permissões já existentes de gameplay,
+pausa/modal e suspensão. Com controle disponível, desativa o root dos controles touch e
+suas ações; OnDisable limpa joystick e botões antigos. Sem o último controle, reativa
+somente o que o contexto atual permite. Source não é forçado a Gamepad ao conectar ou
+Touch ao desconectar: uma ação nova escolhe a fonte. Pausa/resultado/seleção não mudam de
+fase/dono pelo hotplug. EventSystem de menus continua separado e ativo.
+
+ActionPlayerInput passa também a exigir movimento neutro após perda/reset de dispositivo,
+além de limpar Quack/Pause/Relics pendentes. Isso impede retomar automaticamente um
+analógico antigo de outro controle ainda conectado quando o controle ativo desaparece.
+Uma pressão/gesto novo funciona sem recriar a partida ou o consumidor.
+
+Os 24 casos originais T008 foram mantidos; a asserção de neutralidade foi fortalecida
+para incluir RelicsPressed introduzido na T010. Seis casos adicionais verificam:
+histórico Source separado da disponibilidade; perda do controle ativo entre dois
+(Removed e Disabled); composição touch tardia; suspensão durante hotplug; zero bytes
+gerenciados em 100 Read após aquecimento. Esse contador cobre a leitura estável, não
+FPS/GC do loop completo do jogo.
+
+UnifiedPlayerInputTests continua verificando os mesmos comportamentos, mas seus cenários
+de toque removem o gamepad sintético criado pelo SetUp. Gamepads preexistentes ficam
+isolados/desabilitados no InputSystem do runner e são restaurados no teardown. Assim,
+toque é testado sem controle disponível, como já previsto no relatório T008; não se
+relaxaram asserções para permitir touch com um controle disponível.
+
+Primeiro foco com a implementação: 64/64 aprovados. Foco após os seis casos adicionais e
+máscara também aplicada às ações touch: **70/70 aprovados**, zero falhas/ignorados, em
+TestResults/Polimento002/T011/focused-final.xml. Inclui ControllerAvailabilityTests,
+UnifiedPlayerInputTests, RelicsInputTests e GamepadInputAdapterTests.
+
+Nenhuma cena, prefab, inputactions ou .meta foi alterado. Validação na cópia isolada
+Temp/Polimento002Validation, Unity 6000.4.3f1. Evidências regeneráveis em
+Logs/Polimento002/T011 e TestResults/Polimento002/T011, fora do commit.
+
+### Validação final T011
+
+| Execução | Total | Aprovados | Falhas | Ignorados |
+|---|---:|---:|---:|---:|
+| EditMode completo | 467 | 467 | 0 | 0 |
+| PlayMode completo | 373 | 363 | 10 | 0 |
+| Windows x64 IL2CPP — entrada | 70 | 70 | 0 | 0 |
+| Android IL2CPP — entrada, S23 Ultra | 68 | 68 | 0 | 0 |
+
+Os 30 casos ControllerAvailabilityTests passam nas três plataformas. Os 10 erros da
+suíte PlayMode são exatamente as regressões de menus da T009, comparadas por nome;
+continuam previstas para T013. Nenhuma falha nova. EditMode e players encerraram com
+exit 0; PlayMode completo com exit 2 devido a essas dez regressões conhecidas.
+Android contém 22 casos RelicsInputTests (Windows contém 24), pois o layout HID
+DualSense usado por dois casos só é registrado nas plataformas correspondentes.
+Os controles desses testes são simulados: não aprovam hotplug físico ou modelos reais.
+
+Resultados: EditMode.xml, PlayMode.xml, windows-runtime.xml e android-runtime.xml em
+TestResults/Polimento002/T011. Android usa pacote de testes separado
+com.cemggames.quackquack.validation002.t011tests, preservando o app normal T007.
+Não foi produzida nova build normal nem medido desempenho global nesta task.
+Aceite físico Xbox/PlayStation/genérico e contextos permanece na T014; T075 antiga
+permanece aberta. T012/T013 não foram implementadas.
+
+SHA-256 das fontes testadas, idênticas entre raiz e cópia isolada:
+
+- UnifiedPlayerInput.cs: A0943AB6B7466984BEBA71F3988827A03D2E0A1CBFF64154546F8B0B61E9E2A6
+- ActionPlayerInput.cs: 81C3D9D429F031344E73CE0C6EF411ED06A73B42168B0112AA539C5E5EEEBF51
+- ControllerAvailabilityTests.cs: BCEB2EB6BF882431BEBC9AC2760FF33021FC018CC9510C5C1488D793352537D3
+- UnifiedPlayerInputTests.cs: D8AC9255B162B3131BB5AC78CB8EF7646BCC5377A6FA9FA1E0E5C1D8C517C969
