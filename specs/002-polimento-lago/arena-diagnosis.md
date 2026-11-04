@@ -227,3 +227,115 @@ Nenhuma correção de produção nesta task. O estado vermelho é intencional e 
 tratado como aceite de gameplay: T005 deve fazer esta matriz passar preservando o teste
 de pressão; T006/T007 continuam responsáveis por geometria e validação jogável/plataformas.
 Não houve nova suíte EditMode, player IL2CPP, Android ou profiling nesta rodada.
+## T005 — Correção de movimento e proteção do corpo físico (04/11/2026)
+
+A solução mantém o Pato dinâmico, os inimigos cinemáticos e os contatos físicos autorados.
+Não engrossa margens, altera solver/CCD, modifica máscaras de contato ou fixa coordenadas
+visuais de arena. Não adiciona componente, asset ou cálculo geométrico puro novo: usa as
+consultas Physics2D sobre os colliders existentes, no PlayerController e scheduler atuais.
+
+### Escolha e alternativas
+
+1. **Limitar a origem da sobreposição:** EnemyUpdateScheduler inclui a camada do jogador
+   no Shape.Cast que já fazia contra terreno. Ao encontrar o Rigidbody2D do Pato, permite
+   apenas a folga física `Physics2D.defaultContactOffset` além do primeiro contato, em vez
+   de atravessar livremente o corpo no passo. A folga preserva contato e pressão do solver;
+   terreno mantém a CollisionSkin autorada anterior. Após o avanço, ColliderDistance confere
+   a profundidade real e retira somente o excesso além da folga física; o cast tem tolerância
+   própria e não é uma medida exata da penetração. Afastamento radial não é bloqueado,
+   incluindo Quack iniciado com as formas ligeiramente sobrepostas. O corpo do Pato é
+   obtido uma vez na composição, não por inimigo/frame. Buffer cheio continua fechando
+   o movimento. Atualização imediata de Body/Transform/EnemyState é preservada.
+2. **Conter o deslocamento do solver:** PlayerController guarda a posição no início do
+   FixedUpdate. Nos callbacks de colisão, varre o trajeto dessa posição até a posição
+   resolvida pela física usando o círculo físico escalado e seu offset, contra sólidos da
+   camada 8 e sem triggers. Usa a PhysicsScene2D do próprio jogador. Se houver obstáculo,
+   limita o deslocamento ao primeiro impacto, com margem numérica de 0,001; buffer de 32
+   cheio retorna ao início do passo. Isso impede atravessar margem/pedra por despenetração,
+   incluindo o pouso do chefe (que não passa pelo scheduler comum). Não escolhe um ponto
+   arbitrário de spawn nem faz clamp por nome de parede/coordenada de câmera.
+3. **Pressão mantida em espaço livre:** nenhuma correção quando a varredura está livre.
+   Consultas usam array reutilizável; múltiplos callbacks na mesma posição resolvida não
+   repetem a consulta. ProjectSettings já usa ReuseCollisionCallbacks=1; não mudou aqui.
+   Não há alocação explícita de coleção/array ou logging recorrente no caminho novo.
+
+**Alternativa comparada e rejeitada:** trocar atribuição imediata por MovePosition, junto
+à proteção do Pato, aprovou os 18 casos T004 (`attempt1.xml`), mas a suíte completa teve
+289/293 aprovados e quatro regressões: SwarmPursuesAndSteeringIsBudgetedWithoutPerEnemyUpdate,
+ChargerWarnsWithRealVisualAndAudioBeforeLockedDirectionCharge,
+SweptContactDamagesPlayerOnceWithInvulnerabilityAcrossEnemies e
+CentralStepActuallyMovesEnemyBodiesAndPresentationTogether. As consultas de combate atuais
+precisam observar deslocamento no mesmo passo; adiar para Simulate quebrou esse contrato.
+Não enfraquecer esses testes nem redesenhar a ordem de todo o combate nesta correção.
+A alternativa final com atualização imediata + cast do Pato passou nos 35 testes focados
+(`attempt2.xml`), antes de adicionar os dois casos de regressão específicos abaixo.
+
+**Alternativas não adotadas:** remover colisão jogador/inimigo elimina pressão; somente
+CCD/mais iterações/parede espessa não resolve a origem demonstrada; clamp retangular
+ignora as pedras e duplica geometria. Um componente ArenaConfinement com limites autorais
+separados não foi necessário; cenas e .meta permanecem intactos, para revisão na T006.
+
+### Testes e limites
+
+A matriz normativa T004 permanece **sem alteração**, inclusive tolerâncias, verificações
+de retorno e teste de pressão (SHA-256 do arquivo
+CCF2D48F91AB4AB9CB0462EFF92EAB3F5F755EB267B2A3F0A9739752174579E7).
+EnemyUpdateSchedulerTests recebe mais dois casos: passo longo limita profundidade de
+contato sem retirar máscara física; Quack consegue separar inimigo começando sobreposto
+na folga de contato. Nenhum teste foi removido ou convertido em Ignore.
+
+Durante preparação final, a assinatura de CircleCast em PhysicsScene2D foi ajustada após
+erro de compilação, consultando o XML da API instalado junto à versão fixada. A rodada
+final abaixo usa essa correção. Logs/XML/CSVs permanecem ignorados em Logs/Polimento002/T005
+e TestResults/Polimento002/T005; cópia isolada Temp/Polimento002Validation.
+
+Esta task não aprova gameplay físico ou desempenho: a sensação da pressão e deslize,
+Windows/Android reais, hardware intermediário/entrada e profiling continuam para T007 e
+as tasks transversais. A proteção assume início de passo válido e o collider circular
+exigido pelo PlayerController; não é recuperação de spawn inválido/teleporte externo para
+fora da arena. Alterações dinâmicas de geometria/escala não fazem parte deste incremento.
+
+Uma suíte intermediária com os novos testes teve 294/295 aprovados: o teste de passo longo
+mediu profundidade 0,025 para folga física 0,01, apesar do limite baseado no cast. A correção
+passou a verificar ColliderDistance após avançar e retirar o excesso usando a separação
+normal/signed distance da própria engine. O XML da API local documenta a orientação da
+normal; não se duplicou interseção de círculo/retângulo em regra pura. O teste mantém
+seu limite de folga +0,001 e não foi flexibilizado.
+
+### Resultado final da correção
+
+- **295/295 PlayMode aprovados**, zero falhas/ignorados, Unity exit 0;
+  `TestResults/Polimento002/T005/PlayMode-accepted.xml`.
+- Todos os 18 cenários T004 têm `firstInvalid=-1`, retorno a espaço caminhável e
+  deslocamento de retomada >0,5. Os 17 casos antes vermelhos agora passam, sem alterar
+  o arquivo da matriz. As duas regressões novas e todos os testes antigos passam.
+- Pressão em espaço livre: 48 passos com contato e 0,2254483 unidade de deslocamento
+  projetado em 1 s; retomada 10,91999 unidades. Antes, no mesmo ensaio T004, eram
+  1,709099 unidades sob pressão. **O contato/empurrão permanece, mas a intensidade efetiva
+  caiu com a limitação de sobreposição.** Não se declara equivalência de sensação ou
+  balanceamento por esse teste: T007 deve avaliar se o bloqueio/pressão continuam relevantes.
+
+| Grupo | Contenção e retomada na suíte completa |
+|---|---|
+| Quatro bordas | Sem violação; retomada projetada 10,17–12,29 |
+| Quatro cantos | Sem violação; retomada 5,44–9,61 |
+| Duas pedras | Sem violação; retomada 6,11 / 11,93 |
+| Passo longo 0,10 s | Sem violação; retomada 10,01 / 9,61 |
+| Spawn original | Sem violação; retomada 11,48 |
+| Quatro casos do chefe | Sem violação; retomada 10,16–12,40 após liberar espaço |
+
+Hashes SHA-256 das fontes na raiz e na cópia de validação são idênticos:
+
+| Fonte | SHA-256 |
+|---|---|
+| EnemyUpdateScheduler.cs | E9F891C6E06A2319ACE6E53C2834364E5E3E3C5B8BF3245FC3047166F01E1D2B |
+| PlayerController.cs | B085BA05FE767A93030771EB285C2179EA9ACBBC4E664D78D5FD465AFD897DF6 |
+| EnemyUpdateSchedulerTests.cs | B3394BE25F44876B2ECA86E7346A6D17C44BA0FE66DC356E49225F98413A4839 |
+
+Não houve nova build de produto/player IL2CPP, Android ou medição de FPS/GC nesta rodada.
+T006/T007 e T075 anterior continuam pendentes. As cenas e todos os .meta foram preservados.
+
+Suíte EditMode completa também aprovada: **465/465**, zero falhas/ignorados,
+`TestResults/Polimento002/T005/EditMode-accepted.xml`, Unity exit 0. Não foi necessário
+ArenaBoundsTests: não há novo algoritmo geométrico puro; a proteção usa Physics2D real,
+validada na matriz de integração acima.

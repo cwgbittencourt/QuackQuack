@@ -72,6 +72,32 @@ namespace QuackQuack.Tests.PlayMode
             PooledEnemy result=null;for(int i=0;i<director.Capacity;i++)if(director.TryGetActive(i,out var e,out _)&&e.Definition==d)result=e;
             return result;
         }
+        [Test]
+        public void LongStepCapsPlayerPenetrationWithoutRemovingPhysicalContacts()
+        {
+            var enemy=Spawn(EnemyRole.Swarm);
+            Advance(1);
+            var separation=enemy.Shape.Distance(player.GetComponent<CircleCollider2D>());
+            Assert.That(separation.isValid,Is.True);
+            Assert.That(separation.distance,Is.GreaterThanOrEqualTo(-Physics2D.defaultContactOffset-0.001f));
+            Assert.That(enemy.Body.position.x,Is.LessThan(2));
+            Assert.That((enemy.Shape.excludeLayers.value & (1<<player.gameObject.layer)),Is.Zero);
+        }
+
+        [Test]
+        public void KnockbackCanSeparateEnemyAlreadyOverlappingPlayerContactSkin()
+        {
+            var enemy=Spawn(EnemyRole.Swarm);
+            float contactDistance=enemy.Shape.radius+player.GetComponent<CircleCollider2D>().radius;
+            enemy.Body.position=Vector2.right*(contactDistance-Physics2D.defaultContactOffset*0.5f);
+            enemy.transform.position=enemy.Body.position; Physics2D.SyncTransforms();
+            Advance(0); long lease=enemy.LeaseId;
+            Assert.That(scheduler.ApplyControl(enemy,lease,Vector2.right*4,1),Is.True);
+            Vector2 before=enemy.Body.position;
+            Advance(0.1f);
+            Assert.That(enemy.Body.position.x-before.x,Is.GreaterThan(0.1f),"Contact skin must not trap Quack knockback.");
+            Assert.That(enemy.Shape.Distance(player.GetComponent<CircleCollider2D>()).distance,Is.GreaterThan(0));
+        }
         private void Advance(float seconds){run.Advance(seconds);scheduler.Advance(seconds);Physics2D.SyncTransforms();}
 
         [Test]

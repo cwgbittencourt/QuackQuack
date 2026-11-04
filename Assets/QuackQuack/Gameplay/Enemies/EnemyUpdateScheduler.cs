@@ -29,7 +29,7 @@ namespace QuackQuack.Gameplay.Enemies
         private readonly Dictionary<string,string> effectKeys=new Dictionary<string,string>(StringComparer.Ordinal);
         private readonly RaycastHit2D[] contacts=new RaycastHit2D[16];
         private RunState run;private SpawnDirector director;private PoolService pools;private GameplayEventBus events;
-        private PlayerController player;private EnemyBehaviorSettings settings;
+        private PlayerController player;private Rigidbody2D playerBody;private CircleCollider2D playerShape;private EnemyBehaviorSettings settings;
         private int cursor;private double clock;private long tick,correlation;private bool ready,advancing;
         public bool AutomaticTick{get;set;}=true;
         public int LastSteeringCount{get;private set;}
@@ -42,7 +42,7 @@ namespace QuackQuack.Gameplay.Enemies
             if(ready)throw new InvalidOperationException("Scheduler already initialized.");
             if(run==null||director==null||pools==null||events==null||player==null||player.State==null||settings==null||!settings.IsValid||definitions==null)
                 throw new ArgumentException("Valid scheduler services, player and settings required.");
-            this.run=run;this.director=director;this.pools=pools;this.events=events;this.player=player;this.settings=settings;
+            this.run=run;this.director=director;this.pools=pools;this.events=events;this.player=player;playerBody=player.GetComponent<Rigidbody2D>();playerShape=player.GetComponent<CircleCollider2D>();this.settings=settings;
             int types=0;
             foreach(var d in definitions)
             {
@@ -166,11 +166,32 @@ namespace QuackQuack.Gameplay.Enemies
             float distance=displacement.magnitude;
             if(distance>0)
             {
-                var filter=new ContactFilter2D{useTriggers=false,useLayerMask=true,layerMask=1<<8};
+                var filter=new ContactFilter2D{useTriggers=false,useLayerMask=true,layerMask=(1<<8)|(1<<player.gameObject.layer)};
+                bool approachingPlayer=false;
                 int found=enemy.Shape.Cast(displacement.normalized,filter,contacts,distance);
                 if(found==contacts.Length)distance=0;
-                else for(int i=0;i<found;i++)distance=Mathf.Min(distance,Mathf.Max(0,contacts[i].distance-settings.CollisionSkin));
+                else for(int i=0;i<found;i++)
+                {
+                    var hit=contacts[i];
+                    if(hit.rigidbody==playerBody)
+                    {
+                        // Keep physical pressure, but never place an enemy arbitrarily deep
+                        // into the player on a long step. Moving away must remain possible.
+                        if(Vector2.Dot(displacement,enemy.Body.position-playerBody.position)>=0)continue;
+                        approachingPlayer=true;
+                        distance=Mathf.Min(distance,Mathf.Max(0,hit.distance+Physics2D.defaultContactOffset));
+                    }
+                    else distance=Mathf.Min(distance,Mathf.Max(0,hit.distance-settings.CollisionSkin));
+                }
                 enemy.Body.position+=displacement.normalized*distance;
+                if(approachingPlayer)
+                {
+                    // Shape casts include solver tolerances. Enforce the skin against the
+                    // actual collider distance, not only the approximate time of impact.
+                    var separation=enemy.Shape.Distance(playerShape);
+                    if(separation.isValid&&separation.distance < -Physics2D.defaultContactOffset)
+                        enemy.Body.position+=separation.normal*(separation.distance+Physics2D.defaultContactOffset);
+                }
             }
             enemy.Body.linearVelocity=Vector2.zero;
             // The director performs physics queries again in this same frame. Rigidbody2D.position

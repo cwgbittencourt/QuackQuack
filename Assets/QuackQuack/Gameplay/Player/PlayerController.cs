@@ -8,6 +8,7 @@ using QuackQuack.Platform.Input;
 using QuackQuack.Systems.Run;
 using QuackQuack.Systems.Combat;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace QuackQuack.Gameplay.Player
 {
@@ -23,6 +24,9 @@ namespace QuackQuack.Gameplay.Player
         private GameplayEventBus events;
         private Rigidbody2D body;
         private Vector2 move;
+        private Vector2 physicsStart, checkedPosition;
+        private CircleCollider2D shape;
+        private readonly RaycastHit2D[] terrainHits = new RaycastHit2D[32];
         private bool requestedQuack;
         private double nextQuack, simulationSeconds;
         private RunPhase previousPhase;
@@ -47,6 +51,7 @@ namespace QuackQuack.Gameplay.Player
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
+            shape = GetComponent<CircleCollider2D>();
             body.gravityScale = 0;
             body.freezeRotation = true;
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
@@ -104,6 +109,7 @@ namespace QuackQuack.Gameplay.Player
         private void FixedUpdate()
         {
             if (!CanSimulate) { ClearCommands(); return; }
+            physicsStart = checkedPosition = body.position;
             simulationSeconds += Time.fixedDeltaTime;
             tick++;
             var terrain = TerrainZone.Resolve(water, body.position, State.Terrain);
@@ -122,6 +128,36 @@ namespace QuackQuack.Gameplay.Player
             if (requestedQuack) { ActivateQuack(); requestedQuack = false; }
         }
 
+        // Kinematic actors (including the boss landing) can depenetrate a dynamic body
+        // through a wall despite CCD. Sweep the actual solver displacement from this
+        // step's starting point, retaining pressure only along walkable space.
+        private void OnCollisionEnter2D(Collision2D collision) => ConstrainPhysicsDisplacement();
+        private void OnCollisionStay2D(Collision2D collision) => ConstrainPhysicsDisplacement();
+        private void ConstrainPhysicsDisplacement()
+        {
+            if (!CanSimulate) return;
+            if (body.position == checkedPosition) return; // One query for the same solver result, regardless of contact count.
+            checkedPosition = body.position;
+            Vector2 delta = body.position - physicsStart;
+            float distance = delta.magnitude;
+            if (distance <= 0.00001f) return;
+            Vector2 direction = delta / distance;
+            var filter = new ContactFilter2D { useTriggers = false, useLayerMask = true, layerMask = 1 << 8 };
+            // Match the circular player's authored shape, including scale and offset.
+            float radius = shape.radius * Mathf.Max(Mathf.Abs(transform.lossyScale.x), Mathf.Abs(transform.lossyScale.y));
+            Vector2 offset = transform.TransformVector(shape.offset);
+            int count = gameObject.scene.GetPhysicsScene2D().CircleCast(physicsStart + offset, radius, direction, distance, filter, terrainHits);
+            float allowed = count == terrainHits.Length ? 0 : distance;
+            for (int i = 0; i < count; i++) {
+                var hit = terrainHits[i];
+                if (Vector2.Dot(direction, hit.normal) >= -0.0001f) continue;
+                allowed = Mathf.Min(allowed, Mathf.Max(0, hit.distance - 0.001f));
+            }
+            if (allowed >= distance) return;
+            body.position = physicsStart + direction * allowed;
+            checkedPosition = body.position;
+            transform.position = new Vector3(body.position.x, body.position.y, transform.position.z);
+        }
         public bool ActivateQuack()
         {
             if (!CanSimulate) return false;
