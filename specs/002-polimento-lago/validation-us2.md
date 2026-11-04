@@ -7,8 +7,8 @@ T014 permanece aberta até concluir a matriz obrigatória. T075 da feature 001 n
 
 Xbox Series/Windows Bluetooth aprovado em C01–C09, após retestes físicos das correções
 de ordem da pausa e acesso às ações de resultados. DualSense/Windows também aprovado;
-genérico/Windows em execução e Xbox/DualSense no S23 aguardam testes físicos. Genérico/Android não
-coberto por incompatibilidade informada. T014 permanece aberta.
+8BitDo/Windows também aprovado e Xbox/S23 Bluetooth em teste; DualSense/S23 pendente.
+8BitDo/S23 não reconhecido na tentativa OTG, causa ainda não isolada. T014 permanece aberta.
 
 R2: 399/399 PlayMode completo; 63/63 em cada player IL2CPP Windows/Android. Builds
 normais R2 geradas com sucesso, com duas correções localizadas e prefab de resultados
@@ -52,15 +52,16 @@ Modelos/conexões informados pelo usuário nesta rodada:
 |---|---|---|
 | Xbox Series | Bluetooth disponível | Bluetooth disponível |
 | PlayStation DualSense | Bluetooth disponível | Bluetooth disponível |
-| Genérico, marca/modelo ainda não informado | Receptor 2,4 GHz disponível | Usuário informa que não funciona no S23 |
+| 8BitDo, nome do sistema Ultimate C 2.4G (informado inicialmente como 2C) | Receptor 2,4 GHz/XInput aprovado | OTG/B + Home: tentativa não reconhecida, causa ainda não isolada |
 
 Inventário Windows relatou Xbox Wireless Controller / Bluetooth / Status OK. Esse
 inventário não substitui confirmação de entrada no player. Serial, endereço Bluetooth,
 IP e identificadores de instância não são registrados neste relatório.
 
-A combinação genérico/Android está **não coberta por indisponibilidade de hardware
-compatível**; não é falha atribuída ao jogo sem reprodução. Não aprovar essa célula por
-resultados Xbox/DualSense, simulação ou teste genérico no Windows.
+A combinação 8BitDo/Android permanece **não aprovada**. Há OTG disponível, mas a
+tentativa não reconheceu o controle e a causa ainda não foi isolada; aguarda teste do
+adaptador e estado do pareamento. Não atribuir falha ao jogo nem aprovar essa célula
+por resultados Xbox/DualSense, simulação ou teste Windows.
 
 ## Critérios da rodada
 
@@ -263,3 +264,50 @@ Genérico/Windows solicitado na sequência; genérico/Android continua não cobe
 APK R2 atualizado com sucesso no S23 via instalação -r, mantendo o pacote normal de
 validação .t014. Não foi aberto para teste físico Android enquanto os controles estão
 em uso no Windows. Etapa Android pronta; dados/apps anteriores preservados.
+
+### Identificação e modo do terceiro controle no Windows
+
+Usuário informou inicialmente "8BitDo Ultimate 2C 2.4G"; o Windows apresenta
+"Ultimate C 2.4G Wireless Controller" e o usuário confirmou ausência de seletor
+2.4G/Bluetooth. Registrar essa identificação do sistema e a divergência do nome
+informado, sem inventar uma revisão de hardware. O procedimento do Ultimate C foi
+consultado no manual/FAQ oficial:
+
+- [Windows — Ultimate C 2.4G](https://manual.8bitdo.com/ultimate-c-2.4g-controller/ultimate-c-windows-2.4g.html).
+- [FAQ — modos XInput/DInput e Android](https://support.8bitdo.com/faq/ultimate-c-2.4g-wireless-controller.html).
+
+Antes do ajuste, consulta isolada do Unity registrou gamepads=0 e joysticks=0
+(8bitdo-inventory.log, helper Editor somente na cópia, sem injeção de entrada).
+Após ligar com X + Home, o usuário confirmou que passou a funcionar corretamente.
+Reconhecimento/movimento foi restabelecido com o modo Windows indicado pelo fabricante;
+nenhuma mudança de código ou firmware foi feita para esse achado. Os roteiros completos
+C01–C09 foram retomados; não aprovar todos com base apenas no reconhecimento.
+
+O manual também prevê Android com receptor USB em modo B + Home. Foi solicitada a
+confirmação de adaptador USB-C/OTG antes de manter ou retirar a pendência Android.
+Não foi confirmado Bluetooth nesse modelo nem inferida incompatibilidade definitiva
+com S23 a partir da tentativa inicial. O resultado Windows será específico ao modo
+XInput e a este controle, sem extrapolar para DirectInput/Joystick ou outros modelos.
+
+### 8BitDo / Windows 2,4 GHz, modo XInput — R2
+
+Após o ajuste de modo, o usuário confirmou "tudo funciona" para comandos, propriedade
+da pausa, navegação/confirmar/retornar nos quatro menus e alteração/restauração do
+atalho de Relíquias. Confirmou também o roteiro de retirar/recolocar o receptor nos
+cinco contextos com analógico/Quack pressionado, sem exceções relatadas.
+**Terceiro controle/Windows aprovado em C01–C09 no modo XInput recomendado.**
+
+Usuário confirmou disponibilidade de adaptador USB-C/OTG. A combinação 8BitDo/Android
+passa de não coberta a teste pendente pelo receptor, em B + Home conforme manual;
+não é necessário adquirir hardware. As três combinações Windows estão aprovadas.
+
+### Tentativa inicial 8BitDo / S23 por OTG
+
+Com receptor no OTG e B + Home, usuário informou que não funcionou, acrescentando que
+o adaptador pode estar com problema. O LED/estado de pareamento e o funcionamento do
+adaptador ainda não foram isolados. Classificação: **não reconhecido na tentativa,
+causa indeterminada**; não atribuir falha ao jogo nem aprovar Android desse modelo.
+Solicitado teste do adaptador com periférico USB conhecido e confirmação de desligar
+completamente antes de trocar o modo. Em paralelo, iniciado roteiro Xbox/S23 Bluetooth,
+que não depende do OTG. A porta em modo host deixou o aparelho indisponível no ADB;
+o app normal R2 já estava instalado e pode ser aberto manualmente.
