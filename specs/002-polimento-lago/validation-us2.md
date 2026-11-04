@@ -1,7 +1,18 @@
 # Validação física de entrada e menus — T014
 
-**Data**: 04/11/2026. **Código-base**: e016c39 (T013). **Estado**: em execução;
+**Data**: 04/11/2026. **Código-base inicial**: e016c39 (T013); correções R1/R2 descritas abaixo. **Estado**: em execução;
 T014 permanece aberta até concluir a matriz obrigatória. T075 da feature 001 não muda.
+
+## Resumo atual da rodada
+
+Xbox Series/Windows Bluetooth aprovado em C01–C09, após retestes físicos das correções
+de ordem da pausa e acesso às ações de resultados. DualSense/Windows também aprovado;
+genérico/Windows em execução e Xbox/DualSense no S23 aguardam testes físicos. Genérico/Android não
+coberto por incompatibilidade informada. T014 permanece aberta.
+
+R2: 399/399 PlayMode completo; 63/63 em cada player IL2CPP Windows/Android. Builds
+normais R2 geradas com sucesso, com duas correções localizadas e prefab de resultados
+atualizado pelo Unity. Nenhum teste sintético substitui as células físicas pendentes.
 
 ## Preparação comprovada
 
@@ -99,3 +110,156 @@ movimento/Quack/Start/View e propriedade da pausa em Relíquias; depois testar p
 hotplug nos cinco contextos e resultados, antes de trocar de controle/plataforma.
 As builds normais permanecem disponíveis nos caminhos acima; T014 não foi marcada
 como concluída e nenhuma task posterior foi executada.
+
+## Relato físico Xbox Series / Windows Bluetooth — build inicial
+
+O usuário confirmou nesta rodada, sem mouse:
+
+- Direcional e analógico alcançam todas as ações da melhoria, com contorno visível.
+- B em BANIR retorna à carta sem encerrar a escolha; A escolhe uma única vez.
+- Movimento, Quack/A, Start/Menu e Relíquias/View funcionam corretamente.
+- Abrir/fechar Relíquias durante simulação retoma; abrir durante pausa conserva a pausa.
+
+**Falha encontrada**: na pausa, cima/baixo do direcional e analógico percorrem uma ordem
+contrária à disposição dos botões. Todas as opções são alcançáveis, mas a direção é
+incoerente. O usuário não explicitou isoladamente ausência de Quack automático após
+confirmar uma melhoria; esse detalhe permanece para reconfirmação.
+
+Regressão adicionada antes da correção: PauseVerticalNavigationMatchesScreenOrder,
+quatro casos (DpadDown/DpadUp/StickDown/StickUp), 0/4 aprovados, mesmas quatro falhas
+na navegação real do InputSystemUIInputModule. O teste também confere a ordem visual
+dos widgets; não é apenas uma inspeção dos links. XML pause-direction-before.xml,
+exit 2. A causa é a lista [Continuar, Relíquias, Controles, Abandonar], sem relação
+com a ordem vertical autorada. Correção localizada para [Relíquias, Continuar,
+Abandonar, Controles]; não inverter eixos do dispositivo nem mudar os demais menus.
+A próxima build normal usa Builds/T014R1, preservando a inicial e seus hashes acima.
+
+### Reteste físico da correção — Xbox / Windows R1
+
+O usuário respondeu "perfeito" ao reteste de cima/baixo do direcional e analógico
+na sequência visual Relíquias → Continuar → Abandonar → Controles. A falha de
+navegação da pausa está corrigida também no teste físico desta combinação.
+Confirmou explicitamente: escolher uma carta retoma sem Quack automático.
+
+Regressão após a correção: 52/52 PlayMode e 52/52 no Windows IL2CPP, zero falhas e
+ignorados, exit 0. Inclui os quatro casos de direção (todos os botões, direcional e
+analógico), mais fluxos de Relíquias, melhoria e entrada unificada. Logs/XML em
+Logs/Polimento002/T014 e TestResults/Polimento002/T014: pause-direction-after e
+windows-r1-tests. Suítes completas T013 permanecem evidência histórica; não foram
+repetidas para esta troca localizada de ordem.
+
+Build normal Windows R1 gerada com sucesso por PrototypeBuildPipeline, sem runner
+ou alteração de regras. Caminho: Temp/Polimento002Validation/Builds/T014R1/Windows/
+QuackQuackT014.exe. SHA-256 GameAssembly.dll:
+15CE8EB59095AD10DCF25724C904A50CF73AF71FEC18614B4C8979BBC439C7F5.
+A janela foi observada a partir desse executável, não da build inicial.
+
+Xbox/Windows: C01/C02 e C03 confirmados no relato inicial e no reteste dirigido;
+C04 (perfil/novo atalho) e C05–C09 (hotplug por contexto) estão solicitados e ainda
+aguardam relato. As demais combinações e C10 Android seguem pendentes.
+
+### Perfil, hotplug e achado em resultados — Xbox / Windows R1
+
+O usuário confirmou o perfil automático e os rótulos esperados, a mudança do atalho de
+Relíquias, seu uso no controle, retenção do valor ao reabrir a configuração e RESTAURAR
+PADRÕES (C04). Relatou que desligar/ligar funcionou sem eventos inesperados. O relato
+não enumerou os contextos individualmente; a discriminação C05–C09 ainda será confirmada,
+sem exigir repetição do que ele já realizou.
+
+**Falha nova em resultados**: controle alterna entre barras com esquerda/direita e
+rola com cima/baixo, mas não chega aos botões. Usuário precisou do mouse. O botão
+TENTAR SALVAR deve permanecer indisponível quando salvo; JOGAR NOVAMENTE precisa ser
+alcançável. Causa confirmada no uGUI local: Scrollbar em navegação Automatic retorna
+null nos links do próprio eixo e consome cima/baixo como rolagem; busca espacial não
+criou uma saída horizontal até as ações. ResultsView também não preparava contornos.
+
+Regressão results-before.xml: cinco novos casos, um aprovado e quatro falhas esperadas,
+exit 2. Falharam alcance horizontal das ações com save pendente/concluído e retorno das
+barras por Cancel no direcional/analógico. A regra de rolagem existente foi preservada.
+A R2 cria links explícitos horizontais incluindo colunas e ações disponíveis, mantém
+cima/baixo para rolar e usa Cancel para focar ações sem ativá-las. AutoHide exige atualizar
+links após o layout; a primeira correção deixou um link transitório para barra escondida
+(66/67); foi acrescentada atualização após o layout do Canvas, mantendo essa regressão.
+Acrescentado também teste de retry por Submit que salva sem reiniciar implicitamente.
+ResultsScreen.prefab é atualizado via ResultsSetup.UpdateNavigation no Unity, sem
+recriar a cena ou alterar regras de save/recompensa.
+
+A R1 passou também 52/52 no runner Android IL2CPP (exit 0, zero ignorados), em pacote de
+testes separado com.cemggames.quackquack.validation002.t014tests. Seu APK normal foi
+gerado com sucesso; o reteste físico Android aguarda a versão com resultados corrigidos.
+
+### Confirmação de cobertura do hotplug Xbox / Windows
+
+O usuário esclareceu: "Incluiu todas", em resposta à enumeração dos cinco contextos
+(partida, pausa, Relíquias, melhoria, resultados) e à tentativa segurando analógico/
+Quack. C05–C09 têm relato positivo de desligar/religar sem eventos inesperados na R1;
+o acesso às ações de resultados segue em reteste específico na R2 devido à falha de
+navegação identificada. Não solicitar repetição integral dos demais casos já aprovados.
+
+### Validação automatizada final da R2
+
+- PlayMode completo: 399/399, zero falhas/ignorados, exit 0 (r2-PlayMode.xml).
+- Windows x64 IL2CPP: 63/63, zero falhas/ignorados, exit 0 (windows-r2-tests.xml).
+- Android ARM64 IL2CPP no S23: 63/63, zero falhas/ignorados, exit 0 (android-r2-tests.xml).
+
+Os 63 casos incluem ControlSettingsFlowTests (12), RelicLoadoutFlowTests (16),
+UpgradeSelectionTests (17), UnifiedPlayerInputTests (7) e ResultsSceneFlowTests (11).
+Os runners R2 usam QuackQuack T014 Tests e, no Android, pacote .t014tests, separados
+da build normal de teste manual. Os seis novos casos de resultados incluem os dois
+estados de save, navegação horizontal a partir de cada coluna, rolagem vertical por
+direcional/analógico, Cancel, reparo de foco/hotplug, barras ocultas e retry real por
+Submit sem reinício involuntário. Os quatro testes novos da pausa permanecem aprovados.
+
+Build normal Windows R2 gerada com sucesso em Builds/T014R2/Windows. SHA-256 de
+GameAssembly.dll: 5585342DD300829FF4638F3C113417D4291BCB5E66D100E3FB02DD2D1A15DB5C.
+A primeira abertura foi encerrada antes do reteste; usuário indicou fechamento manual
+e o log mostrou saída normal, sem exceção do jogo. R2 reaberta e observada na partida;
+retorno físico de resultados/ações/reconexão solicitado. Não classificar o encerramento
+como crash nem declarar esse reteste aprovado antes do relato.
+
+### Reteste físico dos resultados — Xbox / Windows R2
+
+O usuário confirmou que, a partir de uma barra, esquerda/direita alcança JOGAR NOVAMENTE
+com contorno, cima/baixo continua rolando e B foca as ações. A inicia uma única partida;
+TENTAR SALVAR permanece indisponível quando o progresso está salvo. Confirmou também
+que desligar/religar nesta tela mantém o foco utilizável, sem ativar a ação sozinho.
+O bloqueio de navegação de resultados está corrigido fisicamente nesta combinação.
+
+**Xbox Series / Windows Bluetooth aprovado no roteiro C01–C09**: comando básico,
+propriedade da pausa, melhoria sem Quack automático, perfil/atalho/restauração, hotplug
+nos cinco contextos com analógico/Quack pressionado e retestes R1/R2 das duas falhas.
+Não extrapolar este resultado para os outros modelos ou Android. Roteiro do DualSense
+no Windows solicitado; testes desse modelo e do genérico ainda aguardam retorno.
+
+### Artefatos R2 e integridade
+
+APK normal R2 gerado com exit 0/PROTOTYPE_BUILD_OK em
+Temp/Polimento002Validation/Builds/T014R2/Android/QuackQuackT014.apk. SHA-256:
+5E844DEBFFD0054808756016D3249E57A45B2A89FB7AB6995F4FDE6ED31AF285.
+Usa o mesmo pacote normal de validação .t014; o runner .t014tests é separado.
+Nenhuma credencial, serial, log, resultado XML, cache, screenshot ou build é versionado.
+
+Fontes/asset abaixo conferidos por SHA-256 entre raiz e cópia que produziu os testes
+e as builds. .meta existentes preservados; apenas ResultsScreen.prefab precisou ser
+atualizado pelo Unity na R2. Cenas e ProjectSettings do produto permanecem inalterados.
+- Gameplay/Upgrades/ControlSettingsMenu.cs: 4E085CAD2F8F1570D7025AC8F22569BA9F5980D8B1124D22A59BB3B2EA20132D
+- Presentation/UI/ResultsView.cs: 57633CDC6C5B7F37547F8619D6FD1EA189DB12E2B02225D770DF4F67496C5317
+- Editor/ResultsSetup.cs: 9C383CF2F396903CA2575F5FEEE662A39D44F235E880EBB53BD7D8B09266A7B5
+- Prefabs/Prototype/ResultsScreen.prefab: EF09A0D129631C7AC9A5C05F2AB7D4C6FFCF761D5DBA358A25CCF286B6B03DA6
+- Tests/PlayMode/ControlSettingsFlowTests.cs: 4E76E6C13C1EDAD00CD5719DB9E1687261FC97CE42ED251A24C2E3CE19D2E4EE
+- Tests/PlayMode/RelicLoadoutFlowTests.cs: 334A252E46B3BAE42E235B869D59BAAAD4DDB0DFD5111B1D7971A7020AE19170
+- Tests/PlayMode/ResultsSceneFlowTests.cs: 95978486C829A2C991088D7F01997DA524A967083C3F826A8888DC329B96607D
+
+### DualSense / Windows Bluetooth — R2
+
+O usuário confirmou "Tudo funcionando corretamente" para o roteiro sem mouse de
+movimento/Cross, Options, Create/Share, propriedade da pausa e navegação/confirmar/
+retornar nas melhorias, pausa, Relíquias e resultados, com foco/rótulos adequados.
+Confirmou também o segundo roteiro de troca/restauração de atalho e desligar/religar
+nos cinco contextos, incluindo analógico/Quack pressionado, sem relatar exceções.
+**DualSense/Windows aprovado no roteiro C01–C09 relatado.**
+Genérico/Windows solicitado na sequência; genérico/Android continua não coberto.
+
+APK R2 atualizado com sucesso no S23 via instalação -r, mantendo o pacote normal de
+validação .t014. Não foi aberto para teste físico Android enquanto os controles estão
+em uso no Windows. Etapa Android pronta; dados/apps anteriores preservados.

@@ -74,10 +74,11 @@ namespace QuackQuack.Gameplay.Upgrades
             open.gameObject.SetActive(paused);
             if (paused) {
                 pauseCount = 0;
-                if (MenuNavigation.Usable(pause)) pauseActions[pauseCount++] = pause;
+                // Follow the visible top-to-bottom order across the two canvases.
                 if (relics != null && MenuNavigation.Usable(relics.OpenButton)) pauseActions[pauseCount++] = relics.OpenButton;
-                pauseActions[pauseCount++] = open;
+                if (MenuNavigation.Usable(pause)) pauseActions[pauseCount++] = pause;
                 if (MenuNavigation.Usable(abandon)) pauseActions[pauseCount++] = abandon;
+                pauseActions[pauseCount++] = open;
                 // This short menu can change availability as another modal closes.
                 MenuNavigation.Graph(pauseActions, pauseCount);
                 for (int i = 0; i < pauseCount; i++) pauseActions[i].GetComponent<MenuCancelRelay>().Target = gameObject;

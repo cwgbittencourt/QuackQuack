@@ -226,6 +226,12 @@ namespace QuackQuack.Tests.PlayMode
             yield return null; yield return null; // Hold for two frames: one edge must remain one action.
             InputSystem.QueueStateEvent(pad, new GamepadState()); yield return null;
         }
+        public IEnumerator Tilt(Vector2 direction)
+        {
+            InputSystem.QueueStateEvent(pad, new GamepadState()); yield return null;
+            InputSystem.QueueStateEvent(pad, new GamepadState { leftStick = direction }); yield return null; yield return null;
+            InputSystem.QueueStateEvent(pad, new GamepadState()); yield return null;
+        }
         public void Dispose()
         {
             if (pad.added) InputSystem.RemoveDevice(pad);

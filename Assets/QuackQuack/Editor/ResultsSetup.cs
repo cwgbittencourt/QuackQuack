@@ -11,6 +11,7 @@ namespace QuackQuack.Editor
 {
     public static class ResultsSetup
     {
+        private const string NavigationHint = "Esquerda/direita: colunas e ações  •  Cima/baixo: rolar coluna  •  Retornar: focar ações";
         public const string ProgressPath = "Assets/QuackQuack/Content/Encounters/ResultsProgression.asset";
         public const string PrefabPath = "Assets/QuackQuack/Prefabs/Prototype/ResultsScreen.prefab";
         [MenuItem("QuackQuack/Build T061 results screen")]
@@ -40,7 +41,7 @@ namespace QuackQuack.Editor
             var status = Label("Save status", panel, 72, -934, 950, 54, 22, "Progresso salvo");
             var retry = Button(panel, "TENTAR SALVAR", 1080, -934, 320, new Color(0.12f, 0.28f, 0.32f), Color.white);
             var restart = Button(panel, "JOGAR NOVAMENTE", 1424, -934, 424, new Color(0.98f, 0.81f, 0.35f), new Color(0.06f, 0.1f, 0.12f));
-            Label("Scroll hint", panel, 72, -1016, 1776, 30, 18, "Role cada coluna para revisar os detalhes da partida.").color = new Color(0.56f, 0.67f, 0.7f);
+            Label("Scroll hint", panel, 72, -1016, 1776, 30, 18, NavigationHint).color = new Color(0.56f, 0.67f, 0.7f);
             var view = root.GetComponent<ResultsView>();
             Set(view, "panel", p => p.objectReferenceValue = panel.gameObject); Set(view, "title", p => p.objectReferenceValue = title); Set(view, "summary", p => p.objectReferenceValue = summary);
             Set(view, "combat", p => p.objectReferenceValue = texts[0]); Set(view, "build", p => p.objectReferenceValue = texts[1]); Set(view, "rewards", p => p.objectReferenceValue = texts[2]);
@@ -49,6 +50,17 @@ namespace QuackQuack.Editor
             panel.gameObject.SetActive(false); IntegratedUiSetup.Configure(root);
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath); Object.DestroyImmediate(root);
             var scene = EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/LakeRun.unity"); Attach(); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+        }
+        public static void UpdateNavigation()
+        {
+            var root = PrefabUtility.LoadPrefabContents(PrefabPath);
+            try {
+                foreach (var button in root.GetComponentsInChildren<Button>(true)) { button.targetGraphic = button.GetComponent<Image>(); MenuNavigation.Prepare(button); }
+                foreach (var bar in root.GetComponentsInChildren<Scrollbar>(true)) MenuNavigation.Prepare(bar);
+                foreach (var text in root.GetComponentsInChildren<Text>(true)) if (text.name == "Scroll hint") text.text = NavigationHint;
+                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+            } finally { PrefabUtility.UnloadPrefabContents(root); }
+            AssetDatabase.SaveAssets(); Debug.Log("T014_RESULTS_NAVIGATION_SAVED");
         }
         public static void Attach()
         {
@@ -69,7 +81,7 @@ namespace QuackQuack.Editor
             var bar = Rect("Scrollbar", rect, new Vector2(1, 0), Vector2.one); bar.pivot = new Vector2(1, 0.5f); bar.sizeDelta = new Vector2(10, -40); bar.anchoredPosition = new Vector2(-8, 0);
             bar.gameObject.AddComponent<Image>().color = new Color(0.04f, 0.09f, 0.11f);
             var handle = Rect("Handle", bar, Vector2.zero, Vector2.one); var image = handle.gameObject.AddComponent<Image>(); image.color = new Color(0.25f, 0.48f, 0.52f);
-            var scrollbar = bar.gameObject.AddComponent<Scrollbar>(); scrollbar.direction = Scrollbar.Direction.BottomToTop; scrollbar.handleRect = handle; scrollbar.targetGraphic = image;
+            var scrollbar = bar.gameObject.AddComponent<Scrollbar>(); scrollbar.direction = Scrollbar.Direction.BottomToTop; scrollbar.handleRect = handle; scrollbar.targetGraphic = image; MenuNavigation.Prepare(scrollbar);
             scroll.viewport = viewport; scroll.content = content; scroll.verticalScrollbar = scrollbar; scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
             return text;
         }
@@ -86,7 +98,7 @@ namespace QuackQuack.Editor
         { text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); text.fontSize = size; text.color = new Color(0.93f, 0.95f, 0.9f); text.supportRichText = true; text.alignment = TextAnchor.UpperLeft; text.horizontalOverflow = HorizontalWrapMode.Wrap; text.verticalOverflow = VerticalWrapMode.Truncate; text.raycastTarget = false; }
         private static Button Button(Transform parent, string title, float x, float y, float width, Color background, Color foreground)
         {
-            var rect = Box(title, parent, x, y, width, 64); rect.GetComponent<Image>().color = background; var button = rect.gameObject.AddComponent<Button>();
+            var rect = Box(title, parent, x, y, width, 64); rect.GetComponent<Image>().color = background; var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = rect.GetComponent<Image>(); MenuNavigation.Prepare(button);
             var text = Label("Label", rect, 8, -10, width - 16, 44, 24, title); text.color = foreground; text.alignment = TextAnchor.MiddleCenter; return button;
         }
         private static void Set(Object target, string field, System.Action<SerializedProperty> assign)

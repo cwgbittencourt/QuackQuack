@@ -8,13 +8,16 @@ using UnityEngine.UI;
 
 namespace QuackQuack.Presentation.UI
 {
-    public sealed class ResultsView : MonoBehaviour
+    public sealed class ResultsView : MonoBehaviour, ICancelHandler
     {
         [SerializeField] private GameObject panel;
         [SerializeField] private Text title, summary, combat, build, rewards, saveStatus;
         [SerializeField] private Button retry, restart;
         [SerializeField] private ScrollRect[] scrolls;
         private Action retryAction, restartAction;
+        private readonly Selectable[] navigation = new Selectable[5];
+        private int navigationCount;
+        private bool closing;
         public bool IsVisible => panel != null && panel.activeSelf;
         public string TitleText => title.text;
         public string SummaryText => summary.text;
@@ -28,13 +31,13 @@ namespace QuackQuack.Presentation.UI
         {
             Unbind(); retryAction = retrySave; restartAction = playAgain;
             retry.onClick.AddListener(Retry); restart.onClick.AddListener(Restart);
-            panel.SetActive(false);
+            closing = false; panel.SetActive(false);
         }
         public void Show(RunResult result, RunProgressReceipt progress, Func<string, string> resolve, bool saved)
         {
             if (result == null || progress == null) throw new ArgumentNullException("Result presentation");
             string Name(string id) => Escape(resolve == null ? id : resolve(id));
-            panel.SetActive(true);
+            closing = false; panel.SetActive(true);
             title.text = result.IsVictory ? "VITÓRIA" : result.Outcome == RunPhase.Abandoned ? "PARTIDA ABANDONADA" : "DERROTA";
             title.color = result.IsVictory ? new Color(1, 0.85f, 0.35f) : result.Outcome == RunPhase.Abandoned ? new Color(0.68f, 0.85f, 0.9f) : new Color(1, 0.5f, 0.48f);
             summary.text = "TEMPO  " + Time(result.DurationSeconds) + "     •     CHEFE  " + (result.BossReached ? (string.IsNullOrEmpty(result.BossId) ? "Alcançado" : Name(result.BossId)) : "Não alcançado") + "     •     SEED  " + result.Seed;
@@ -85,9 +88,61 @@ namespace QuackQuack.Presentation.UI
             saveStatus.color = saved ? new Color(0.56f, 0.83f, 0.65f) : new Color(1, 0.7f, 0.45f);
             retry.interactable = !saved; restart.interactable = true;
             Canvas.ForceUpdateCanvases(); if (scrolls != null) foreach (var scroll in scrolls) scroll.verticalNormalizedPosition = 1;
+            RefreshNavigation(true);
             if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject((saved ? restart : retry).gameObject);
         }
-        public void BeginRestart() { retry.interactable = restart.interactable = false; }
+        private void OnEnable()
+        {
+            // Register after uGUI layout so AutoHide bars cannot leave stale links.
+            CanvasUpdateRegistry.IsRebuildingLayout();
+            Canvas.willRenderCanvases += RefreshFocus;
+        }
+        private void OnDisable() => Canvas.willRenderCanvases -= RefreshFocus;
+        private void LateUpdate() => RefreshFocus();
+        private void RefreshFocus()
+        {
+            if (!IsVisible || closing) return;
+            RefreshNavigation(); MenuNavigation.Repair(navigation, navigationCount);
+        }
+        private void AddNavigation(Selectable value, ref int count, ref bool changed)
+        {
+            if (!MenuNavigation.Usable(value)) return;
+            if (navigation[count] != value) changed = true;
+            navigation[count++] = value;
+        }
+        private void RefreshNavigation(bool force = false)
+        {
+            int count = 0; bool changed = force; Selectable firstBar = null, lastBar = null;
+            if (scrolls != null) foreach (var scroll in scrolls) {
+                var bar = scroll != null ? scroll.verticalScrollbar : null;
+                if (!MenuNavigation.Usable(bar)) continue;
+                if (firstBar == null) firstBar = bar; lastBar = bar;
+                AddNavigation(bar, ref count, ref changed);
+            }
+            AddNavigation(retry, ref count, ref changed); AddNavigation(restart, ref count, ref changed);
+            if (count != navigationCount) changed = true;
+            navigationCount = count;
+            if (!changed || count == 0) return;
+            MenuNavigation.Graph(navigation, count);
+            // Scrollbar.OnMove needs null vertical links to retain native up/down scrolling.
+            if (scrolls != null) foreach (var scroll in scrolls) {
+                var bar = scroll != null ? scroll.verticalScrollbar : null;
+                if (!MenuNavigation.Usable(bar)) continue;
+                var links = bar.navigation; links.selectOnUp = links.selectOnDown = null; bar.navigation = links;
+            }
+            if (firstBar != null) foreach (var action in new[] { retry, restart }) {
+                if (!MenuNavigation.Usable(action)) continue;
+                var links = action.navigation; links.selectOnUp = lastBar; links.selectOnDown = firstBar; action.navigation = links;
+            }
+        }
+        public void OnCancel(BaseEventData data)
+        {
+            if (!IsVisible || closing) return;
+            if (MenuNavigation.Selected is Scrollbar) MenuNavigation.Restore(restart, retry);
+            else MenuNavigation.Repair(navigation, navigationCount);
+            data.Use();
+        }
+        public void BeginRestart() { closing = true; retry.interactable = restart.interactable = false; }
         private void Retry() { if (retry.interactable) retryAction?.Invoke(); }
         private void Restart() { if (restart.interactable) restartAction?.Invoke(); }
         public void Unbind() { if (retry != null) retry.onClick.RemoveListener(Retry); if (restart != null) restart.onClick.RemoveListener(Restart); retryAction = restartAction = null; }

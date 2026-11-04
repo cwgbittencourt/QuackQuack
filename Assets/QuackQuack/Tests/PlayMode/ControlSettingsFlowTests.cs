@@ -24,6 +24,7 @@ namespace QuackQuack.Tests.PlayMode
     public sealed class ControlSettingsFlowTests
     {
         private static readonly Vector2Int[] Sizes = { new Vector2Int(1920,1080), new Vector2Int(2160,1080), new Vector2Int(2340,1080), new Vector2Int(1440,1080) };
+        private static readonly string[] VerticalInputs = { "DpadDown", "DpadUp", "StickDown", "StickUp" };
         private ControlSettingsMenu menu;
         private MenuRegressionInput driver;
         private RunDirector director;
@@ -65,6 +66,22 @@ namespace QuackQuack.Tests.PlayMode
             yield return driver.Press(GamepadButton.East); Assert.That(menu.IsVisible,Is.False); Assert.That(Run.Phase,Is.EqualTo(RunPhase.Paused));
             Assert.That(EventSystem.current.currentSelectedGameObject,Is.EqualTo(Button("Open settings").gameObject));
             yield return driver.Press(GamepadButton.East); Assert.That(Run.IsSimulating,Is.True);
+        }
+        [UnityTest] public IEnumerator PauseVerticalNavigationMatchesScreenOrder([ValueSource(nameof(VerticalInputs))] string source)
+        {
+            director.TogglePause(); yield return null; Canvas.ForceUpdateCanvases();
+            var controls=GameObject.Find("Run controls").GetComponentsInChildren<Button>();
+            var ordered=new[] { Object.FindAnyObjectByType<RelicLoadoutView>().OpenButton,
+                controls.Single(b=>b.name=="PAUSAR"), controls.Single(b=>b.name=="ABANDONAR"), Button("Open settings") };
+            for(int i=1;i<ordered.Length;i++) Assert.That(ordered[i].transform.position.y,Is.LessThan(ordered[i-1].transform.position.y),"fixture must follow visual top-to-bottom order");
+            bool down=source.EndsWith("Down",StringComparison.Ordinal);
+            for(int i=0;i<ordered.Length;i++) {
+                ordered[i].Select();
+                if(source.StartsWith("Dpad",StringComparison.Ordinal)) yield return driver.Press(down?GamepadButton.DpadDown:GamepadButton.DpadUp);
+                else yield return driver.Tilt(down?Vector2.down:Vector2.up);
+                Assert.That(EventSystem.current.currentSelectedGameObject,Is.EqualTo(ordered[(i+(down?1:ordered.Length-1))%ordered.Length].gameObject),source+" from "+ordered[i].name);
+                Assert.That(Run.Phase,Is.EqualTo(RunPhase.Paused));
+            }
         }
         [UnityTest] public IEnumerator ProfileOwnedPauseReturnsToBossAndDoesNotQuack()
         {

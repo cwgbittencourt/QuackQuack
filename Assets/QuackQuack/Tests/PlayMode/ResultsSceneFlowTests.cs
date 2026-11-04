@@ -2,6 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.LowLevel;
+using QuackQuack.Presentation.UI;
 using NUnit.Framework;
 using QuackQuack.Core.Run;
 using QuackQuack.Gameplay.Player;
@@ -17,6 +21,10 @@ namespace QuackQuack.Tests.PlayMode
     [Category("ResultsRuntime")]
     public class ResultsSceneFlowTests
     {
+        private static readonly bool[] SaveStates = { false, true };
+        private static readonly string[] ScrollInputs = { "Dpad", "Stick" };
+        private MenuRegressionInput driver;
+        private int controllerRetries, controllerRestarts;
         private string directory, path;
         private Func<string> previousPath;
         private RunDirector director;
@@ -33,6 +41,7 @@ namespace QuackQuack.Tests.PlayMode
         }
         [UnityTearDown] public IEnumerator Cleanup()
         {
+            driver?.Dispose(); driver = null;
             var live = Object.FindAnyObjectByType<RunDirector>(); if (live != null) live.TryAbandon();
             if (GameBootstrap.Instance != null) Object.Destroy(GameBootstrap.Instance.gameObject);
             yield return null;
@@ -44,6 +53,82 @@ namespace QuackQuack.Tests.PlayMode
             string resolved = Path.GetFullPath(directory), temp = Path.GetFullPath(Application.temporaryCachePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
             Assert.That(resolved.StartsWith(temp, StringComparison.OrdinalIgnoreCase), Is.True); Assert.That(Path.GetFileName(resolved), Does.StartWith("QuackQuack-T061Scene-"));
             if (Directory.Exists(resolved)) Directory.Delete(resolved, true);
+        }
+        private IEnumerator ControllerResults(bool saved)
+        {
+            driver=new MenuRegressionInput(); director.TryAbandon(); yield return null;
+            controllerRetries=controllerRestarts=0;
+            bridge.View.Bind(()=>controllerRetries++,()=>controllerRestarts++);
+            bridge.View.Show(director.Result,bridge.Committed.Receipt,id=>id,saved);
+            foreach(var scroll in bridge.View.GetComponentsInChildren<ScrollRect>()) scroll.content.GetComponent<Text>().text += string.Concat(Enumerable.Repeat("\nDetalhe da partida",80));
+            Canvas.ForceUpdateCanvases(); yield return null; yield return null; Canvas.ForceUpdateCanvases();
+            Assert.That(bridge.View.GetComponentsInChildren<Scrollbar>().Length,Is.EqualTo(3));
+        }
+        private Button ResultButton(string name) => bridge.View.GetComponentsInChildren<Button>(true).Single(b=>b.name==name);
+        [UnityTest] public IEnumerator ResultsControllerCanReachActionsFromEveryColumn([ValueSource(nameof(SaveStates))] bool saved)
+        {
+            yield return ControllerResults(saved);
+            var restart=ResultButton("JOGAR NOVAMENTE"); var retry=ResultButton("TENTAR SALVAR");
+            foreach(var bar in bridge.View.GetComponentsInChildren<Scrollbar>()) {
+                bar.Select(); bool reachedRestart=false, reachedRetry=false;
+                for(int i=0;i<5;i++) {
+                    yield return driver.Press(GamepadButton.DpadRight);
+                    var selected=EventSystem.current.currentSelectedGameObject;
+                    reachedRestart |= selected==restart.gameObject; reachedRetry |= selected==retry.gameObject;
+                    MenuRegressionInput.AssertUsableFocus(bridge.View.transform);
+                }
+                Assert.That(reachedRestart,Is.True,"Right navigation trapped in columns");
+                Assert.That(reachedRetry,Is.EqualTo(!saved),"Save action must be reachable only when available");
+            }
+            MenuRegressionInput.AssertReachableActions(bridge.View.transform,restart);
+            if(!saved) {retry.Select(); yield return driver.Press(GamepadButton.South); Assert.That(controllerRetries,Is.EqualTo(1));}
+            restart.Select(); yield return driver.Press(GamepadButton.South);
+            Assert.That(controllerRestarts,Is.EqualTo(1)); Assert.That(GameBootstrap.Instance.Run.Phase,Is.EqualTo(RunPhase.Results));
+        }
+        [UnityTest] public IEnumerator ResultsScrollPreservesVerticalAxisAndCancelReachesActions([ValueSource(nameof(ScrollInputs))] string source)
+        {
+            yield return ControllerResults(true);
+            foreach(var bar in bridge.View.GetComponentsInChildren<Scrollbar>()) {
+                bar.value=1; bar.Select();
+                if(source=="Dpad")yield return driver.Press(GamepadButton.DpadDown); else yield return driver.Tilt(Vector2.down);
+                Assert.That(EventSystem.current.currentSelectedGameObject,Is.EqualTo(bar.gameObject)); Assert.That(bar.value,Is.LessThan(1));
+                yield return driver.Press(GamepadButton.East);
+                Assert.That(EventSystem.current.currentSelectedGameObject,Is.EqualTo(ResultButton("JOGAR NOVAMENTE").gameObject));
+            }
+            EventSystem.current.SetSelectedGameObject(null); driver.Dispose(); driver=new MenuRegressionInput(); yield return null;
+            MenuRegressionInput.AssertUsableFocus(bridge.View.transform);
+            Assert.That(controllerRetries+controllerRestarts,Is.Zero,"Cancel/hotplug must not activate an action");
+        }
+        [UnityTest] public IEnumerator ResultsHiddenBarsAndSavedRetryCannotTrapFocus()
+        {
+            yield return ControllerResults(false);
+            var bar=bridge.View.GetComponentsInChildren<Scrollbar>()[0]; bar.Select();
+            foreach(var scroll in bridge.View.GetComponentsInChildren<ScrollRect>()) scroll.content.GetComponent<Text>().text="";
+            Canvas.ForceUpdateCanvases(); yield return null; yield return null; Canvas.ForceUpdateCanvases();
+            MenuRegressionInput.AssertUsableFocus(bridge.View.transform);
+            bridge.View.Show(director.Result,bridge.Committed.Receipt,id=>id,true); yield return null;
+            Assert.That(ResultButton("TENTAR SALVAR").IsInteractable(),Is.False);
+            MenuRegressionInput.AssertReachableActions(bridge.View.transform,ResultButton("JOGAR NOVAMENTE"));
+            Assert.That(controllerRetries+controllerRestarts,Is.Zero);
+        }
+        [UnityTest] public IEnumerator ResultsControllerRetrySavesWithoutImplicitRestart()
+        {
+            driver=new MenuRegressionInput(); director.Persist();
+            string held=path+".controller-held";
+            Assert.That(Path.GetDirectoryName(Path.GetFullPath(held)),Is.EqualTo(Path.GetFullPath(directory)));
+            File.Move(path,held);
+            try {
+                Directory.CreateDirectory(path); director.TryAbandon(); yield return null;
+                Assert.That(bridge.View.CanRetry,Is.True);
+            } finally {
+                if(Directory.Exists(path))Directory.Delete(path,false);
+                File.Move(held,path);
+            }
+            string original=director.RunId; ResultButton("TENTAR SALVAR").Select(); yield return driver.Press(GamepadButton.South);
+            Assert.That(bridge.View.CanRetry,Is.False); Assert.That(bridge.View.CanRestart,Is.True);
+            Assert.That(director.RunId,Is.EqualTo(original)); Assert.That(GameBootstrap.Instance.Run.Phase,Is.EqualTo(RunPhase.Results));
+            Assert.That(Service().Load().Data.Progress.Runs,Is.EqualTo(1));
+            Assert.That(EventSystem.current.currentSelectedGameObject,Is.EqualTo(ResultButton("JOGAR NOVAMENTE").gameObject));
         }
         private JsonSaveService Service()
         { var ids = new List<string>(); foreach (var d in director.RelicCatalog.Relics) ids.Add(d.Id); return new JsonSaveService(path, ids.ToArray()); }
