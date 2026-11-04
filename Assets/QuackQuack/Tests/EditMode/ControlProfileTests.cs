@@ -87,6 +87,12 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(next.Binding(ProfileAction.Relics), Is.EqualTo("<Gamepad>/rightShoulder"));
         }
         [Test] public void OversizedFileFallsBack() { File.WriteAllText(Path.Combine(directory, ControlProfileStore.FileName), new string('x', 9000)); Assert.That(new ControlProfileStore(directory).Recovered, Is.True); }
+        [Test] public void MovingQuackCannotFreeUiSubmitForPauseOrRelics()
+        {
+            var profile = Assign(ProfileAction.Quack, "<Gamepad>/buttonNorth");
+            Assert.That(profile.TryAssign(ProfileAction.Pause, "<Gamepad>/buttonSouth", false, out _), Is.False);
+            Assert.That(profile.TryAssign(ProfileAction.Relics, "<Gamepad>/buttonSouth", false, out _), Is.False);
+        }
         [Test] public void InvalidEnumsAreRejected()
         {
             Assert.That(new ControlProfile().TryAssign((ProfileAction)99, "<Gamepad>/rightShoulder", false, out _), Is.False);

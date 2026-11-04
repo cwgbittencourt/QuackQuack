@@ -64,7 +64,7 @@ namespace QuackQuack.Editor
             serialized.FindProperty("view").objectReferenceValue = ui.GetComponent<RelicLoadoutView>(); serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
         }
-        private static void BuildView()
+        public static void BuildView()
         {
             var root = new GameObject("Relic loadout", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             root.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay; root.GetComponent<Canvas>().sortingOrder = 250;
@@ -93,7 +93,7 @@ namespace QuackQuack.Editor
         private static Text Text(string name,Transform parent,Vector2 pos,Vector2 size,int fontSize,string value)
         {var text=Rect(name,parent,pos,size).gameObject.AddComponent<Text>();text.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");text.fontSize=fontSize;text.text=value;text.color=Color.white;text.alignment=TextAnchor.MiddleLeft;text.raycastTarget=false;return text;}
         private static Button Button(string name,Transform parent,Vector2 pos,Vector2 size,string label)
-        {var rect=Rect(name,parent,pos,size);var image=rect.gameObject.AddComponent<Image>();image.color=new Color(0.15f,0.36f,0.38f);var button=rect.gameObject.AddComponent<Button>();button.targetGraphic=image;Text("Label",rect,Vector2.zero,size,23,label).alignment=TextAnchor.MiddleCenter;return button;}
+        {var rect=Rect(name,parent,pos,size);var image=rect.gameObject.AddComponent<Image>();image.color=new Color(0.15f,0.36f,0.38f);var button=rect.gameObject.AddComponent<Button>();button.targetGraphic=image;MenuNavigation.Prepare(button);Text("Label",rect,Vector2.zero,size,23,label).alignment=TextAnchor.MiddleCenter;return button;}
         public static void Preview()
         {
             EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/Lake.unity");

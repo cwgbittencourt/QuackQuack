@@ -135,7 +135,8 @@ namespace QuackQuack.Tests.PlayMode
             yield return LoadLake();
             var player = Object.FindAnyObjectByType<PlayerController>();
             Assert.That(InputOf(player), Is.InstanceOf<UnifiedPlayerInput>());
-            var selected = new GameObject("T067 selected UI button", typeof(RectTransform), typeof(Button)).GetComponent<Button>();
+            // Use an authored pause-menu action; unrelated background buttons are excluded by T013.
+            var selected = Object.FindAnyObjectByType<QuackQuack.Presentation.UI.RelicLoadoutView>().OpenButton;
             int clicks = 0; selected.onClick.AddListener(() => clicks++);
             EventSystem.current.SetSelectedGameObject(selected.gameObject);
             int quacks = 0; GameBootstrap.Instance.Events.Combat += value => { if (value.Type == CombatEventType.QuackActivated) quacks++; };

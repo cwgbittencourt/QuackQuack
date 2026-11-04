@@ -35,6 +35,8 @@ namespace QuackQuack.Platform.Input
         {
             if (version != CurrentVersion || !Enum.IsDefined(typeof(ControllerFamily), family)) return false;
             if (!Allowed(quack, false) || !Allowed(pause, true) || !Allowed(relics, true)) return false;
+            // South is UI Submit: menu shortcuts must never also confirm the focused action.
+            if (pause == "<Gamepad>/buttonSouth" || relics == "<Gamepad>/buttonSouth") return false;
             return (pause.Length == 0 || pause != quack) && (relics.Length == 0 || relics != quack) &&
                 (pause.Length == 0 || relics.Length == 0 || pause != relics);
         }

@@ -13,7 +13,7 @@ namespace QuackQuack.Editor
         [MenuItem("QuackQuack/Repair integrated gameplay UI")]
         public static void Build()
         {
-            foreach (string path in new[] { MobileControlsSetup.PrefabPath, RelicSetup.PrefabPath, UpgradeSelectionSetup.PrefabPath, ResultsSetup.PrefabPath })
+            foreach (string path in new[] { MobileControlsSetup.PrefabPath, RelicSetup.PrefabPath, UpgradeSelectionSetup.PrefabPath, ResultsSetup.PrefabPath, PolishUiSetup.ProfilePath })
             {
                 var root = PrefabUtility.LoadPrefabContents(path);
                 try { Configure(root); PrefabUtility.SaveAsPrefabAsset(root,path); }
@@ -43,6 +43,7 @@ namespace QuackQuack.Editor
                 FitModal(safe.Find("Panel") as RectTransform);
             }
             if (root.GetComponent<UpgradeSelectionView>() != null) FitModal(safe.Find("Selection modal") as RectTransform);
+            if (root.GetComponent<QuackQuack.Gameplay.Upgrades.ControlSettingsMenu>() != null) FitModal(safe.Find("Profile panel") as RectTransform);
             if (root.GetComponent<ResultsView>() != null) FitModal(safe.Find("Results panel") as RectTransform);
         }
 

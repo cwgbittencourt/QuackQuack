@@ -36,6 +36,7 @@ namespace QuackQuack.Gameplay.Upgrades
             }
             player.Relics = Loadout; progression.Runner.Relics = Loadout;
             UnlockProgress(); view.Bind(Loadout, ids, names, descriptions, requirements, Toggle, Show);
+            player.RelicsRequested += ToggleVisible;
             run.Changed += PhaseChanged; Ready = true; PhaseChanged(run.Phase);
         }
         private void Update() { if (Ready && run.IsSimulating) UnlockProgress(); }
@@ -52,6 +53,7 @@ namespace QuackQuack.Gameplay.Upgrades
             if (!Ready || !view.IsVisible || run.Phase != RunPhase.Paused) return false;
             return Loadout.IsEquipped(id) ? Loadout.Unequip(id) : Loadout.Equip(id);
         }
+        private void ToggleVisible() => Show(!view.IsVisible);
         public void Show(bool visible)
         {
             if (!Ready) return;
@@ -79,7 +81,7 @@ namespace QuackQuack.Gameplay.Upgrades
         {
             if (run != null) run.Changed -= PhaseChanged;
             if (view != null) view.Unbind();
-            if (player != null) player.Relics = null;
+            if (player != null) { player.RelicsRequested -= ToggleVisible; player.Relics = null; }
             if (progression != null && progression.Runner != null) progression.Runner.Relics = null;
         }
     }

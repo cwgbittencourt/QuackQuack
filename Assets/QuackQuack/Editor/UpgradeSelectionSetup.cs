@@ -60,7 +60,7 @@ namespace QuackQuack.Editor
             EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
         }
 
-        private static void BuildView()
+        public static void BuildView()
         {
             var root = new GameObject("Upgrade selection", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             var canvas = root.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = 300;
@@ -110,7 +110,7 @@ namespace QuackQuack.Editor
         {
             var rect = Rect(name, parent, Vector2.one * 0.5f, Vector2.one * 0.5f, position, size);
             var image = rect.gameObject.AddComponent<Image>(); image.color = new Color(0.19f, 0.36f, 0.4f);
-            var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = image;
+            var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = image; MenuNavigation.Prepare(button);
             var text = Label("Label", rect, Vector2.zero, size, 24, label); text.alignment = TextAnchor.MiddleCenter;
             return button;
         }

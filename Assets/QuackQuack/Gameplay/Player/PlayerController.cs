@@ -35,6 +35,9 @@ namespace QuackQuack.Gameplay.Player
         private readonly Collider2D[] overlaps = new Collider2D[128];
         private readonly QuackSystem quack = new QuackSystem();
         public PlayerState State { get; private set; }
+        public event System.Action RelicsRequested;
+        private bool menuInputBlocked;
+        public void SetMenuInputBlocked(bool blocked) { menuInputBlocked = blocked; RefreshInputContext(); ClearCommands(); }
         public RelicLoadout Relics { get; set; }
         public float EnemySlowMultiplier {get;private set;}=1;
         public void SetEnemySlow(float multiplier)
@@ -94,6 +97,8 @@ namespace QuackQuack.Gameplay.Player
         public void ApplyCommand(PlayerCommand command)
         {
             if (State == null || !isActiveAndEnabled) return;
+            if (menuInputBlocked) { ClearCommands(); return; }
+            if (command.RelicsPressed && !command.PausePressed) { RelicsRequested?.Invoke(); ClearCommands(); return; }
             if (command.PausePressed)
             {
                 if (run.IsSimulating) run.TryTransition(RunPhase.Paused);
@@ -236,8 +241,8 @@ namespace QuackQuack.Gameplay.Player
             move = Vector2.zero; requestedQuack = false;
             if (body != null) body.linearVelocity = Vector2.zero;
         }
-        private void RefreshInputContext() => ownedInput?.SetContext(isActiveAndEnabled && run != null && run.IsSimulating,
-            isActiveAndEnabled && run != null && run.Phase == RunPhase.Paused);
+        private void RefreshInputContext() => ownedInput?.SetContext(!menuInputBlocked && isActiveAndEnabled && run != null && run.IsSimulating,
+            !menuInputBlocked && isActiveAndEnabled && run != null && run.Phase == RunPhase.Paused);
         private void OnDisable() { ClearCommands(); ownedInput?.SetContext(false, false); }
         private void OnEnable()
         {

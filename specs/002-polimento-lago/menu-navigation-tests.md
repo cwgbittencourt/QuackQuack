@@ -1,5 +1,7 @@
 # Regressões de navegação e pausa dos menus — T009
 
+Estado atual: integração T013 concluída e regressões de menus corrigidas. Veja [menu-integration.md](menu-integration.md). O conteúdo abaixo preserva a entrega e os resultados históricos da task indicada no título.
+
 **Data**: 04/11/2026. **Base**: c96d516 (T008).
 **Escopo**: testes antes da implementação de FR-014/015, sem corrigir código de produção.
 Arquivos: RelicLoadoutFlowTests.cs e UpgradeSelectionTests.cs, preservando os .meta.

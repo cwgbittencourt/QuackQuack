@@ -13,6 +13,7 @@ namespace QuackQuack.Presentation.UI
         [SerializeField] private Selectable pauseAlternative, relicsAlternative;
         private ControlProfileStore store;
         private bool bound;
+        public void SetAlternatives(Selectable pauseAccess, Selectable relicsAccess) { pauseAlternative = pauseAccess; relicsAlternative = relicsAccess; }
         public bool HasPauseAlternative => Usable(pauseAlternative);
         public bool HasRelicsAlternative => Usable(relicsAlternative);
         private static bool Usable(Selectable target) => target != null && target.IsActive() && target.IsInteractable();
@@ -62,7 +63,7 @@ namespace QuackQuack.Presentation.UI
             SetLabel(quack, "QUACK: " + profile.Label(ProfileAction.Quack, UnityEngine.InputSystem.Gamepad.current));
             SetLabel(pause, "PAUSA: " + profile.Label(ProfileAction.Pause, UnityEngine.InputSystem.Gamepad.current));
             SetLabel(relics, "RELÍQUIAS: " + profile.Label(ProfileAction.Relics, UnityEngine.InputSystem.Gamepad.current));
-            SetLabel(family, "CONTROLE: " + profile.Family);
+            SetLabel(family, "CONTROLE: " + (profile.Family == ControllerFamily.Automatic ? "AUTOMÁTICO" : profile.Family == ControllerFamily.Generic ? "GENÉRICO" : profile.Family.ToString().ToUpperInvariant()));
         }
         private static void SetLabel(Button button, string label) { if (button != null) { var text = button.GetComponentInChildren<Text>(); if (text != null) text.text = label; } }
         private void Message(string text) { if (status != null) status.text = text; }

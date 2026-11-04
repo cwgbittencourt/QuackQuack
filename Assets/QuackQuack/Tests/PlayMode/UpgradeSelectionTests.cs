@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Linq;
@@ -140,9 +139,13 @@ namespace QuackQuack.Tests.PlayMode
         {
             Open("bumerangue");
             var background = InputSystem.settings.backgroundBehavior;
+#if UNITY_EDITOR
             var editorRouting = InputSystem.settings.editorInputBehaviorInPlayMode;
+#endif
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+#if UNITY_EDITOR
             InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+#endif
             var keyboard = InputSystem.AddDevice<Keyboard>();
             try
             {
@@ -165,7 +168,9 @@ namespace QuackQuack.Tests.PlayMode
             finally
             {
                 InputSystem.RemoveDevice(keyboard); InputSystem.settings.backgroundBehavior = background;
+#if UNITY_EDITOR
                 InputSystem.settings.editorInputBehaviorInPlayMode = editorRouting;
+#endif
             }
         }
 
@@ -269,4 +274,3 @@ namespace QuackQuack.Tests.PlayMode
         }
     }
 }
-#endif

@@ -15,7 +15,7 @@ namespace QuackQuack.Presentation.UI
         public Button choose, banish;
     }
 
-    public sealed class UpgradeSelectionView : MonoBehaviour
+    public sealed class UpgradeSelectionView : MonoBehaviour, ICancelHandler
     {
         [SerializeField] private GameObject panel;
         [SerializeField] private Text heading, resources;
@@ -26,6 +26,9 @@ namespace QuackQuack.Presentation.UI
         private Func<string, bool> rerollCommand, skipCommand;
         private readonly UnityAction[] chooseHandlers = new UnityAction[3], banishHandlers = new UnityAction[3];
         private bool wired;
+        private Selectable previousFocus;
+        private readonly Selectable[] navigation = new Selectable[8];
+        private int navigationCount;
         private int commandFrame = -1;
         public UpgradeSelectionSnapshot Displayed { get; private set; }
         public bool IsVisible => panel != null && panel.activeSelf;
@@ -51,7 +54,7 @@ namespace QuackQuack.Presentation.UI
             }
             reroll.onClick.AddListener(Reroll); skip.onClick.AddListener(Skip); wired = true;
         }
-        private void LateUpdate() { Refresh(); }
+        private void LateUpdate() { Refresh(); if (IsVisible) MenuNavigation.Repair(navigation, navigationCount); }
         public void Refresh() { if (read != null) Render(read()); }
         public void Render(UpgradeSelectionSnapshot value)
         {
@@ -60,10 +63,11 @@ namespace QuackQuack.Presentation.UI
             string previousId = Displayed == null ? null : Displayed.OfferId;
             Displayed = value;
             bool visible = value != null && value.Visible;
+            if (visible && !wasVisible) previousFocus = MenuNavigation.Selected;
             panel.SetActive(visible);
             if (!visible)
             {
-                if (wasVisible && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
+                if (wasVisible) MenuNavigation.Restore(previousFocus);
                 return;
             }
             heading.text = "ESCOLHA UMA MELHORIA  •  NÍVEL " + value.Level;
@@ -80,8 +84,30 @@ namespace QuackQuack.Presentation.UI
                 ui.choose.interactable = true; ui.banish.interactable = value.Banishes > 0;
             }
             reroll.interactable = value.Rerolls > 0; skip.interactable = true;
+            RebuildNavigation();
             if ((!wasVisible || previousId != value.OfferId) && value.Cards.Count > 0 && EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(cards[0].choose.gameObject);
+        }
+        private void RebuildNavigation()
+        {
+            navigationCount = 0;
+            foreach (var card in cards) {
+                MenuNavigation.Prepare(card.choose); MenuNavigation.Prepare(card.banish);
+                card.choose.navigation = card.banish.navigation = new Navigation { mode = Navigation.Mode.None };
+                if (MenuNavigation.Usable(card.choose)) navigation[navigationCount++] = card.choose;
+                if (MenuNavigation.Usable(card.banish)) navigation[navigationCount++] = card.banish;
+            }
+            reroll.navigation = new Navigation { mode = Navigation.Mode.None };
+            if (MenuNavigation.Usable(reroll)) navigation[navigationCount++] = reroll;
+            navigation[navigationCount++] = skip; MenuNavigation.Graph(navigation, navigationCount);
+            MenuNavigation.Repair(navigation, navigationCount);
+        }
+        public void OnCancel(BaseEventData data)
+        {
+            if (!IsVisible) return;
+            var selected = MenuNavigation.Selected;
+            foreach (var card in cards) if (selected == card.banish && MenuNavigation.Usable(card.choose)) { card.choose.Select(); data.Use(); return; }
+            MenuNavigation.Repair(navigation, navigationCount); data.Use(); // Mandatory choice is never resolved by Cancel.
         }
         private bool BeginCommand()
         {

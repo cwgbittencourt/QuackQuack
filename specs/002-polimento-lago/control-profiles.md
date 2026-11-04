@@ -1,5 +1,7 @@
 # Perfis de controle — T012
 
+Estado atual: integração T013 concluída e regressões de menus corrigidas. Veja [menu-integration.md](menu-integration.md). O conteúdo abaixo preserva a entrega e os resultados históricos da task indicada no título.
+
 **Data**: 04/11/2026. **Base**: 9afeae9 (T011). Escopo FR-015, somente T012.
 
 ## Comportamento implementado

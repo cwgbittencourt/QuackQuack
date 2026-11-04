@@ -2,10 +2,11 @@ using System;
 using QuackQuack.Core.Progression;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace QuackQuack.Presentation.UI
 {
-    public sealed class RelicLoadoutView : MonoBehaviour
+    public sealed class RelicLoadoutView : MonoBehaviour, ICancelHandler
     {
         [SerializeField] private GameObject panel;
         [SerializeField] private Text summary;
@@ -19,6 +20,10 @@ namespace QuackQuack.Presentation.UI
         private UnityEngine.Events.UnityAction[] handlers;
         private int version = -1;
         private bool available = true;
+        private Selectable previousFocus;
+        private readonly Selectable[] navigation = new Selectable[11];
+        private int navigationCount;
+        public Button OpenButton => open;
         public bool IsVisible => panel != null && panel.activeSelf;
         public void Bind(RelicLoadout state, string[] ids, string[] names, string[] descriptions, string[] requirements,
             Func<string, bool> command, Action<bool> showCommand)
@@ -31,9 +36,17 @@ namespace QuackQuack.Presentation.UI
         }
         private void Open() => show?.Invoke(true);
         private void Close() => show?.Invoke(false);
-        public void SetVisible(bool visible) { panel.SetActive(visible); open.gameObject.SetActive(available && !visible); Refresh(); }
+        public void SetVisible(bool visible)
+        {
+            bool changed = visible != IsVisible;
+            if (changed && visible) { previousFocus = MenuNavigation.Selected; version = -1; }
+            panel.SetActive(visible); open.gameObject.SetActive(available && !visible); Refresh();
+            if (visible) MenuNavigation.Repair(navigation, navigationCount);
+            else if (changed) MenuNavigation.Restore(previousFocus, available ? open : null);
+        }
+        public void OnCancel(BaseEventData data) { if (IsVisible) { Close(); data.Use(); } }
         public void SetAvailable(bool value) { available = value; open.gameObject.SetActive(value && !IsVisible); if (!value) SetVisible(false); }
-        private void LateUpdate() => Refresh();
+        private void LateUpdate() { Refresh(); if (IsVisible) MenuNavigation.Repair(navigation, navigationCount); }
         public void Refresh()
         {
             if (loadout == null || version == loadout.Version) return;
@@ -46,6 +59,10 @@ namespace QuackQuack.Presentation.UI
                 toggles[i].interactable = unlocked && (equipped || loadout.EquippedIds.Count < 3);
                 toggles[i].GetComponentInChildren<Text>().text = equipped ? "REMOVER" : unlocked ? "EQUIPAR" : "BLOQUEADA";
             }
+            navigationCount = 0;
+            foreach (var button in toggles) { MenuNavigation.Prepare(button); button.navigation = new Navigation { mode = Navigation.Mode.None }; if (MenuNavigation.Usable(button)) navigation[navigationCount++] = button; }
+            navigation[navigationCount++] = close; MenuNavigation.Graph(navigation, navigationCount);
+            if (IsVisible) MenuNavigation.Repair(navigation, navigationCount);
         }
         public void Unbind()
         {

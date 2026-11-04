@@ -249,6 +249,7 @@ namespace QuackQuack.Tests.PlayMode
                 control.transition == Selectable.Transition.SpriteSwap ? control.spriteState.selectedSprite != null :
                 control.transition == Selectable.Transition.Animation && !string.IsNullOrEmpty(control.animationTriggers.selectedTrigger);
             Assert.That(cue, Is.True, "Focused action needs a visual selection cue.");
+            var outline = control.GetComponent<Outline>(); if (outline != null) Assert.That(outline.enabled, Is.True, "Selected control must show its focus outline.");
         }
         public static void AssertReachableActions(Transform modal, Selectable first)
         {
