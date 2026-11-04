@@ -249,6 +249,124 @@ namespace QuackQuack.Tests.PlayMode
             if (Directory.Exists(resolved)) Directory.Delete(resolved, true);
         }
 
+        // T004: normative assertions. These intentionally remain red until T005/T006.
+        private static readonly string[] RegressionCases = {
+            "east", "west", "north", "south", "north-east", "north-west", "south-east", "south-west",
+            "training-rock", "south-rock", "east-long", "south-west-long", "spawn-return",
+            "boss-east", "boss-west", "boss-north", "boss-south-long", "pressure"
+        };
+
+        [UnityTest]
+        [Category("ArenaContainmentRegression")]
+        public IEnumerator WholeBodyStaysWalkableAndMovementResumesAfterPressure(
+            [ValueSource(nameof(RegressionCases))] string scenario)
+        {
+            var player = Object.FindAnyObjectByType<QuackQuack.Gameplay.Player.PlayerController>();
+            var body = player.GetComponent<Rigidbody2D>();
+            var shape = player.GetComponent<CircleCollider2D>();
+            var east = GameObject.Find("East bank").GetComponent<BoxCollider2D>();
+            var west = GameObject.Find("West bank").GetComponent<BoxCollider2D>();
+            var north = GameObject.Find("North bank").GetComponent<BoxCollider2D>();
+            var south = GameObject.Find("South bank").GetComponent<BoxCollider2D>();
+            var rocks = new[] { GameObject.Find("Training rock").GetComponent<BoxCollider2D>(),
+                GameObject.Find("South rock").GetComponent<BoxCollider2D>() };
+            var inner = Rect.MinMaxRect(west.bounds.max.x, south.bounds.max.y, east.bounds.min.x, north.bounds.min.y);
+            const float tolerance = 0.02f; // Solver skin only; never permit traversing a bank/rock.
+            float step = scenario.EndsWith("long", StringComparison.Ordinal) ? 0.1f : 0.02f;
+            Time.fixedDeltaTime = step;
+            bool boss = scenario.StartsWith("boss-", StringComparison.Ordinal);
+            bool pressureOnly = scenario == "pressure";
+            Vector2 outward = new Vector2(scenario.Contains("east") ? 1 : scenario.Contains("west") ? -1 : 0,
+                scenario.Contains("north") ? 1 : scenario.Contains("south") ? -1 : 0).normalized;
+            float radius = shape.bounds.extents.x;
+            Vector2 start = new Vector2(outward.x == 0 ? 0 : Mathf.Sign(outward.x) * (inner.xMax - radius - 0.03f),
+                outward.y == 0 ? 0 : Mathf.Sign(outward.y) * (inner.yMax - radius - 0.03f));
+            if (scenario == "spawn-return") { start = body.position; outward = Vector2.left; }
+            if (scenario.Contains("rock")) {
+                var rock = scenario == "training-rock" ? rocks[0] : rocks[1];
+                start = new Vector2(rock.bounds.min.x - radius - 0.03f, rock.bounds.center.y);
+                outward = Vector2.right;
+            }
+            if (pressureOnly) { start = new Vector2(0, -2); outward = Vector2.right; }
+            player.State.TakeDamage(1, 0, float.MaxValue);
+            for (int i = 0; i < director.Spawns.Capacity; i++)
+                if (director.Spawns.TryGetActive(i, out var initial, out long lease)) initial.Despawn(lease);
+            var enemies = new List<PooledEnemy>();
+            if (boss) {
+                // Invoke the actual encounter transition, not a hand-built substitute arena.
+                director.SendMessage("BeginBoss");
+                Assert.That(bootstrap.Run.Phase, Is.EqualTo(QuackQuack.Core.Run.RunPhase.Boss));
+                Assert.That(director.Boss, Is.Not.Null);
+            } else {
+                director.Spawns.ActiveLimit = 200;
+                Assert.That(director.Spawns.TryEnqueue(new QuackQuack.Core.Run.SpawnRequest(1000000,
+                    "arena-regression", "formiga", 64, new Rect(-9,-5,1,1), 0,
+                    QuackQuack.Core.Combat.EventPriority.Feedback, long.MaxValue)), Is.True);
+                for (int i = 0; i < 20 && director.Spawns.ActiveCount < 64; i++)
+                    director.Spawns.Process(1000000+i, new Rect(-100,-100,1,1));
+                Assert.That(director.Spawns.ActiveCount, Is.EqualTo(64));
+                for (int i = 0; i < director.Spawns.Capacity; i++)
+                    if (director.Spawns.TryGetActive(i, out var enemy, out _)) enemies.Add(enemy);
+                Vector2 tangent = new Vector2(-outward.y, outward.x);
+                for (int i = 0; i < enemies.Count; i++) {
+                    var enemy = enemies[i];
+                    Vector2 position = start - outward * (0.9f + (i % 8) * 0.45f) + tangent * ((i / 8 - 3.5f) * 0.3f);
+                    enemy.Body.position = position; enemy.transform.position = position;
+                    enemy.Body.linearVelocity = Vector2.zero;
+                    Assert.That((enemy.Shape.excludeLayers.value & (1 << player.gameObject.layer)), Is.Zero,
+                        "Regression must retain authored enemy/player contacts.");
+                }
+            }
+            body.position = start; body.transform.position = start; body.linearVelocity = Vector2.zero;
+            Physics2D.SyncTransforms();
+            Assert.That(IsWalkable(shape, inner, rocks, tolerance), Is.True, "Invalid initial player placement.");
+            int firstInvalid = -1, contactSteps = 0;
+            float maxPressureDisplacement = 0;
+            var contacts = new ContactPoint2D[128];
+            int steps = Mathf.RoundToInt((pressureOnly ? 1 : 12) / step);
+            for (int tick = 0; tick < steps; tick++) {
+                player.ApplyCommand(new QuackQuack.Core.Shared.PlayerCommand(boss ? outward : Vector2.zero));
+                player.SendMessage("FixedUpdate"); bootstrap.Run.Advance(step);
+                if (boss) director.Boss.Advance(step); else director.Scheduler.Advance(step);
+                Physics2D.Simulate(step);
+                if (!IsWalkable(shape, inner, rocks, tolerance) && firstInvalid < 0) firstInvalid = tick;
+                int count = shape.GetContacts(contacts);
+                for (int i = 0; i < count; i++)
+                    if (contacts[i].collider.GetComponent<PooledEnemy>() != null ||
+                        contacts[i].otherCollider.GetComponent<PooledEnemy>() != null) { contactSteps++; break; }
+                maxPressureDisplacement = Mathf.Max(maxPressureDisplacement, Vector2.Dot(body.position - start, outward));
+            }
+            Vector2 releasedAt = body.position;
+            foreach (var enemy in enemies) enemy.Despawn(enemy.LeaseId);
+            if (boss) director.Boss.gameObject.SetActive(false); // Remove the solid boss too: recovery requires free space.
+            Vector2 retreat = scenario.Contains("rock") || pressureOnly ? -outward : (-releasedAt).normalized;
+            for (int tick = 0; tick < Mathf.RoundToInt(2.4f / step); tick++) {
+                player.ApplyCommand(new QuackQuack.Core.Shared.PlayerCommand(retreat));
+                player.SendMessage("FixedUpdate"); bootstrap.Run.Advance(step); Physics2D.Simulate(step);
+            }
+            float retreatDistance = Vector2.Dot(body.position - releasedAt, retreat);
+            TestContext.WriteLine(FormattableString.Invariant($"scenario={scenario}; seed={bootstrap.Run.Seed}; dt={step}; firstInvalid={firstInvalid}; contacts={contactSteps}; pressure={maxPressureDisplacement}; released={releasedAt}; returned={body.position}; retreat={retreatDistance}"));
+            var failures = new List<string>();
+            if (firstInvalid >= 0) failures.Add("Whole body crossed walkable boundary/obstacle at tick " + firstInvalid);
+            if (!IsWalkable(shape, inner, rocks, tolerance)) failures.Add("Player failed to return to walkable space after horde release");
+            if (retreatDistance <= 0.5f) failures.Add("Movement did not resume toward free space");
+            if (pressureOnly && contactSteps == 0) failures.Add("Enemy/player physical contact was removed");
+            if (pressureOnly && maxPressureDisplacement <= 0.05f) failures.Add("Idle player must still yield to normal enemy pressure");
+            Assert.That(failures, Is.Empty, string.Join("; ", failures));
+            yield return null;
+        }
+
+        private static bool IsWalkable(CircleCollider2D shape, Rect inner, BoxCollider2D[] rocks, float tolerance)
+        {
+            var bounds = shape.bounds;
+            if (bounds.min.x < inner.xMin - tolerance || bounds.max.x > inner.xMax + tolerance ||
+                bounds.min.y < inner.yMin - tolerance || bounds.max.y > inner.yMax + tolerance) return false;
+            foreach (var rock in rocks) {
+                var distance = shape.Distance(rock);
+                if (!distance.isValid || distance.distance < -tolerance) return false;
+            }
+            return true;
+        }
         private static readonly string[] Cases = { "grid64-a", "grid64-b", "grid64-no-player-contacts", "grid64-frozen", "no-enemies", "spawn64-right-a", "spawn64-right-b" };
 
         [UnityTest]

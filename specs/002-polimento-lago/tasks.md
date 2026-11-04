@@ -1,7 +1,7 @@
 # Tasks: Polimento e confiabilidade do Lago
 
 **Input**: [spec](spec.md), [plan](plan.md), [research](research.md), [data-model](data-model.md), [contracts](contracts/gameplay-contracts.md), [decisions](decisions.md).
-**Status**: T001–T003 concluídas; T004–T053 pendentes. IDs locais desta feature 002; não continuam nem substituem T001–T078 da feature 001.
+**Status**: T001–T004 concluídas; T005–T053 pendentes (T004 com regressões vermelhas documentadas antes da correção). IDs locais desta feature 002; não continuam nem substituem T001–T078 da feature 001.
 **Tests**: exigidos por FR-018/constituição. Testes de regra não aprovam gameplay, entrada física ou desempenho.
 **Execution**: uma task por solicitação ou somente intervalo explícito. Validar, atualizar checkbox e commitar incremento lógico; parar para revisão/publicação. Se faltar hardware/aceite, registrar pendência sem marcar a validação concluída. Nenhuma task autoriza ampliar escopo.
 
@@ -22,7 +22,7 @@ Objetivo: viabilizar diagnóstico reproduzível sem alterar regras. Não recriar
 **Goal**: impedir expulsão/aprisionamento preservando pressão. **Independent Test**: horda em cada borda, canto e pedra, incluindo arena do chefe; remover pressão e verificar retomada.
 
 - [x] T003 [US1] Reproduzir expulsão na LakeRun real usando `Assets/QuackQuack/Tests/PlayMode/ArenaContainmentTests.cs` e registrar causa confirmada versus hipótese, seed/timestep/contatos, geometria e alternativas em `specs/002-polimento-lago/arena-diagnosis.md`; não escolher clamp/teleporte antes da evidência (FR-016; T002).
-- [ ] T004 [US1] Codificar regressões que falham para bordas/cantos/obstáculos, passo longo e retomada quando houver espaço em `Assets/QuackQuack/Tests/PlayMode/ArenaContainmentTests.cs`; incluir não remoção da pressão normal e arena de chefe (FR-016; T003).
+- [x] T004 [US1] Codificar regressões que falham para bordas/cantos/obstáculos, passo longo e retomada quando houver espaço em `Assets/QuackQuack/Tests/PlayMode/ArenaContainmentTests.cs`; incluir não remoção da pressão normal e arena de chefe (FR-016; T003).
 - [ ] T005 [US1] Corrigir a causa demonstrada em `Assets/QuackQuack/Gameplay/Enemies/EnemyUpdateScheduler.cs`, `Assets/QuackQuack/Gameplay/Player/PlayerController.cs` e, somente se justificado, `Assets/QuackQuack/Gameplay/Player/ArenaConfinement.cs`; registrar escolha/alternativas, testar eventual cálculo geométrico puro em `Assets/QuackQuack/Tests/EditMode/ArenaBoundsTests.cs` e verificar corpo inteiro sem desativar contatos globais (FR-016; T004).
 - [ ] T006 [US1] Integrar geometria/configuração necessária via `Assets/QuackQuack/Editor/LakeArenaSetup.cs` e `Assets/QuackQuack/Editor/LakeRunSetup.cs`, gerando `Assets/QuackQuack/Scenes/LakeRun.unity` pelo Unity e preservando .meta; manter obstáculos/água/terra e arena do chefe (FR-016; T005).
 - [ ] T007 [US1] Validar pressão/recuo/retomada na partida Windows/Android e regressão automatizada; registrar evidências e limitações em `specs/002-polimento-lago/validation-us1.md` (FR-016/018; T006).

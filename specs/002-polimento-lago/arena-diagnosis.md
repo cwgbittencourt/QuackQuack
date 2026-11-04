@@ -160,3 +160,70 @@ O Pato permaneceu em RunPhase.Playing e ActivateQuack foi aceito após o retorno
 | spawn64-right-a / spawn64-right-b | 47D2AB039BA95890622FCCD84B4EE683BC7A95B3A778E317C7E187DBAA02709E |
 
 Esses hashes identificam a evidência desta rodada; não são expectativa portátil de bits de física entre máquinas/versões. Não versionar CSV/XML/logs. T004–T007 e T075 antiga permanecem abertas.
+## T004 — Regressões normativas antes da correção
+
+Adicionada `WholeBodyStaysWalkableAndMovementResumesAfterPressure` na fixture
+`ArenaLakeRunReproductionTests`, no mesmo `ArenaContainmentTests.cs`. Categoria
+`ArenaContainmentRegression`: 18 casos descobertos, sem Ignore/Explicit ou falha esperada
+convertida em sucesso. T003 continua diagnóstica; as novas asserções exigem o contrato C1.
+
+- Usa RunBootstrap/LakeRun, seed 42, componentes, colliders e scheduler de produção.
+  Estágio inicial controlado, Pato vivo/invulnerável, armas automáticas desligadas para
+  isolar deslocamento. Não altera máscaras, tipos de corpo, paredes ou parâmetros do solver.
+- Horda de 64 Formigas, formação 8×8 a partir de 0,9 unidade atrás do Pato; comando zero.
+  Verifica quatro bordas, quatro cantos, Training rock, South rock e spawn original.
+- Janela de pressão de 12 segundos, passo 0,02 s; repete leste e sudoeste com passo longo
+  de 0,10 s. Este último é stress explícito, não declaração de desempenho/plataforma suportada.
+- Em cada passo pós-física verifica bounds do corpo inteiro contra faces internas das
+  quatro margens e ColliderDistance contra ambas as pedras. Tolerância 0,02 unidade
+  para skin do solver, muito menor que espessura da margem; não tolera atravessar obstáculos.
+  Acumula a primeira violação e continua até avaliar também a retomada.
+- Após retirar a horda, aplica comando por 2,4 segundos em direção ao interior; nas
+  pedras, afasta-se da face testada. Exige deslocamento projetado >0,5 unidade **e**
+  corpo novamente caminhável. Deslizar paralelamente à parede por fora não satisfaz retorno.
+- Caso `pressure`: Pato parado em área livre durante 1 segundo. Exige contatos físicos
+  com inimigos e deslocamento pela pressão >0,05 unidade. Confere também que nenhuma
+  máscara de exclusão dos inimigos removeu o jogador. Impede aceitar remoção global
+  de contato ou tornar o jogador totalmente imóvel como correção de contenção.
+- Quatro casos `boss-*`: transição real BeginBoss, fase Boss e instância do Sapo-Rei
+  verificadas, ataques automáticos ativos e comando contra leste/oeste/norte/sul (sul em
+  0,10 s). A transição de produção remove a horda e desliga o scheduler; não cria horda
+  artificial na fase do chefe. Antes de medir retomada, desativa o corpo sólido do chefe
+  para liberar espaço. Não cobre todos os padrões/fases do chefe ou contato em Android.
+
+Execução na cópia isolada `Temp/Polimento002Validation`, Unity 6000.4.3f1, Windows Editor.
+Para repetir somente esta matriz, usar `-runTests -testPlatform PlayMode
+-testFilter WholeBodyStaysWalkableAndMovementResumesAfterPressure`; para executar também
+T002/T003, filtrar `ArenaContainmentTests;ArenaLakeRunReproductionTests`. Não usar `-quit`.
+Cada caso escreve seed, timestep, primeira violação, contatos, deslocamento, posição antes/
+depois da liberação e projeção de retorno no output do XML. Resultados/logs seguem ignorados.
+
+Primeira tentativa encontrou `Assert.Multiple` ausente no NUnit embarcado; substituído
+por coleta explícita de violações e uma asserção final, preservando todas as condições.
+Primeira suíte compilada: 293 casos, 276 aprovados/17 falhas/zero ignorados. Revisão da
+fixture removeu também o chefe antes da retomada e direcionou retorno das bordas ao
+interior; os resultados finais abaixo correspondem à fonte revisada.
+
+### Resultado final T004
+
+Suíte completa: **293 descobertos, 276 aprovados, 17 falhas, zero ignorados**;
+`TestResults/Polimento002/T004/PlayMode-final.xml`, exit code Unity 2. Todas as 17 falhas
+pertencem à nova matriz e são violações explícitas de contenção/retorno; nenhum erro de
+setup/teardown ou teste antigo falhou. Os **275 testes anteriores passaram**.
+
+| Grupo | Resultado observado antes da correção |
+|---|---|
+| Quatro bordas | Primeira violação tick 4; nenhum retorna à região caminhável após liberar horda |
+| Quatro cantos | Primeira violação tick 7; retorno projetado ~0,30, abaixo de 0,5 e ainda fora |
+| Duas pedras | Primeira violação tick 3; Training rock retorna a espaço válido depois, mas a violação durante pressão continua falhando |
+| Leste/sudoeste em 0,10 s | Primeira violação tick 0/1; continuam fora após liberação |
+| Spawn original | Primeira violação tick 263; termina fora e não reentra |
+| Boss leste/oeste/norte/sul longo | Violação tick 51/51/51/10; **retomada passa após retirar corpo do chefe**. Falha é penetração transitória, não prova de expulsão completa nesses quatro casos |
+| Pressão em espaço livre | Passa: 48 passos com contato; deslocamento projetado 1,709; retomada 11,400 |
+
+Fonte testada e raiz com SHA-256 idêntico:
+`CCF2D48F91AB4AB9CB0462EFF92EAB3F5F755EB267B2A3F0A9739752174579E7`.
+Nenhuma correção de produção nesta task. O estado vermelho é intencional e não pode ser
+tratado como aceite de gameplay: T005 deve fazer esta matriz passar preservando o teste
+de pressão; T006/T007 continuam responsáveis por geometria e validação jogável/plataformas.
+Não houve nova suíte EditMode, player IL2CPP, Android ou profiling nesta rodada.
