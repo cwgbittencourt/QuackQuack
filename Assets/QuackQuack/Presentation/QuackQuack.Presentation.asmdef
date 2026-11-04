@@ -3,6 +3,8 @@
   "rootNamespace": "QuackQuack.Presentation",
   "references": [
     "QuackQuack.Core",
+    "QuackQuack.Platform",
+    "Unity.InputSystem",
     "Unity.ugui"
   ],
   "autoReferenced": true

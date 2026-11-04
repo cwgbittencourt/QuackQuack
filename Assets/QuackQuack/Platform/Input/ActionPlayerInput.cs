@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace QuackQuack.Platform.Input
 {
-    // One private runtime clone per consumer. Bindings live only in the authored asset.
+    // One private runtime clone per consumer; profile overrides never mutate the authored asset.
     internal sealed class ActionPlayerInput : IPlayerInput, IDisposable
     {
         private static long activityClock;
@@ -13,11 +13,14 @@ namespace QuackQuack.Platform.Input
         private readonly InputAction move, quack, pause, relics;
         private readonly InputSource source;
         private readonly InputDevice device;
+        private readonly ControlProfileStore profiles;
+        private bool gameplayContext = true, pauseContext = true;
         private bool quackEdge, pauseEdge, relicsEdge, disposed, waitForNeutral;
         public long Activity { get; private set; }
-        public ActionPlayerInput(InputSource source, InputDevice device = null)
+        public ActionPlayerInput(InputSource source, InputDevice device = null, ControlProfileStore profiles = null)
         {
             this.source = source; this.device = device;
+            this.profiles = source == InputSource.Gamepad ? profiles ?? ControlProfileStore.Shared : null;
             asset = UnityEngine.Object.Instantiate(PlayerInputConfiguration.Load().Actions);
             asset.bindingMask = InputBinding.MaskByGroup(source.ToString());
             if (device != null) asset.devices = new[] { device };
@@ -25,6 +28,7 @@ namespace QuackQuack.Platform.Input
             move = map.FindAction("Move", true); quack = map.FindAction("Quack", true); pause = map.FindAction("Pause", true); relics = map.FindAction("Relics", true);
             move.performed += OnMove; quack.performed += OnQuack; pause.performed += OnPause; relics.performed += OnRelics;
             InputSystem.onDeviceChange += OnDeviceChange;
+            if (this.profiles != null) { this.profiles.Changed += ApplyProfile; this.profiles.ForConsumer().ApplyTo(asset); }
             map.Enable();
         }
         private void OnMove(InputAction.CallbackContext context)
@@ -40,8 +44,15 @@ namespace QuackQuack.Platform.Input
             var command = new PlayerCommand(waitForNeutral ? Vector2.zero : value, quackEdge, pauseEdge, source, relicsEdge);
             quackEdge = pauseEdge = relicsEdge = false; return command;
         }
+        private void ApplyProfile()
+        {
+            asset.Disable(); profiles.ForConsumer().ApplyTo(asset);
+            quackEdge = pauseEdge = relicsEdge = false; waitForNeutral = true;
+            SetContext(gameplayContext, pauseContext);
+        }
         public void SetContext(bool gameplay, bool allowPause)
         {
+            gameplayContext = gameplay; pauseContext = allowPause;
             if (disposed) return;
             // Pending edges belong to the context in which they were produced.
             if (move.enabled != gameplay || pause.enabled != allowPause) quackEdge = pauseEdge = relicsEdge = false;
@@ -73,6 +84,7 @@ namespace QuackQuack.Platform.Input
         {
             if (disposed) return; disposed = true;
             InputSystem.onDeviceChange -= OnDeviceChange;
+            if (profiles != null) profiles.Changed -= ApplyProfile;
             move.performed -= OnMove; quack.performed -= OnQuack; pause.performed -= OnPause; relics.performed -= OnRelics;
             asset.Disable(); quackEdge = pauseEdge = relicsEdge = false;
             UnityEngine.Object.Destroy(asset);
