@@ -1,6 +1,6 @@
 # Validação física de entrada e menus — T014
 
-**Data**: 04/11/2026. **Código-base inicial**: e016c39 (T013); correções R1/R2 descritas abaixo. **Estado**: em execução;
+**Data**: 04/11/2026. **Código-base inicial**: e016c39 (T013); correções R1/R2 descritas abaixo. **Estado**: validação parcial registrada;
 T014 permanece aberta até concluir a matriz obrigatória. T075 da feature 001 não muda.
 
 ## Resumo atual da rodada
@@ -8,8 +8,8 @@ T014 permanece aberta até concluir a matriz obrigatória. T075 da feature 001 n
 Xbox Series/Windows Bluetooth aprovado em C01–C09, após retestes físicos das correções
 de ordem da pausa e acesso às ações de resultados. DualSense/Windows também aprovado;
 8BitDo/Windows também aprovado. Xbox/S23 Bluetooth aprovado em C01–C10;
-DualSense/S23 em teste.
-8BitDo/S23 não reconhecido na tentativa OTG, causa ainda não isolada. T014 permanece aberta.
+DualSense/S23 Bluetooth também aprovado em C01–C10.
+8BitDo/S23 não reconhecido na tentativa OTG, causa ainda não isolada. Por decisão do usuário, essa combinação fica pendente por enquanto; manter Xbox e DualSense como validações aprovadas. T014 permanece aberta.
 
 R2: 399/399 PlayMode completo; 63/63 em cada player IL2CPP Windows/Android. Builds
 normais R2 geradas com sucesso, com duas correções localizadas e prefab de resultados
@@ -338,3 +338,40 @@ partida sem controle, ocultando novamente ao reconectar. Não relatou exceções
 **Xbox Series/S23 Bluetooth aprovado em C01–C10.**
 DualSense/S23 solicitado na sequência. 8BitDo/S23 permanece não aprovado e sem causa
 isolada na conexão OTG; não extrapolar o resultado Bluetooth para esse receptor.
+
+### DualSense / S23 Bluetooth — R2
+
+O usuário confirmou que o DualSense funcionou corretamente para o roteiro de
+movimento/Cross, Options, Create, propriedade da pausa, menus de melhoria/pausa/
+Relíquias/resultados e alteração/restauração de atalho, com foco/confirmar/retornar e
+rótulos. Não explicitou se a família foi automática ou selecionada manualmente;
+registrar funcionamento/rótulos aprovados, sem inventar esse detalhe de identificação.
+Confirmou "tudo funcionou" para desligar/religar nos cinco contextos, incluindo
+analógico/Quack pressionado, preservação de foco/contexto, retorno funcional do toque
+na partida e ocultação novamente ao reconectar. Não relatou casos não testados.
+**DualSense/S23 Bluetooth aprovado no roteiro C01–C10 relatado.**
+
+Cinco combinações aprovadas: Xbox, DualSense e 8BitDo/XInput no Windows; Xbox e DualSense
+por Bluetooth no S23. Única combinação restante: 8BitDo/S23 pelo receptor OTG, ainda
+não reconhecido na tentativa e com causa não isolada. Solicitados teste do OTG com
+mouse conhecido e novo pareamento do receptor no modo Android conforme FAQ oficial.
+Isso não encerra a T014 nem a T075 anterior; não foi alterado código nesta atualização.
+
+### Encerramento parcial solicitado pelo usuário
+
+O usuário informou que não possui periférico USB conhecido para testar o OTG e pediu
+para deixar o controle genérico pendente no S23. Reforçou que, por enquanto, devem ser
+mantidas as validações com Xbox e DualSense. Não foi solicitado continuar o diagnóstico
+ou repetir o pareamento; esses passos não foram confirmados como executados.
+
+| Controle | Windows | S23 Ultra |
+|----------|---------|-----------|
+| Xbox Series | Aprovado C01–C09 | Aprovado C01–C10, Bluetooth |
+| DualSense | Aprovado C01–C09 | Aprovado C01–C10, Bluetooth |
+| 8BitDo (identificado como Ultimate C) | Aprovado C01–C09, XInput/receptor | Pendente por decisão do usuário; tentativa OTG sem resposta, causa não isolada |
+
+Preservar a evidência já obtida no Windows para o 8BitDo, sem estender o aceite ao
+Android. A T014 continua com checkbox aberto pela combinação restante. Não há mudança
+de código ou novo aceite da T075 nesta atualização. Revisão documental e verificação
+de whitespace são suficientes para este registro; os testes anteriores continuam
+identificados acima e não foram repetidos para uma alteração apenas documental.
