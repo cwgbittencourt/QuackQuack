@@ -21,6 +21,9 @@ namespace QuackQuack.Tests.PlayMode
 {
     public class UpgradeSelectionTests
     {
+        private MenuRegressionInput menuInput;
+        private static readonly string[] CancelTargets = { "Choose 0", "Banish 0", "Reroll", "Skip" };
+        private static readonly int[] CardCounts = { 1, 3 };
         private LakeBuildProgression progression;
         private UpgradeSelectionView view;
         [UnitySetUp]
@@ -166,9 +169,97 @@ namespace QuackQuack.Tests.PlayMode
             }
         }
 
+        private MenuRegressionInput Controller()
+        {
+            GameBootstrap.Instance.ExternalClock = true;
+            return menuInput ?? (menuInput = new MenuRegressionInput());
+        }
+        private Transform Modal => Button("Choose 0").transform.parent.parent;
+
+        [UnityTest]
+        public IEnumerator CancelCannotImplicitlySkipOrChooseMandatoryOffer([ValueSource(nameof(CancelTargets))] string target)
+        {
+            var driver = Controller();
+            Assert.That(progression.Upgrades.TryCollectExperience(10), Is.True); view.Refresh();
+            Assert.That(view.IsVisible, Is.True); Assert.That(GameBootstrap.Instance.Run.Phase, Is.EqualTo(RunPhase.ChoosingUpgrade));
+            string id = view.Displayed.OfferId; int history = progression.Upgrades.Build.History.Count, resolved = 0;
+            int rerolls = progression.Upgrades.RerollsRemaining, banishes = progression.Upgrades.BanishRemaining;
+            progression.Upgrades.OfferResolved += _ => resolved++;
+            Button(target).Select(); yield return driver.Press(GamepadButton.East);
+            Assert.That(view.IsVisible, Is.True, "Cancel cannot dismiss a mandatory offer as an implicit skip.");
+            Assert.That(GameBootstrap.Instance.Run.Phase, Is.EqualTo(RunPhase.ChoosingUpgrade));
+            Assert.That(progression.Upgrades.CurrentOffer.OfferId, Is.EqualTo(id)); Assert.That(progression.Upgrades.CurrentOffer.IsClosed, Is.False);
+            Assert.That(progression.Upgrades.Build.History.Count, Is.EqualTo(history)); Assert.That(progression.Upgrades.ConfirmedChoices, Is.Empty);
+            Assert.That(resolved, Is.Zero); Assert.That(progression.Upgrades.RerollsRemaining, Is.EqualTo(rerolls));
+            Assert.That(progression.Upgrades.BanishRemaining, Is.EqualTo(banishes)); MenuRegressionInput.AssertUsableFocus(Modal);
+        }
+
+        [UnityTest]
+        public IEnumerator CancelFromBanishReturnsToItsCardWithoutResolvingTheOffer()
+        {
+            var driver = Controller(); Open("bumerangue", "ovos", "pena-aerodinamica");
+            string id = view.Displayed.OfferId; Button("Banish 0").Select();
+            yield return driver.Press(GamepadButton.East);
+            Assert.That(view.IsVisible, Is.True); Assert.That(view.Displayed.OfferId, Is.EqualTo(id));
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(Button("Choose 0").gameObject));
+        }
+
+        [UnityTest]
+        public IEnumerator DirectionalGraphReachesEveryAvailableCardAndResourceAction([ValueSource(nameof(CardCounts))] int count)
+        {
+            Controller(); Open(count == 1 ? new[] { "bumerangue" } : new[] { "bumerangue", "ovos", "pena-aerodinamica" });
+            yield return null; MenuRegressionInput.AssertUsableFocus(Modal);
+            MenuRegressionInput.AssertReachableActions(Modal, Button("Choose 0"));
+        }
+
+        [UnityTest]
+        public IEnumerator ControllerRerollRepairsFocusAndInvalidatesOldOfferOnce()
+        {
+            var driver = Controller(); Open("bumerangue", "ovos", "pena-aerodinamica");
+            string old = view.Displayed.OfferId; int remaining = view.Displayed.Rerolls;
+            Button("Reroll").Select(); yield return driver.Press(GamepadButton.South);
+            Assert.That(view.Displayed.OfferId, Is.Not.EqualTo(old)); Assert.That(view.Displayed.Rerolls, Is.EqualTo(remaining - 1));
+            Assert.That(progression.Upgrades.TryConfirm(old, "bumerangue"), Is.False);
+            MenuRegressionInput.AssertUsableFocus(Modal); MenuRegressionInput.AssertReachableActions(Modal, Button("Choose 0"));
+        }
+
+        [UnityTest]
+        public IEnumerator ExhaustedRerollAndBanishAreSkippedByTheNavigationGraph()
+        {
+            var driver = Controller(); Open("bumerangue", "ovos", "pena-aerodinamica");
+            int rerolls = progression.Upgrades.RerollsRemaining;
+            for (int i = 0; i < rerolls; i++) { Button("Reroll").Select(); yield return driver.Press(GamepadButton.South); }
+            Assert.That(Button("Reroll").IsInteractable(), Is.False);
+            Button("Banish 0").Select(); yield return driver.Press(GamepadButton.South);
+            Assert.That(view.IsVisible, Is.True); Assert.That(Button("Banish 0").IsInteractable(), Is.False);
+            MenuRegressionInput.AssertUsableFocus(Modal); MenuRegressionInput.AssertReachableActions(Modal, Button("Choose 0"));
+        }
+
+        [UnityTest]
+        public IEnumerator ControllerConfirmAppliesOneChoiceWithoutQuackLeakingAfterResume()
+        {
+            var driver = Controller(); Open("bumerangue", "ovos"); int history = progression.Upgrades.Build.History.Count, quacks = 0;
+            GameBootstrap.Instance.Events.Combat += e => { if (e.Type == QuackQuack.Core.Combat.CombatEventType.QuackActivated) quacks++; };
+            Button("Choose 0").Select(); yield return driver.Press(GamepadButton.South);
+            Assert.That(view.IsVisible, Is.False); Assert.That(progression.Upgrades.ConfirmedChoices.Count, Is.EqualTo(1));
+            Assert.That(progression.Upgrades.Build.History.Count, Is.EqualTo(history + 1)); Assert.That(quacks, Is.Zero);
+            Assert.That(GameBootstrap.Instance.Run.Phase, Is.EqualTo(RunPhase.Playing));
+        }
+
+        [UnityTest]
+        public IEnumerator ResolvingSelectionRestoresThePreviousAvailableUiFocus()
+        {
+            var driver = Controller();
+            var opener = Object.FindAnyObjectByType<RelicLoadoutView>().GetComponentsInChildren<Button>(true).Single(b => b.name == "Open relics");
+            opener.Select(); Open("bumerangue", "ovos");
+            yield return driver.Press(GamepadButton.South);
+            Assert.That(view.IsVisible, Is.False); Assert.That(opener.isActiveAndEnabled && opener.IsInteractable(), Is.True);
+            Assert.That(EventSystem.current.currentSelectedGameObject, Is.EqualTo(opener.gameObject));
+        }
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            menuInput?.Dispose(); menuInput = null;
             if (GameBootstrap.Instance != null) Object.Destroy(GameBootstrap.Instance.gameObject);
             yield return null;
             var loaded = SceneManager.GetActiveScene();
