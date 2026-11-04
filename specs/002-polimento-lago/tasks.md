@@ -1,7 +1,7 @@
 # Tasks: Polimento e confiabilidade do Lago
 
 **Input**: [spec](spec.md), [plan](plan.md), [research](research.md), [data-model](data-model.md), [contracts](contracts/gameplay-contracts.md), [decisions](decisions.md).
-**Status**: T001–T007 concluídas; T008–T053 pendentes (regressão nativa e validação manual dirigida US1 registradas; aceite global/performance ainda pendente). IDs locais desta feature 002; não continuam nem substituem T001–T078 da feature 001.
+**Status**: T001–T008 concluídas; T009–T053 pendentes (T008 com regressões vermelhas documentadas antes da implementação; aceite global/performance ainda pendente). IDs locais desta feature 002; não continuam nem substituem T001–T078 da feature 001.
 **Tests**: exigidos por FR-018/constituição. Testes de regra não aprovam gameplay, entrada física ou desempenho.
 **Execution**: uma task por solicitação ou somente intervalo explícito. Validar, atualizar checkbox e commitar incremento lógico; parar para revisão/publicação. Se faltar hardware/aceite, registrar pendência sem marcar a validação concluída. Nenhuma task autoriza ampliar escopo.
 
@@ -31,7 +31,7 @@ Objetivo: viabilizar diagnóstico reproduzível sem alterar regras. Não recriar
 
 **Goal**: hotplug sem perda de ações e navegação completa. **Independent Test**: teclado/controle/toque, troca em gameplay, pausa, relíquias, melhoria e resultados sem mouse.
 
-- [ ] T008 [P] [US2] Criar casos de disponibilidade/hotplug Added/Removed/Enabled/Disabled, última fonte antiga e comandos presos em `Assets/QuackQuack/Tests/PlayMode/ControllerAvailabilityTests.cs`, portáveis aos players; registrar falhas antes da implementação (FR-013; T007).
+- [x] T008 [P] [US2] Criar casos de disponibilidade/hotplug Added/Removed/Enabled/Disabled, última fonte antiga e comandos presos em `Assets/QuackQuack/Tests/PlayMode/ControllerAvailabilityTests.cs`, portáveis aos players; registrar falhas antes da implementação (FR-013; T007).
 - [ ] T009 [P] [US2] Criar casos de foco/Cancel/atalho e preservação de pausa em `Assets/QuackQuack/Tests/PlayMode/RelicLoadoutFlowTests.cs` e `Assets/QuackQuack/Tests/PlayMode/UpgradeSelectionTests.cs`, incluindo oferta obrigatória sem pulo implícito (FR-014/015; T007).
 - [ ] T010 [US2] Adicionar ação comum Relics, bindings Xbox/PS/genérico e borda por contexto em `Assets/QuackQuack/Platform/Input/QuackQuackInput.inputactions`, `Assets/QuackQuack/Platform/Input/ActionPlayerInput.cs` e `Assets/QuackQuack/Core/Shared/PlayerCommand.cs`; sul confirma/leste retorna na UI, nenhum vazamento de gameplay (FR-015; T008/T009).
 - [ ] T011 [US2] Separar disponibilidade de última atividade em `Assets/QuackQuack/Platform/Input/UnifiedPlayerInput.cs`; ocultar touch quando controle conectado/habilitado, restaurar na perda/desabilitação limpando comandos e mantendo contexto, inclusive resultados (FR-013; T010).
