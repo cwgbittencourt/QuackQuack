@@ -1,6 +1,6 @@
-# Diagnóstico de pressão da arena — preparação T002
+# Diagnóstico de pressão da arena — T002/T003
 
-Data: 03/11/2026. Base: `48da689` ([baseline T001](baseline.md)). Esta entrega prepara observação e fixture; **não reproduz a expulsão de produção, não confirma a causa física e não corrige movimento**. T003/T004 continuam pendentes. Requisitos FR-016/018; [contrato C1](contracts/gameplay-contracts.md).
+Data: 03/11/2026. Preparação T002 sobre `48da689` ([baseline T001](baseline.md)); reprodução T003 sobre `5b9f374`. A T002 preparou observação e fixture; a execução T003 abaixo reproduziu saída na LakeRun real e isolou o mecanismo físico. **Nenhuma correção foi aplicada; T004 em diante permanecem pendentes.** Requisitos FR-016/018; [contrato C1](contracts/gameplay-contracts.md).
 
 ## Ativação opt-in
 
@@ -76,6 +76,87 @@ Logs/XMLs locais em Logs/Polimento002/T002 e TestResults/Polimento002/T002, igno
 
 Reprodução: sincronizar somente os dois scripts e seus .meta na cópia isolada T001; Unity 6000.4.3f1, -batchmode -projectPath <copia> -buildTarget Win64 -runTests -testPlatform PlayMode -testFilter ArenaContainmentTests -testResults <arquivo.xml> -logFile <arquivo.log>. Não usar -quit com -runTests. Exigir total 10, Passed e zero ignorados; executar depois a regressão PlayMode completa sem filtro. Não aceitar execução com zero casos.
 
-## Próxima etapa autorizável: T003
+## Escopo de reprodução preparado na T002
 
 Compor cenário reproduzível na LakeRun real: seed, comandos, composição/leases, pressão em borda/canto/obstáculo, timestep/carga e contexto da arena do chefe. Capturar antes/depois dos passos relevantes, verificar buffers sem truncamento e registrar frame de expulsão/retomada. Só após reprodução afirmar causa e elaborar regressões T004. Nenhuma dessas execuções ou correções foi antecipada na T002; T075 da feature 001 continua aberta.
+
+## Execução T003 — reprodução controlada na LakeRun
+
+Relato complementar do usuário nesta rodada: Pato parado desde o início; inimigos o pressionaram para a esquerda duas vezes, até sair da cena; Quack ainda empurrava inimigos, mas movimento parecia indisponível. O relato orienta o cenário; não equivale a captura instrumentada da sessão original.
+
+Fixture adicionada no mesmo ArenaContainmentTests.cs: classe ArenaLakeRunReproductionTests, categoria ArenaPressureReproduction. Carrega **RunBootstrap → LakeRun reais**, aguarda RunDirector.Ready, usa Pato/colliders/prefabs/formiga/pools/SpawnDirector/EnemyUpdateScheduler reais. Não altera cenas, definições, movimento ou scripts de runtime.
+
+### Condições reproduzíveis
+
+- Seed real do bootstrap: **42**; passo 0,02s; velocityIterations=8, positionIterations=3, sem alterar parâmetros do solver. Pato dinâmico, CircleCollider2D raio 0,42, detecção contínua autorada; inimigos cinemáticos, raio 0,4. Contatos inimigo/inimigo e XP continuam suprimidos como no produto; contato inimigo/Pato preservado no caso principal.
+- Timeline/relógio automático do diretor e ataques automáticos de armas congelados para isolar pressão, sem substituir PlayerController. O teste injeta comando Move=zero e executa o FixedUpdate real do jogador, Advance do scheduler e Physics2D.Simulate em ordem explícita. Não altera a velocidade por força/teleporte durante a pressão.
+- O seed/requisição de spawn é real, mas a **formação inicial é construída**, não uma reprodução natural das ondas: 64 formigas solicitadas pelo SpawnDirector em lotes, depois posicionadas em grade 8×8 a um lado do jogador, espaçamento 0,45 no eixo X e 0,30 no Y. Primeiro centro a 0,9 unidades em X e ±0,15 em Y, distância ~0,912 maior que soma dos raios 0,82: não começa com inimigos sobrepostos ao Pato. Sobreposição entre inimigos é permitida pela política de contatos do produto.
+- Horda à esquerda do Pato em (11,8;0), junto da margem leste; variante do relato mantém **spawn real (-6;-2)** e coloca horda à direita. Não usar zero inimigos de fato com colliders invisíveis: o controle sem inimigos despawna todos.
+- Dano inicial de 1 e invulnerabilidade longa mantêm o alvo vivo para não confundir morte com expulsão; propriedades físicas e dano/velocidade dos inimigos não são editados. Isso isola deslocamento, não é teste de balanceamento/sobrevivência.
+- 600 passos (12s), com captura pré/pós por passo, 1200 frames no ring de capacidade 1400, 128 pares por frame, 64 atores mais quatro margens. Após pressão, despawn da horda e 120 passos (2,4s) de comando em direção à origem, usando controlador real. Quack é solicitado depois da tentativa de retorno; aceitação é registrada, sem inferir dano/empurrão sobre alvos já removidos.
+- Fixture usa SimulationMode2D.Script somente durante a tentativa, restaura modo/passos ao terminar, descarrega cena e usa save temporário próprio. Antes de destruir serviços, abandona a partida para evitar dependências já destruídas. Nenhum save pessoal é usado.
+
+Geometria observada/autorada da LakeRun: margem leste x=[12,25;12,75], oeste x=[-12,75;-12,25], norte y=[6,75;7,25], sul y=[-7,25;-6,75]. Margens horizontais abrangem x=[-12,8;12,8], verticais y=[-7;7]; há sobreposição sólida nos cantos, não uma abertura entre bancos. Rochas interiores permanecem presentes; esta task não cobre a matriz de pressão contra rochas ou a arena do chefe.
+
+### Resultado e controles
+
+Primeira saída completa é definida aqui como **bounds do collider inteiramente além da face externa de alguma margem**. Contato residual de skin pode permanecer mesmo nessa condição; isso não significa ausência absoluta de todo overlap do motor. Penetração inicial usa bounds além da face interna por mais de 0,02; não confundir essa condição parcial com saída completa.
+
+| Cenário | Inicial do Pato | Primeira saída (tick zero-based / tempo após staging) | Posição após 12s | Após remover horda e comandar retorno por 2,4s |
+|---|---|---|---|---|
+| grid64-a / grid64-b | (11,8;0) | 162 / 3,26s, pela margem sul | (11,82516;-7,674999) | (5,863132;-7,674999), não reentrou |
+| spawn64-right-a / spawn64-right-b | (-6;-2) | 392 / 7,86s, margem norte após pressão junto da oeste | (-11,825007;7,674999) | (-5,863071;7,674999), não reentrou |
+| grid64-no-player-contacts | (11,8;0) | Não ocorreu em 12s | (11,8;0) | (1,640010;0), dentro |
+| grid64-frozen | (11,8;0) | Não ocorreu em 12s | (11,8;0) | (1,640010;0), dentro |
+| no-enemies | (11,8;0) | Não ocorreu em 12s | (11,8;0) | (1,640010;0), dentro |
+
+Controle sem contato: adiciona exclusão da camada do Pato **somente nas instâncias da fixture**, mantendo scheduler/geometria iguais; release do pool restaura máscara. É contrafactual de diagnóstico, não proposta aprovada de correção. Controle congelado mantém colliders e horda inicial, mas não executa Advance do scheduler. No cenário sem inimigos, a lista de inimigos ativos é zero. Os controles mostram necessidade de movimento da horda + contato físico no caso construído; não são prova de que remover colisão seria solução aceitável.
+
+As duas repetições de cada cenário principal produziram frames.csv byte a byte iguais, inclusive tempos/posições/contagens; leases/IDs dos atores são únicos por ciclo e não precisam coincidir entre execuções. Máximo observado de contatos: 5 no caso junto da leste e 7 no spawn. Leitura de **todos** os 1200 frames por caso: zero flags de buffer cheio, zero sobrescritas. Não houve exclusão seletiva de frames.
+
+### Evidência do passo de expulsão
+
+| Cenário e fase | Tick | Posição Y | Velocidade Y |
+|---|---:|---:|---:|
+| grid64-a, pós-física | 160 | -6,947831 | 0 |
+| grid64-a, pós-física | 161 | -6,983831 | 0 |
+| grid64-a, pré-física | 162 | -6,983831 | 0 |
+| grid64-a, pós-física | 162 | -7,674783 | 0 |
+| spawn64-right-a, pós-física | 391 | 6,979000 | 0 |
+| spawn64-right-a, pré-física | 392 | 6,979000 | 0 |
+| spawn64-right-a, pós-física | 392 | 7,674744 | 0 |
+
+No primeiro caso, a margem sul (collider runtime 39208 na captura controlada inicial) tem distância assinada ao Pato -0,663831 no pré-passo 162; após simulação, -0,005217, com normal geométrica mudando de -Y para +Y. O bounds superior do Pato após a expulsão é -7,254783, além da face externa -7,25. Impulsos normais registrados nesses contatos são zero; posição muda apesar de velocidade do Pato zerada. IDs runtime mudam entre carregamentos; identificar geometria pelos quatro últimos atores registrados, não fixar ID como regra.
+
+O Pato permaneceu em RunPhase.Playing e ActivateQuack foi aceito após o retorno em todos os cenários. Ainda ocorreu deslocamento paralelo à margem externa, mas a componente de retorno foi barrada. Portanto a reprodução demonstra **saída e impossibilidade de reentrar pelo caminho tentado**, não congelamento de todos os eixos nem falha global do adaptador de entrada. A variante do spawn passou junto da margem esquerda e saiu por cima; a saída exatamente pela face esquerda relatada pelo usuário não foi capturada. O empurrão do Quack contra inimigos enquanto fora também não foi medido.
+
+### Causa confirmada nesta reprodução versus hipóteses
+
+**Confirmado:** o scheduler aproxima inimigos cinemáticos por atribuição imediata de Body.position, fazendo Shape.Cast somente contra camada 8 (terreno), sem varrer o Pato. Os contatos físicos com o jogador dinâmico permanecem ativos. As leituras pré-simulação mostram sobreposição geométrica com inimigos; a pressão desloca o jogador sem comando, aprofunda a penetração no banco e a resolução posicional o expulsa para a face externa. A mesma configuração não expulsa ao retirar contato jogador/inimigo ou movimento do scheduler. Nenhuma escrita de posição do jogador ocorre no trecho medido da fixture; só staging inicial, comando pelo controlador e simulação física.
+
+**Confirmado:** não há falha de carregamento da LakeRun ou buraco autorado naquele canto; as margens sólidas estão presentes e se sobrepõem. Detecção contínua do jogador não impediu esta correção posicional. Uma vez fora, a própria parede sólida bloqueia a reentrada tentada, enquanto a partida e comandos continuam aceitos.
+
+**Ainda hipótese/limite:** não foi instrumentada a sessão original do usuário; não se afirma identidade de todos os detalhes ou da face de saída. Não se isolou qual escolha interna/ordem de contatos do solver é suficiente em todas as plataformas, nem comparou outro método de movimento cinemático. Não atribuir o defeito ao número exato de iterações, apenas à camada física observada. Timestep longo, rochas, outras bordas/espécies/quantidades, frequência render/fixed real e arena do chefe ainda precisam das regressões T004 e validação T007.
+
+### Alternativas para avaliar na T005, após regressões T004
+
+1. Resolver deslocamento/pressão dos inimigos sem inserção cinemática arbitrária contra o Pato, avaliando sweep/contatos relevantes e integração em passo físico. Comparar preservação de pressão, densidade, navegação e custo; nenhum método foi implementado nesta task.
+2. Definir contrato de área caminhável e proteção/recuperação excepcional baseada em posição válida como defesa adicional, sem teleporte que esconda interpenetração ou elimine a pressão.
+3. Reforçar geometria/ordem de simulação somente com prova comparativa; engrossar parede, aumentar iterações ou habilitar CCD isoladamente não constitui solução demonstrada.
+4. Rejeitar desativação global de contatos jogador/inimigo como atalho: o contrafactual remove a pressão que deve ser preservada.
+
+### Evidências e reprodução da T003
+
+- Fonte: mesmo ArenaContainmentTests.cs, classe ArenaLakeRunReproductionTests. O teste verifica composição, captura e ausência de truncamento; **passar não significa que a arena contém o Pato**. T004 adicionará as asserções normativas de contenção/retomada que devem falhar antes da correção.
+- Cópia de validação: Temp/Polimento002Validation, Unity 6000.4.3f1 Windows Editor PlayMode. Nenhuma nova medição Android/player/performance foi feita aqui.
+- Definir QUACK_ARENA_OUTPUT para diretório ignorado e executar -batchmode -projectPath <copia> -buildTarget Win64 -runTests -testPlatform PlayMode -testFilter ArenaLakeRunReproductionTests -testResults <xml> -logFile <log>. Sem variável, exporta no temporaryCachePath/ArenaPressureT003. Repetir preservando geometria, seed, formação, ordem e passo.
+- Sete casos focados aprovados em TestResults/Polimento002/T003/user-scenario.xml, zero ignorados; CSVs/metadata/summary em TestResults/Polimento002/T003/user-scenario. Tentativas iniciais em attempt1/attempt2/controlled foram preservadas, inclusive o resultado negativo da formação concentrada (64 em faixa estreita não expeliu em 12s).
+- Primeiro ensaio teve falha de teardown por ordem de descarte dos serviços; a fixture passou a abandonar antes de destruir o bootstrap, sem mudar RunDirector/WeaponRunner. Não esconder esse erro com LogAssert.Expect nem contá-lo como falha de contenção.
+- Regressão PlayMode final: **275/275 aprovados, zero falhas/ignorados**, incluindo os 10 casos de instrumentação T002 e os sete cenários T003 (TestResults/Polimento002/T003/PlayMode.xml). A execução completa também exportou as repetições em TestResults/Polimento002/T003/regression. Não houve alteração de regras nem testes EditMode novos; os 465/465 EditMode da T002 são referência anterior, não nova execução desta rodada. Logs, capturas e resultados regeneráveis continuam ignorados.
+
+| Frames CSV da coleta focada | SHA-256 |
+|---|---|
+| grid64-a / grid64-b | A80BDACA5BC50A413C215855DA12DD76E40A2A14E5BAD97C20FDA16495C8154B |
+| spawn64-right-a / spawn64-right-b | 47D2AB039BA95890622FCCD84B4EE683BC7A95B3A778E317C7E187DBAA02709E |
+
+Esses hashes identificam a evidência desta rodada; não são expectativa portátil de bits de física entre máquinas/versões. Não versionar CSV/XML/logs. T004–T007 e T075 antiga permanecem abertas.

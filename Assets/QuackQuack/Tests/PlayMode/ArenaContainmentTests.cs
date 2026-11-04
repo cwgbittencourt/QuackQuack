@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using NUnit.Framework;
@@ -187,6 +188,148 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(capture.IsCapturing, Is.False);
             Begin();
             Assert.Throws<ArgumentOutOfRangeException>(() => capture.Capture(-1, 0, ArenaCapturePhase.ExplicitAfterSimulation));
+        }
+    }
+}
+
+namespace QuackQuack.Tests.PlayMode
+{
+    // Diagnostic evidence, not the containment regression/acceptance contract of T004/T007.
+    [Category("ArenaPressureReproduction")]
+    public sealed class ArenaLakeRunReproductionTests
+    {
+        private Func<string> previousSave;
+        private string saveDirectory;
+        private SimulationMode2D previousMode;
+        private float previousStep;
+        private QuackQuack.Systems.Run.RunDirector director;
+        private QuackQuack.Systems.Run.GameBootstrap bootstrap;
+
+        [UnitySetUp]
+        public IEnumerator LoadProductionArena()
+        {
+            previousMode = Physics2D.simulationMode; previousStep = Time.fixedDeltaTime;
+            previousSave = QuackQuack.Systems.Run.RunDirector.SavePathProvider;
+            saveDirectory = Path.Combine(Application.temporaryCachePath, "ArenaRepro-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(saveDirectory);
+            QuackQuack.Systems.Run.RunDirector.SavePathProvider = () => Path.Combine(saveDirectory, "save.json");
+            if (QuackQuack.Systems.Run.GameBootstrap.Instance != null) Object.Destroy(QuackQuack.Systems.Run.GameBootstrap.Instance.gameObject);
+            yield return null;
+            yield return SceneManager.LoadSceneAsync("RunBootstrap");
+            double deadline = Time.realtimeSinceStartupAsDouble + 30;
+            do {
+                director = Object.FindAnyObjectByType<QuackQuack.Systems.Run.RunDirector>();
+                if (director != null && director.Ready) break;
+                yield return null;
+            } while (Time.realtimeSinceStartupAsDouble < deadline);
+            Assert.That(director != null && director.Ready, Is.True);
+            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("LakeRun"));
+            bootstrap = QuackQuack.Systems.Run.GameBootstrap.Instance;
+            director.AutomaticTick = false;
+            director.Scheduler.AutomaticTick = false;
+            foreach (var runner in Object.FindObjectsByType<QuackQuack.Gameplay.Weapons.WeaponRunner>(FindObjectsSortMode.None)) runner.AutomaticTick = false;
+            Physics2D.simulationMode = SimulationMode2D.Script; Time.fixedDeltaTime = 0.02f;
+        }
+
+        [UnityTearDown]
+        public IEnumerator CleanupProductionArena()
+        {
+            Physics2D.simulationMode = previousMode; Time.fixedDeltaTime = previousStep;
+            if (director != null && director.Ready) director.TryAbandon();
+            if (bootstrap != null) Object.Destroy(bootstrap.gameObject);
+            yield return null;
+            var loaded = SceneManager.GetActiveScene();
+            var empty = SceneManager.CreateScene("After arena reproduction"); SceneManager.SetActiveScene(empty);
+            if (loaded.IsValid() && loaded.isLoaded) yield return SceneManager.UnloadSceneAsync(loaded);
+            QuackQuack.Systems.Run.RunDirector.SavePathProvider = previousSave;
+            string resolved = Path.GetFullPath(saveDirectory);
+            string cache = Path.GetFullPath(Application.temporaryCachePath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            Assert.That(resolved.StartsWith(cache, StringComparison.OrdinalIgnoreCase), Is.True);
+            Assert.That(Path.GetFileName(resolved), Does.StartWith("ArenaRepro-"));
+            if (Directory.Exists(resolved)) Directory.Delete(resolved, true);
+        }
+
+        private static readonly string[] Cases = { "grid64-a", "grid64-b", "grid64-no-player-contacts", "grid64-frozen", "no-enemies", "spawn64-right-a", "spawn64-right-b" };
+
+        [UnityTest]
+        public IEnumerator DiagnosticLakeRunPressureWritesEvidence([ValueSource(nameof(Cases))] string scenario)
+        {
+            var player = Object.FindAnyObjectByType<QuackQuack.Gameplay.Player.PlayerController>();
+            var body = player.GetComponent<Rigidbody2D>(); var shape = player.GetComponent<CircleCollider2D>();
+            var bank = GameObject.Find("East bank").GetComponent<BoxCollider2D>();
+            Assert.That(body.bodyType, Is.EqualTo(RigidbodyType2D.Dynamic));
+            Assert.That(shape.radius, Is.EqualTo(0.42f).Within(0.001));
+            Assert.That(bank.bounds.size.x, Is.EqualTo(0.5f).Within(0.001));
+            player.State.TakeDamage(1, 0, float.MaxValue); // Isolate displacement from death; physical properties stay authored.
+            for (int i = 0; i < director.Spawns.Capacity; i++)
+                if (director.Spawns.TryGetActive(i, out var initial, out long lease)) initial.Despawn(lease);
+            director.Spawns.ActiveLimit = 200;
+            int enemyCount = scenario == "no-enemies" ? 0 : 64;
+            if(enemyCount > 0) Assert.That(director.Spawns.TryEnqueue(new QuackQuack.Core.Run.SpawnRequest(1000000,"arena-diagnostic","formiga",64,
+                new Rect(-9,-5,1,1),0,QuackQuack.Core.Combat.EventPriority.Feedback,long.MaxValue)), Is.True);
+            for (int i = 0; i < 20 && director.Spawns.ActiveCount < enemyCount; i++) director.Spawns.Process(1000000+i,new Rect(-100,-100,1,1));
+            Assert.That(director.Spawns.ActiveCount, Is.EqualTo(enemyCount));
+            var enemies = new List<PooledEnemy>();
+            for (int i = 0; i < director.Spawns.Capacity; i++) if (director.Spawns.TryGetActive(i,out var enemy,out _)) enemies.Add(enemy);
+            bool atSpawn = scenario.StartsWith("spawn", StringComparison.Ordinal);
+            Vector2 start = atSpawn ? body.position : new Vector2(bank.bounds.min.x - shape.radius - 0.03f, 0);
+            body.position = start; body.transform.position = start; body.linearVelocity = Vector2.zero;
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                var enemy = enemies[i];
+                Vector2 p = start + new Vector2((atSpawn ? 1 : -1)*(0.9f+(i%8)*0.45f), ((i/8)-3.5f)*0.3f);
+                enemy.Body.position = p; enemy.transform.position = p; enemy.Body.linearVelocity = Vector2.zero;
+                Assert.That(enemy.Body.bodyType, Is.EqualTo(RigidbodyType2D.Kinematic));
+                if(scenario == "grid64-no-player-contacts") enemy.Shape.excludeLayers |= 1 << player.gameObject.layer;
+            }
+            Physics2D.SyncTransforms();
+            var south = GameObject.Find("South bank").GetComponent<BoxCollider2D>();
+            var north = GameObject.Find("North bank").GetComponent<BoxCollider2D>();
+            var west = GameObject.Find("West bank").GetComponent<BoxCollider2D>();
+            var inner = Rect.MinMaxRect(west.bounds.max.x,south.bounds.max.y,bank.bounds.min.x,north.bounds.min.y);
+            var outer = Rect.MinMaxRect(west.bounds.min.x,south.bounds.min.y,bank.bounds.max.x,north.bounds.max.y);
+            var observed = new List<Collider2D>(); foreach (var enemy in enemies) observed.Add(enemy.Shape);
+            observed.Add(bank); observed.Add(south); observed.Add(north); observed.Add(west);
+            var observer = new GameObject("LakeRun pressure observer").AddComponent<ArenaPressureDiagnostics>();
+            observer.Begin(bootstrap.Run.Seed,body,shape,observed.ToArray(),1400,128,false);
+            int firstIntrusion = -1, firstCenterOutside = -1, firstFullyOutside = -1, maxContacts = 0, fullBuffers = 0;
+            float maxX = body.position.x;
+            for (int tick = 0; tick < 600; tick++)
+            {
+                player.ApplyCommand(new QuackQuack.Core.Shared.PlayerCommand(Vector2.zero));
+                player.SendMessage("FixedUpdate");
+                bootstrap.Run.Advance(0.02f);
+                if(scenario != "grid64-frozen") director.Scheduler.Advance(0.02f);
+                observer.Capture(tick,tick*0.02,ArenaCapturePhase.FixedBeforeSimulation);
+                Physics2D.Simulate(0.02f);
+                observer.Capture(tick,tick*0.02+0.02,ArenaCapturePhase.ExplicitAfterSimulation);
+                observer.TryGetFrame(observer.Count-1,out var sample);
+                maxContacts=Math.Max(maxContacts,sample.Contacts);
+                if(sample.ContactBufferFull||sample.OverlapBufferFull)fullBuffers++;
+                maxX=Math.Max(maxX,body.position.x);
+                if(firstIntrusion<0&&(shape.bounds.max.x>inner.xMax+0.02f||shape.bounds.min.x<inner.xMin-0.02f||shape.bounds.max.y>inner.yMax+0.02f||shape.bounds.min.y<inner.yMin-0.02f))firstIntrusion=tick;
+                if(firstCenterOutside<0&&!outer.Contains(body.position))firstCenterOutside=tick;
+                if(firstFullyOutside<0&&(shape.bounds.min.x>outer.xMax||shape.bounds.max.x<outer.xMin||shape.bounds.min.y>outer.yMax||shape.bounds.max.y<outer.yMin))firstFullyOutside=tick;
+            }
+            observer.Stop();
+            string output=Environment.GetEnvironmentVariable("QUACK_ARENA_OUTPUT");
+            if(string.IsNullOrWhiteSpace(output))output=Path.Combine(Application.temporaryCachePath,"ArenaPressureT003");
+            Directory.CreateDirectory(output);
+            string prefix=Path.Combine(output,scenario); observer.ExportCsv(prefix);
+            Vector2 beforeRelease=body.position;
+            foreach(var enemy in enemies)enemy.Despawn(enemy.LeaseId);
+            for(int tick=0;tick<120;tick++) {
+                player.ApplyCommand(new QuackQuack.Core.Shared.PlayerCommand((-beforeRelease).normalized)); player.SendMessage("FixedUpdate");
+                bootstrap.Run.Advance(0.02f); Physics2D.Simulate(0.02f);
+            }
+            bool quackAccepted = player.ActivateQuack();
+            string summary=FormattableString.Invariant($"scenario={scenario}\nseed={bootstrap.Run.Seed}\nstep=0.02\nenemies={enemyCount}\nstart_x={start.x:R}\nstart_y={start.y:R}\nbank_inner={bank.bounds.min.x:R}\nbank_outer={bank.bounds.max.x:R}\nfirst_intrusion={firstIntrusion}\nfirst_center_outside={firstCenterOutside}\nfirst_fully_outside={firstFullyOutside}\nmax_x={maxX:R}\nbefore_release_x={beforeRelease.x:R}\nbefore_release_y={beforeRelease.y:R}\nafter_return_x={body.position.x:R}\nafter_return_y={body.position.y:R}\ninner_ymin={inner.yMin:R}\nouter_ymin={outer.yMin:R}\nquack_accepted_after_return={quackAccepted}\nphase_after_return={bootstrap.Run.Phase}\nvelocity_iterations={Physics2D.velocityIterations}\nposition_iterations={Physics2D.positionIterations}\nmax_contacts={maxContacts}\nfull_buffers={fullBuffers}\noverwritten={observer.Overwritten}");
+            File.WriteAllText(prefix+".summary.txt",summary);
+            TestContext.WriteLine(summary);
+            Assert.That(observer.Count, Is.EqualTo(1200)); Assert.That(observer.Overwritten, Is.Zero);
+            Assert.That(fullBuffers, Is.Zero);
+            Object.DestroyImmediate(observer.gameObject);
+            yield return null;
         }
     }
 }
