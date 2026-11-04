@@ -43,6 +43,7 @@ namespace QuackQuack.Editor
                 finally { Object.DestroyImmediate(asset); }
                 AssetDatabase.ImportAsset(ActionsPath, ImportAssetOptions.ForceSynchronousImport);
             }
+            UpdateRelicsBindings();
             if (!File.Exists(MobileControlsSetup.PrefabPath)) MobileControlsSetup.Build();
             if (!AssetDatabase.IsValidFolder("Assets/QuackQuack/Resources")) AssetDatabase.CreateFolder("Assets/QuackQuack", "Resources");
             var configuration = AssetDatabase.LoadAssetAtPath<PlayerInputConfiguration>(ConfigurationPath);
@@ -52,5 +53,25 @@ namespace QuackQuack.Editor
             data.FindProperty("mobileControlsPrefab").objectReferenceValue = AssetDatabase.LoadAssetAtPath<GameObject>(MobileControlsSetup.PrefabPath);
             data.ApplyModifiedPropertiesWithoutUndo(); AssetDatabase.SaveAssets();
         }
-    }
+        [MenuItem("QuackQuack/Update Relics input (002 T010)")]
+        public static void UpdateRelicsBindings()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<InputActionAsset>(ActionsPath);
+            if (asset == null) throw new System.InvalidOperationException("Build the base input asset first.");
+            var map = asset.FindActionMap("Gameplay", true);
+            var relics = map.FindAction("Relics");
+            if (relics == null) relics = map.AddAction("Relics", InputActionType.Button);
+            relics.expectedControlType = "Button"; relics.wantsInitialStateCheck = false;
+            EnsureBinding(relics, "<Gamepad>/select", "Gamepad");
+            EnsureBinding(relics, "<Keyboard>/r", "Keyboard");
+            // ToJson preserves the existing map/action/binding IDs; Unity imports the new action.
+            File.WriteAllText(ActionsPath, asset.ToJson());
+            AssetDatabase.ImportAsset(ActionsPath, ImportAssetOptions.ForceSynchronousImport);
+            Debug.Log("T010_RELICS_BINDINGS_SAVED");
+        }
+        private static void EnsureBinding(InputAction action, string path, string group)
+        {
+            foreach (var binding in action.bindings) if (binding.path == path && binding.groups == group) return;
+            action.AddBinding(path, groups: group);
+        }    }
 }

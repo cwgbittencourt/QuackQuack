@@ -54,7 +54,8 @@ namespace QuackQuack.Platform.Input
             if (mobile != null && mobile.Activity > activity) { activity = mobile.Activity; Source = InputSource.Touch; }
             var selected = Source == InputSource.Touch ? t : Source == InputSource.Gamepad ? g : k;
             return new PlayerCommand(gameplay && !IsSuspended ? selected.Move : Vector2.zero,
-                gameplay && !IsSuspended && selected.QuackPressed, allowPause && !IsSuspended && selected.PausePressed, Source);
+                gameplay && !IsSuspended && selected.QuackPressed, allowPause && !IsSuspended && selected.PausePressed, Source,
+                allowPause && !IsSuspended && selected.RelicsPressed);
         }
         public void SetContext(bool gameplay, bool pause)
         { this.gameplay = gameplay; allowPause = gameplay || pause; ApplyContext(); }

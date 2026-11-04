@@ -179,7 +179,7 @@ namespace QuackQuack.Editor
                 case PlayerInputConfiguration c: valid = c.Actions != null && c.MobileControlsPrefab != null; break;
                 case InputActionAsset a:
                     var map = a.FindActionMap("Gameplay", false);
-                    valid = map != null && map.FindAction("Move", false) != null && map.FindAction("Quack", false) != null && map.FindAction("Pause", false) != null;
+                    valid = map != null && map.FindAction("Move", false) != null && map.FindAction("Quack", false) != null && map.FindAction("Pause", false) != null && map.FindAction("Relics", false) != null;
                     break;
                 case InputActionReference r: valid = r.asset != null && r.action != null; break;
                 default:
