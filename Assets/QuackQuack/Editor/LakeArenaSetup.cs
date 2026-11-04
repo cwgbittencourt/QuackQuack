@@ -89,6 +89,7 @@ namespace QuackQuack.Editor
             pato.AddComponent<Rigidbody2D>();
             pato.AddComponent<CircleCollider2D>().radius = 0.42f;
             var player = pato.AddComponent<PlayerController>();
+            ConfigurePlayerPhysics(player);
             Shape("Body", pato.transform, Vector2.zero, new Vector2(1, 0.8f), new Color(1, 0.84f, 0.28f), 5);
             Shape("Head", pato.transform, new Vector2(0.23f, 0.25f), new Vector2(0.57f, 0.57f), new Color(1, 0.96f, 0.72f), 6);
             Shape("Bill", pato.transform, new Vector2(0.51f, 0.18f), new Vector2(0.4f, 0.19f), new Color(1, 0.48f, 0.12f), 7);
@@ -128,6 +129,21 @@ namespace QuackQuack.Editor
             Debug.Log("T030_LAKE_ARENA_SAVED");
         }
 
+        // Keep serialized arenas aligned with PlayerController.Awake. The T005 sweep
+        // uses the authored terrain colliders; it needs no replacement bounds geometry.
+        internal static void ConfigurePlayerPhysics(PlayerController player)
+        {
+            if (player == null) throw new System.InvalidOperationException("Arena requires a Pato.");
+            var shape = player.GetComponent<CircleCollider2D>();
+            if (shape == null || !shape.enabled || shape.isTrigger)
+                throw new System.InvalidOperationException("Pato requires an enabled solid circular collider.");
+            var body = player.GetComponent<Rigidbody2D>();
+            body.bodyType = RigidbodyType2D.Dynamic;
+            body.gravityScale = 0;
+            body.freezeRotation = true;
+            body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            EditorUtility.SetDirty(body);
+        }
         private static GameObject Rect(string name, Vector2 position, Vector2 size, Color color, int order)
         {
             var obj = new GameObject(name); obj.transform.SetParent(root); obj.transform.position = position;

@@ -339,3 +339,47 @@ Suíte EditMode completa também aprovada: **465/465**, zero falhas/ignorados,
 `TestResults/Polimento002/T005/EditMode-accepted.xml`, Unity exit 0. Não foi necessário
 ArenaBoundsTests: não há novo algoritmo geométrico puro; a proteção usa Physics2D real,
 validada na matriz de integração acima.
+## T006 — Integração da cena e dos geradores (04/11/2026)
+
+A geometria existente foi mantida: a matriz T004 já passava na T005, incluindo pedras,
+cantos e chefe, sem engrossar/relocalizar margens. A integração necessária é explicitar
+na cena a configuração física que PlayerController.Awake aplica em runtime.
+
+- LakeArenaSetup.ConfigurePlayerPhysics configura corpo dinâmico, gravidade zero,
+  rotação travada e detecção contínua, exigindo collider circular sólido/habilitado.
+  O gerador da arena de treino e LakeRunSetup.Build usam a mesma configuração.
+- LakeRunSetup.UpdateArenaPhysics atualiza a LakeRun existente e salva com
+  EditorSceneManager. Menu: `QuackQuack/Update arena physics (002 T006)`.
+  Evita reconstruir HUD/prefabs a partir de uma versão anterior da cena de treino.
+- Gerado pelo Unity 6000.4.3f1 na cópia isolada Temp/Polimento002Validation, com
+  `-batchmode -quit -buildTarget Win64 -executeMethod
+  QuackQuack.Editor.LakeRunSetup.UpdateArenaPhysics`. Marcador
+  `T006_ARENA_PHYSICS_SAVED` e exit 0 em Logs/Polimento002/T006/generate.log.
+- Somente o LakeRun.unity gerado foi copiado de volta, com .meta original intacto.
+  Diff da cena limitado a GravityScale 1→0, CollisionDetection 0→1 e Constraints 0→4
+  no Rigidbody2D do Pato. BodyType já era Dynamic. Nenhum ID/referência, posição,
+  tamanho de collider, layer, máscara, UI, câmera, água/terra, pedra, refúgio ou
+  composição da fase do chefe mudou. Lake.unity não foi regravada nesta entrega;
+  seu gerador já passa a aplicar a configuração compartilhada nas próximas gerações.
+- Repetida a geração no Unity: exit 0, mesmo SHA-256 antes/depois. A atualização é
+  idempotente. Log em Logs/Polimento002/T006/idempotence.log.
+
+A configuração de runtime da T005 permanece igual; não é uma segunda correção de física
+nem novo aceite de gameplay. Não houve edição textual de asset serializado. Logs/XML/
+capturas e alterações de importação/configuração da cópia continuam fora do commit.
+
+Validação da cena gerada: **50/50 PlayMode aprovados, zero falhas/ignorados**, Unity exit 0,
+em TestResults/Polimento002/T006/PlayMode.xml:
+ArenaContainmentTests 10, ArenaLakeRunReproductionTests 25 (incluindo os 18 normativos
+T004), LakeArenaTests 2 e RunDirectorFlowTests 13. Cobre instrumentação, contenção,
+pressão/retomada, treino e integração do encontro do chefe na cena atualizada.
+Não houve nova suíte completa EditMode/PlayMode nem build/player/Android/profiling nesta
+entrega de configuração; 465/295 completos da T005 são evidência anterior.
+
+LakeRun.unity gerada/testada/raiz, SHA-256:
+`04C2BC01279DC5459274737A79C3538DA44DD1B2F6A38676D8B03EA3DC9F3AF8`.
+.meta original preservado, SHA-256:
+`FFC6A9F42A419C811F78BB6A73BA7C5C10A0865A1A8C7D837FEB84C34DBBE455`.
+
+T006 encerrada. A T007 permanece aberta para gameplay Windows/Android, comparação da
+pressão e retomada com entrada física; T075 antiga não muda de estado.

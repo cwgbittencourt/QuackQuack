@@ -32,6 +32,7 @@ namespace QuackQuack.Editor
             settings.ExperiencePrefab = AssetDatabase.LoadAssetAtPath<ExperiencePickup>("Assets/QuackQuack/Prefabs/Prototype/ExperiencePickup.prefab");
             EditorUtility.SetDirty(settings); if (!settings.IsValid) throw new System.InvalidOperationException("Invalid run settings.");
             var scene = EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/Lake.unity");
+            LakeArenaSetup.ConfigurePlayerPhysics(Object.FindAnyObjectByType<PlayerController>());
             Object.DestroyImmediate(Object.FindAnyObjectByType<LakeArenaController>());
             foreach (var label in Object.FindObjectsByType<TextMesh>(FindObjectsSortMode.None)) Object.DestroyImmediate(label.gameObject);
             foreach (string name in new[] { "Risk corridor north", "Risk corridor south", "Emitter" })
@@ -71,6 +72,17 @@ namespace QuackQuack.Editor
             foreach (var existing in EditorBuildSettings.scenes) if (!existing.path.EndsWith("RunBootstrap.unity") && !existing.path.EndsWith("LakeRun.unity")) scenes.Add(existing);
             scenes.Add(new EditorBuildSettingsScene("Assets/QuackQuack/Scenes/LakeRun.unity", true)); EditorBuildSettings.scenes = scenes.ToArray();
             AssetDatabase.SaveAssets();
+        }
+        [MenuItem("QuackQuack/Update arena physics (002 T006)")]
+        public static void UpdateArenaPhysics()
+        {
+            // Update the existing run rather than rebuilding UI/prefabs from the training
+            // scene. Preserve object IDs, terrain, refuges, camera and current input layout.
+            var scene = EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/LakeRun.unity");
+            LakeArenaSetup.ConfigurePlayerPhysics(Object.FindAnyObjectByType<PlayerController>());
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene)) throw new System.InvalidOperationException("Could not save LakeRun.");
+            Debug.Log("T006_ARENA_PHYSICS_SAVED");
         }
         private static void BindPrefab(string path, bool boss)
         {
