@@ -7,7 +7,8 @@ T014 permanece aberta até concluir a matriz obrigatória. T075 da feature 001 n
 
 Xbox Series/Windows Bluetooth aprovado em C01–C09, após retestes físicos das correções
 de ordem da pausa e acesso às ações de resultados. DualSense/Windows também aprovado;
-8BitDo/Windows também aprovado e Xbox/S23 Bluetooth em teste; DualSense/S23 pendente.
+8BitDo/Windows também aprovado. Xbox/S23 Bluetooth aprovado em C01–C10;
+DualSense/S23 em teste.
 8BitDo/S23 não reconhecido na tentativa OTG, causa ainda não isolada. T014 permanece aberta.
 
 R2: 399/399 PlayMode completo; 63/63 em cada player IL2CPP Windows/Android. Builds
@@ -311,3 +312,29 @@ Solicitado teste do adaptador com periférico USB conhecido e confirmação de d
 completamente antes de trocar o modo. Em paralelo, iniciado roteiro Xbox/S23 Bluetooth,
 que não depende do OTG. A porta em modo host deixou o aparelho indisponível no ADB;
 o app normal R2 já estava instalado e pode ser aberto manualmente.
+
+### Atualização do diagnóstico OTG e início Xbox / S23
+
+Usuário informou receptor e controle com LED aceso, porém sem mover o Pato e sem
+conseguir interagir com o próprio Android por esse controle, ao contrário dos demais.
+Isso não isola a causa: alimentação/LED não comprova tráfego USB, pareamento ou
+compatibilidade do modo; ainda não há confirmação do OTG com periférico conhecido.
+Não classificar como defeito do jogo nem declarar adaptador defeituoso sem essa prova.
+
+Xbox Series por Bluetooth no S23: usuário confirmou funcionamento, ocultação dos
+controles touch e identificação automática da família Xbox, sem ajuste manual.
+O roteiro completo de menus/perfil/hotplug nos cinco contextos e restauração do toque
+foi solicitado; não estender o aceite básico a esses cenários antes do retorno.
+DualSense/S23 continua pendente.
+
+### Xbox Series / S23 Bluetooth — R2
+
+Após o aceite básico/família automática, o usuário confirmou "tudo funcionou" para
+Quack, pausa, Relíquias/propriedade da pausa, navegação/confirmar/retornar nos quatro
+menus, perfil/atalho/restauração e ausência de Quack automático na escolha.
+Confirmou "tudo funcionou corretamente" para desligar/religar nos cinco contextos,
+com analógico/Quack pressionado, preservação de foco/contexto e retorno do toque na
+partida sem controle, ocultando novamente ao reconectar. Não relatou exceções.
+**Xbox Series/S23 Bluetooth aprovado em C01–C10.**
+DualSense/S23 solicitado na sequência. 8BitDo/S23 permanece não aprovado e sem causa
+isolada na conexão OTG; não extrapolar o resultado Bluetooth para esse receptor.
