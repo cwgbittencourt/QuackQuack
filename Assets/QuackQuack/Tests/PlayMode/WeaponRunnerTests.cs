@@ -428,6 +428,37 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(run.Phase, Is.EqualTo(RunPhase.Lost));
         }
 
+        [TestCase(1.3f)] [TestCase(3.08f)]
+        public void EggDetonationShowsActualAreaAndFreezesWithPause(float radius)
+        {
+            var levels = new WeaponLevel[5];
+            for (int i = 0; i < levels.Length; i++) levels[i] = new WeaponLevel(3, 10, 6, 1, radius);
+            Set("levels", levels);
+            target.transform.position = Vector2.right * (radius - 0.1f);
+            var outside = new GameObject("Outside egg area"); outside.transform.SetParent(root.transform); outside.layer = 9;
+            outside.transform.position = Vector2.right * (radius + 1);
+            var outsideTarget = outside.AddComponent<QuackTarget>();
+            outsideTarget.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+            outsideTarget.GetComponent<CircleCollider2D>().isTrigger = true;
+            Physics2D.SyncTransforms();
+            StartRunner(WeaponBehavior.Eggs, 1); runner.Advance(0); runner.Advance(0.01f);
+            var line = System.Array.Find(root.GetComponentsInChildren<LineRenderer>(true), l => l.name == "Egg burst 0");
+            Assert.That(line, Is.Not.Null); Assert.That(line.enabled, Is.True);
+            Assert.That(line.loop, Is.True);
+            for (int i = 0; i < line.positionCount; i++)
+                Assert.That(((Vector2)line.GetPosition(i)).magnitude, Is.EqualTo(radius).Within(0.001f));
+            Assert.That(target.Health, Is.EqualTo(17)); Assert.That(outsideTarget.Health, Is.EqualTo(20));
+            float alpha = line.startColor.a;
+            run.TryTransition(RunPhase.Paused); runner.Advance(1);
+            Assert.That(line.enabled, Is.True); Assert.That(line.startColor.a, Is.EqualTo(alpha));
+            run.TryResume(); runner.Advance(0.2f);
+            Assert.That(line.enabled, Is.True); Assert.That(line.startColor.a, Is.LessThan(alpha));
+            runner.Advance(0.3f); Assert.That(line.enabled, Is.False);
+            runner.Advance(10); runner.Advance(0.01f); Assert.That(line.enabled, Is.True);
+            Assert.That(System.Array.FindAll(root.GetComponentsInChildren<LineRenderer>(true), l => l.name.StartsWith("Egg burst ")).Length, Is.EqualTo(1));
+            runner.enabled = false; Assert.That(line.enabled, Is.False);
+        }
+
         private void Set(string name, object value) => typeof(WeaponDefinition).GetField(name, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(definition, value);
 
         [TestCase(60f)] [TestCase(120f)]

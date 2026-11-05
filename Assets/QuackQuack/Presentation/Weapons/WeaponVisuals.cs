@@ -10,6 +10,12 @@ namespace QuackQuack.Presentation.Weapons
         private LineRenderer[] frontals;
         private Vector3[][] frontalPoints;
         private double[] frontalStarted;
+        private LineRenderer[] bursts;
+        private Vector3[][] burstPoints;
+        private double[] burstStarted;
+        private int nextBurst;
+        private const int BurstSegments = 48;
+        private const double BurstDuration = 0.45;
         private const int FrontalSegments = 20;
         private const double FrontalDuration = 0.25;
 
@@ -17,10 +23,11 @@ namespace QuackQuack.Presentation.Weapons
         public static float PreviewDiameter(float radius, float maxRadius, float maxPixels) =>
             2 * radius * (maxPixels / (2 * maxRadius));
 
-        public void Initialize(int slots)
+        public void Initialize(int slots, int burstCapacity = 1)
         {
             if (auras != null) throw new InvalidOperationException("Weapon visuals are already initialized.");
             if (slots <= 0) throw new ArgumentOutOfRangeException(nameof(slots));
+            if (burstCapacity <= 0) throw new ArgumentOutOfRangeException(nameof(burstCapacity));
             auras = new SpriteRenderer[slots];
             frontals = new LineRenderer[slots];
             frontalPoints = new Vector3[slots][];
@@ -40,6 +47,34 @@ namespace QuackQuack.Presentation.Weapons
                 line.startWidth = line.endWidth = 0.045f; line.enabled = false;
                 frontals[i] = line; frontalPoints[i] = new Vector3[FrontalSegments + 3];
             }
+            bursts = new LineRenderer[burstCapacity];
+            burstPoints = new Vector3[burstCapacity][];
+            burstStarted = new double[burstCapacity];
+            for (int i = 0; i < burstCapacity; i++)
+            {
+                var view = new GameObject("Egg burst " + i);
+                view.transform.SetParent(transform, false);
+                var line = view.AddComponent<LineRenderer>();
+                line.sharedMaterial = auras[0].sharedMaterial;
+                line.useWorldSpace = true; line.loop = true; line.sortingOrder = 14;
+                line.startWidth = line.endWidth = 0.055f; line.enabled = false;
+                bursts[i] = line; burstPoints[i] = new Vector3[BurstSegments];
+            }
+        }
+
+        public void PulseEggArea(Vector2 origin, float radius, double time)
+        {
+            if (!isActiveAndEnabled) return;
+            int slot = nextBurst; nextBurst = (nextBurst + 1) % bursts.Length;
+            var points = burstPoints[slot];
+            for (int i = 0; i < BurstSegments; i++)
+            {
+                float angle = 2 * Mathf.PI * i / BurstSegments;
+                points[i] = origin + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+            }
+            var line = bursts[slot]; line.positionCount = points.Length; line.SetPositions(points);
+            line.startColor = line.endColor = new Color(1, 0.65f, 0.2f, 0.95f);
+            burstStarted[slot] = time; line.enabled = true;
         }
 
         public void PulseFrontal(int slot, Vector2 origin, Vector2 direction, float radius, float angle, double time)
@@ -60,6 +95,15 @@ namespace QuackQuack.Presentation.Weapons
 
         public void Advance(double time)
         {
+            if (bursts != null)
+                for (int i = 0; i < bursts.Length; i++)
+                {
+                    var line = bursts[i]; if (!line.enabled) continue;
+                    double elapsed = time - burstStarted[i];
+                    if (elapsed >= BurstDuration) { line.enabled = false; continue; }
+                    // Keep the damage boundary fixed; only opacity animates.
+                    line.startColor = line.endColor = new Color(1, 0.65f, 0.2f, 0.95f * (1 - (float)(elapsed / BurstDuration)));
+                }
             if (frontals == null) return;
             for (int i = 0; i < frontals.Length; i++)
             {
@@ -93,6 +137,8 @@ namespace QuackQuack.Presentation.Weapons
         public void HideAll()
         {
             HideAuras();
+            if (bursts != null)
+                for (int i = 0; i < bursts.Length; i++) if (bursts[i] != null) bursts[i].enabled = false;
             if (frontals == null) return;
             for (int i = 0; i < frontals.Length; i++) if (frontals[i] != null) frontals[i].enabled = false;
         }

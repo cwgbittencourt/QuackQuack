@@ -1,6 +1,6 @@
 # T023 — Comparação de armas e passivas (US3)
 
-**Data:** 05/11/2026. **Estado:** em validação; T023 permanece aberta. Unity 6000.4.3f1, cópia isolada em `Temp/Polimento002Validation`. Não representa aceite global de plataforma, desempenho ou partida de 15 minutos.
+**Data:** 05/11/2026. **Estado:** T023 concluída; aceite jogável US3 recebido no Windows e S23, builds R4 geradas. Unity 6000.4.3f1, cópia isolada em `Temp/Polimento002Validation`. Não representa aceite global de plataforma, desempenho ou partida de 15 minutos.
 
 ## Revisão aprovada durante o teste
 
@@ -63,6 +63,7 @@ Velocidades de projétil: Bumerangue 7, Tornado 8, Foguetes 5, Bolhas 3. O campo
 | Matriz numérica final | 2.100 projeções finitas/válidas | Diagnóstico, não 2.100 testes de gameplay |
 | Android nativo, versão anterior do balanceamento | 95/95 aprovados na repetição R2 | Não comprova revisão final de Sabão/efeito frontal |
 | Android nativo IL2CPP no S23, revisão R3 | 97/97 aprovados, zero falhas/ignorados, código de saída 0 | Integração executada no aparelho; aceite visual separado |
+| PlayMode após indicador de Ovos/Incubadora (R4) | 462/462 aprovados, zero falhas/ignorados, código de saída 0 | Inclui dois casos novos de área visual/dano, pausa, fade, reuso e desativação |
 
 XMLs locais: `TestResults/Polimento002/T023/final-EditMode.xml`, `final-PlayMode.xml`, `android-tests-r2.xml`. Matriz: `Logs/Polimento002/T023/modifiers.csv`; versão anterior preservada em `modifiers-before.csv`. SHA-256 da matriz final: `FAD5D656CAFE0E8C38DF919DF41954EF8E654182A315E77461406909183BB82E`. Artefatos regeneráveis não são versionados.
 
@@ -77,7 +78,7 @@ Builds normais IL2CPP, sem o script privado de laboratório nos Assets durante a
 | Laboratório Windows | `Builds/T023LabR3/Windows/GameAssembly.dll` | `F5B9FD9B140060314B7CC16CD79CF64407E067F865BA74EA54D3E88B2C32D103` |
 | Laboratório Android | `Builds/T023LabR3/Android/QuackQuackT023LabR3.apk` | `BD04CF631A50795A417A623E0341A64CBE857CBE73DAC320E609D1D8E3DE0146` |
 
-Pacote normal Android: `com.cemggames.quackquack.validation002.t023`; laboratório: `com.cemggames.quackquack.validation002.t023lab`. As quatro builds R3 terminaram com código zero. A instalação R3 normal no S23 (SM-S918B) foi concluída sem limpar dados. Inicialização Windows observada com Pato, ondas, ataques e HUD. Solicitada conferência de movimento, Quack, pausa e escolha/progressão, o usuário respondeu “parece tudo normal”; não informou separadamente cada etapa. Comparações controladas R3 ainda precisam dos respectivos resultados.
+Pacote normal Android: `com.cemggames.quackquack.validation002.t023`; laboratório: `com.cemggames.quackquack.validation002.t023lab`. As quatro builds R3 terminaram com código zero. A instalação R3 normal no S23 (SM-S918B) foi concluída sem limpar dados. Inicialização Windows observada com Pato, ondas, ataques e HUD. Solicitada conferência de movimento, Quack, pausa e escolha/progressão, o usuário respondeu “parece tudo normal”; não informou separadamente cada etapa. Resultados controlados R3 recebidos e registrados abaixo; a evolução de Ovos revelou uma falha visual adicional.
 
 A primeira execução Android apresentou uma falha de sincronização do teste de movimento: a confirmação de melhoria limpa comandos, e o teste amostrava FixedUpdate antes do próximo Update. A fixture agora verifica velocidade zero ao fechar e espera uma atualização antes da física; não houve alteração do controlador de movimento. A repetição nativa passou. Os dois novos testes do feedback frontal falharam pela ausência do efeito antes da implementação e passaram na suíte final; cobrem ângulos 60°/120°, alcance, dano preservado, pausa, término, repetição e desativação.
 
@@ -93,12 +94,38 @@ Laboratório usa cenas, catálogo, resolução, física, projéteis, cartas e ru
 | Aura com parede, limite e pausa/retomada | Funciona corretamente |
 | Pulmão e Amuleto, capacidade/recuperação | Passivas funcionam; ataque frontal sem animação visível |
 
-## Pendências para encerramento
+## Retestes R3/R4 e resultado
 
-- Retestar visual/colisão/prévia de Sabão na revisão 16%/80% e contorno do ataque frontal no Windows.
-- Confirmar as três evoluções e composição com relíquias/terrenos em gameplay.
-- Detalhar o fluxo normal de escolha/progressão no Windows caso não tenha sido coberto pelo retorno geral “parece tudo normal”.
-- Repetir os cenários físicos no S23; testes nativos finais Android já passaram. Laboratório R3 instalado e launcher iniciado por ADB; a aparência e a interação aguardam confirmação do usuário.
-- Registrar os retornos físicos R3, mantendo T023 aberta até o aceite necessário. Configuração Windows para player de testes preparada com código zero; isso não constitui execução de testes nativos Windows.
+Retorno recebido em 05/11/2026 sobre a R3:
+
+| Plataforma/caso | Resultado informado |
+|---|---|
+| Windows — pulso frontal, pausa e Sabão N0/N1/N5 com prévia | “sim, está funcionando corretamente” |
+| Windows — Tornado e Quack supersônico | Funcionam corretamente após evolução |
+| Windows — Incubadora de combate | Dano se estende além do desenho do ovo, sem animação que mostre a área: falha de legibilidade confirmada |
+| Windows — relíquias P0–P4 e terrenos | “os valores acompanham”; não equivale a relato separado de cada efeito percebido |
+| S23 — roteiro R3 por toque (Sabão/prévia, frontal, aura/parede/pausa, bumerangue e seis passivas) | “funciona corretamente”; roteiro não incluía as três evoluções |
+
+Correção implementada: no momento da detonação de Ovos/Incubadora, desenhar um anel centrado na explosão, com o mesmo `max(AreaRadius, HitRadius)` da consulta de dano. O raio permanece fixo e somente a opacidade anima por 0,45 s de simulação. Views e pontos são pré-alocados com capacidade limitada pelo pool de projéteis; saturação substitui o indicador mais antigo sem alterar dano. Não é um novo dano contínuo: é a indicação do pulso já aplicado. Paredes continuam obstruindo o dano conforme regra existente; o anel mostra a área nominal, sem simular recorte por paredes.
+
+XML da correção: `TestResults/Polimento002/T023/egg-PlayMode.xml` (462/462). Casos 1,30 e 3,08 conferem cada ponto do anel no raio de dano, alvo interno atingido e externo preservado, congelamento na pausa, redução de opacidade sem alterar raio, término e reutilização com capacidade um, sem novos objetos por emissão. As regras de dano permanecem as anteriores. As quatro builds R4 terminaram com código zero.
+
+Builds R4 IL2CPP geradas com código zero:
+
+| Artefato na cópia isolada | SHA-256 |
+|---|---|
+| `Builds/T023LabR4/Windows/GameAssembly.dll` | `B14D3E204933384D814F90CDB928FA61DBC6601A2C3B585E5C41C6EDE4F9451C` |
+| `Builds/T023LabR4/Android/QuackQuackT023LabR4.apk` | `2737162A73E23C0EFA752D8D06611B963E73C217523BF0A923073CE00BAB5E96` |
+| `Builds/T023R4/Windows/GameAssembly.dll` | `9AB4099DA5A2A6222661409B8F93EA7D8D558A3E1C79ED4DA5221C5B0DD62CD5` |
+| `Builds/T023R4/Android/QuackQuackT023.apk` | `E48F07B67CE9C1EC4DE0DE13C163A18F9E45E5FBEDF1D71AA68B47D35918E98E` |
+
+Laboratório APK R4 instalado no S23 sem limpar dados e launcher iniciado por ADB; reteste físico aprovado abaixo. APK normal R4 também atualizado no S23 com sucesso, sem limpar dados. Builds normais R4 geradas com código zero, com script diagnóstico privado novamente removido dos Assets durante a compilação.
+
+Windows R4: solicitado comparar Ovos N5 e evolução, tamanho/visibilidade do anel e pausa/retomada, o usuário respondeu “está funcionando”. Correção visual aprovada nesse roteiro.
+
+S23 R4: solicitado comparar Ovos N5/Incubadora, anel e pausa, e confirmar Tornado com Pena e Quack supersônico com Pulmão/pulso por toque, o usuário respondeu “está funcionando”. Aceite do roteiro recebido. Com os retornos R3, cobre as seis passivas, três evoluções, prévia, aura e ida/volta nas duas plataformas testadas.
+
+Testes nativos R3 passaram antes da correção do anel; PlayMode R4 passou depois dela e ambos aparelhos receberam aceite físico R4.
+Configuração Windows para player de testes preparada com código zero; isso não constitui execução de testes nativos Windows. O Windows teve integração no Editor e validação jogável da build IL2CPP.
 
 T014 permanece com a validação 8BitDo/S23 adiada por solicitação do usuário. T024 não foi iniciada.

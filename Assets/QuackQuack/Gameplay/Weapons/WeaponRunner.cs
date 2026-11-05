@@ -101,7 +101,7 @@ namespace QuackQuack.Gameplay.Weapons
             this.terrain = terrain; this.poolKey = poolKey; this.capacity = capacity;
             active = new List<WeaponProjectile>(capacity);
             visuals = gameObject.AddComponent<WeaponVisuals>();
-            visuals.Initialize(slots.Length);
+            visuals.Initialize(slots.Length, capacity);
             run.Changed += OnRunChanged;
             initialized = true;
         }
@@ -303,6 +303,8 @@ namespace QuackQuack.Gameplay.Weapons
         private void AreaHit(WeaponDefinition definition, WeaponLevel stats, Vector2 position, Vector2 direction, bool cone, WeaponProjectile projectile)
         {
             float radius = cone ? stats.Range : Mathf.Max(stats.AreaRadius, definition.HitRadius);
+            if (definition.Behavior == WeaponBehavior.Eggs && projectile != null)
+                visuals.PulseEggArea(position, radius, clock);
             int count = Physics2D.OverlapCircle(position, radius, TargetFilter, overlaps);
             areaHitCount = 0;
             for (int i = 0; i < count; i++)
