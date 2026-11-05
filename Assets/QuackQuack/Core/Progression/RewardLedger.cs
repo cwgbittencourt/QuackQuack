@@ -6,7 +6,7 @@ namespace QuackQuack.Core.Progression
 {
     public enum RewardOrigin { Common, MiniBoss, FinalBoss }
     public enum RewardKind { Experience, HealCommon, HealMiniBoss }
-    public enum RewardState { Due, WaitingForView, Grounded, Claimed, Attracted, Released }
+    public enum RewardState { Due, WaitingForView, Grounded, Claimed, Attracted, Released, Discarded }
 
     public readonly struct RewardId : IEquatable<RewardId>
     {
@@ -154,6 +154,16 @@ namespace QuackQuack.Core.Progression
         {
             if (!byId.TryGetValue(id, out var entry) || entry.State != RewardState.Grounded) return false;
             entry.State = RewardState.Attracted; return true;
+        }
+        public void CancelAttraction(RewardId id)
+        {
+            if (byId.TryGetValue(id, out var entry) && entry.State == RewardState.Attracted) entry.State = RewardState.Grounded;
+        }
+        public bool TryDiscardCapturedHealing(RewardId id)
+        {
+            if (!byId.TryGetValue(id, out var entry) || entry.State != RewardState.Attracted ||
+                (entry.Kind != RewardKind.HealCommon && entry.Kind != RewardKind.HealMiniBoss)) return false;
+            entry.State = RewardState.Discarded; return true;
         }
         private static bool Collectable(RewardEntry entry) => entry.State == RewardState.Grounded || entry.State == RewardState.Attracted;
 

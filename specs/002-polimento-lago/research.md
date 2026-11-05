@@ -66,7 +66,7 @@ Inspeção estática somente; nenhum teste, gameplay ou profiling executado nest
 ## Decisões consolidadas após aprovação
 
 - D1/D2: cura comum sorteada com 10%, fração 15%, sem cooldown/teto de gameplay; miniboss gera uma cura 50% sempre, sem segundo sorteio comum. XP independente e garantido; chefe sem cura herdada.
-- D3: raio de captura 3 × raio físico escalado do Pato, equivalente a um diâmetro além da borda; base 1,26. Velocidade 1,25 × velocidade efetiva na água, base 7,5. Mesmo contrato XP/cura; captura persiste após afastamento, pausa suspende, morte/fim cancelam. Cura cheia permanece não consumida, inclusive acompanhando se já capturada.
+- D3: raio de captura 3 × raio físico escalado do Pato, equivalente a um diâmetro além da borda; base 1,26. Velocidade 1,25 × velocidade efetiva na água, base 7,5. Mesmo contrato XP/cura; captura persiste após afastamento, pausa suspende, morte/fim cancelam. Cura cheia ainda não capturada permanece no chão; cura já capturada é descartada se a vida ficar cheia (revisão explícita D3/T029 em 05/11/2026).
 - D4/D5: dicas só nos primeiros 10 segundos de simulação; símbolos atualizam sem reset. Barras individuais ancoradas acima do especial, sem painel agrupado.
 - D6: Xbox/PlayStation/genérico, mapeamentos reais, perfil configurável e fallback focalizável; Cancel não pula nível obrigatório; preservar ownsPause.
 - D7: somente Bolhas, +8%/nível até +40% no raio efetivo e visual, prévia antes/depois. Não aplicar AreaRadius sobre zero; definir raio efetivo a partir do HitRadius de Bolhas e não alterar aquisição/dano/velocidade.
@@ -79,3 +79,5 @@ Inspeção estática somente; nenhum teste, gameplay ou profiling executado nest
 ## Ambiente e limites
 
 Manifest local: Input System 1.19.0, URP 17.4.0, uGUI 2.0.0, Test Framework 1.6.0; Unity 6000.4.3f1. Nenhuma atualização proposta. Pesquisa local fundamenta estes achados, sem novas alegações sobre APIs externas. Resultados anteriores 465 EditMode/258 PlayMode/34 por player são históricos, não execução desta rodada nem contagem fixa futura.
+
+**Revisão explícita D3 na T029 (05/11/2026):** cura já capturada que encontra vida cheia é descartada, sem cura nem retorno ao chão. Substitui a recomendação anterior de aguardar falta de vida acompanhando. Cura ainda não capturada continua no chão com vida cheia; ver decisions.md.

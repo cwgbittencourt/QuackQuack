@@ -11,7 +11,7 @@ using UnityEngine;
 namespace QuackQuack.Gameplay.Pickups
 {
     [RequireComponent(typeof(CircleCollider2D))]
-    public sealed class ExperiencePickup : MonoBehaviour, IPoolLifecycle
+    public sealed class ExperiencePickup : MonoBehaviour, IPoolLifecycle, IPickupAttractionView
     {
         public const int PhysicsLayer = 10;
         private PoolService pools;
@@ -25,6 +25,18 @@ namespace QuackQuack.Gameplay.Pickups
         public RewardId BoundRewardId => rewardId;
         public RewardState ViewState { get; private set; } = RewardState.Released;
         public Transform AttractionTarget { get; private set; }
+        private CircleCollider2D shape;
+        public bool IsHealing => false;
+        public Transform PickupTransform => transform;
+        public CircleCollider2D PickupCollider => shape;
+        public AttractionState Attraction { get; set; }
+        public void CancelAttraction()
+        {
+            ledger?.CancelAttraction(rewardId); AttractionTarget = null; Attraction = default;
+            if (ViewState == RewardState.Attracted) ViewState = RewardState.Grounded;
+        }
+        void IPickupAttractionView.CollectContact(Collider2D player) => TryCollect(player);
+        void IPickupAttractionView.DiscardCapturedHealing() { }
         public bool TryMarkAttracted(Transform target)
         {
             if (target == null || ViewState != RewardState.Grounded || upgrades == null || !upgrades.CanCollectExperience) return false;
@@ -46,7 +58,7 @@ namespace QuackQuack.Gameplay.Pickups
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetIds() { nextRareId = 0; }
 
-        private void Awake() { gameObject.layer = PhysicsLayer; GetComponent<CircleCollider2D>().isTrigger = true; }
+        private void Awake() { gameObject.layer = PhysicsLayer; shape = GetComponent<CircleCollider2D>(); shape.isTrigger = true; }
 
         public void Initialize(PoolService owner, UpgradeSystem progression, int experienceAmount)
         {
@@ -96,6 +108,7 @@ namespace QuackQuack.Gameplay.Pickups
             ledger = null; rewardId = default; collect = null;
             AttractionTarget = null; ViewState = RewardState.Released;
             activeLease = 0;
+            Attraction = default;
             pools = null; upgrades = null; rareEvents = null; rareId = 0; amount = 0; acquired = claimed = false;
         }
 

@@ -35,11 +35,13 @@ XP de cada derrota deve ser positivo em dados aprovados; despawn/expiração nã
 
 ## 3. AttractionState (novo Core/Progression)
 
-Campos: RewardId, posição atual, estado Grounded/Following/AwaitingMissingHealth, alvo, velocidade derivada. Captura usa distância entre centro do Pato e centro do pickup <= 3 × raio físico do Pato, inclusive igualdade. Base atual: 0,42 → 1,26. Escala física autorada uniforme positiva; mudanças invalidam cache do raio. Sprite/animação não alteram captura.
+Campos: RewardId, posição atual, estado Grounded/Following/Discarded, alvo, velocidade derivada. Captura usa distância entre centro do Pato e centro do pickup <= 3 × raio físico do Pato, inclusive igualdade. Base atual: 0,42 → 1,26. Escala física autorada uniforme positiva; mudanças invalidam cache do raio. Sprite/animação não alteram captura.
 
 Após Following, sair do raio não cancela. Movimento contínuo até contato de coleta, velocidade = 1,25 × velocidade efetiva do jogador na água, incluindo modificadores vigentes e sem penalidade transitória de terreno terra. Atualizar referência quando modificadores mudam. Observar obstáculos não bloqueia movimento do pickup; isso não muda colisão do Pato/inimigos.
 
-Pause/ChoosingUpgrade: congelar posição/claim. Dead/terminal: cancelar following e limpar no teardown; não curar morto. Cura com vida cheia não inicia captura; se ficar cheia após captura, acompanha sem claim até haver vida faltante. Fim de partida não concede automaticamente curas/XP de chão; exceção explicitamente aprovada é XP devido do chefe final antes de encerrar.
+Pause/ChoosingUpgrade: congelar posição/claim. Dead/terminal: cancelar following e limpar no teardown; não curar morto. Cura com vida cheia não inicia captura; se ficar cheia após captura, o pickup é descartado sem cura e sem voltar ao chão. Fim de partida não concede automaticamente curas/XP de chão; exceção explicitamente aprovada é XP devido do chefe final antes de encerrar.
+
+**Implementação T029 e revisão D3 (05/11/2026):** AttractionState puro conserva lease/fase; posição física e alvo ficam na view, e velocidade/raio são projeções atualizadas pelo driver central. Cura capturada com vida cheia termina em RewardState.Discarded, sem claim positivo ou reenfileiramento (correção explícita do usuário); cura no chão continua preservada. Ver decisions.md e test-report-t029.md. O driver utiliza as arrays já alocadas de pickups da partida, sem Update por view.
 
 ## 4. PlayerState.Heal e EffectiveAttributes
 

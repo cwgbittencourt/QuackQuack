@@ -19,6 +19,7 @@ using QuackQuack.Systems.Pooling;
 using QuackQuack.Systems.Save;
 using QuackQuack.Systems.Spawning;
 using QuackQuack.Systems.Upgrades;
+using QuackQuack.Systems.Pickups;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -71,6 +72,7 @@ namespace QuackQuack.Systems.Run
         private ExperiencePickup[] pickups;
         private HealingPickup[] healingPickups;
         private string healingKey;
+        public PickupAttractionSystem Attraction { get; private set; }
         private readonly Dictionary<string, int> rewardSources = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly HashSet<string> miniRewardSources = new HashSet<string>(StringComparer.Ordinal);
         private Func<int, bool> collectExperience;
@@ -161,6 +163,7 @@ namespace QuackQuack.Systems.Run
             pools.Register(healingKey, PoolFamily.Pickup, () => Instantiate(settings.HealingPrefab, transform), settings.HealingCapacity);
             healingPickups = new HealingPickup[settings.HealingCapacity];
             HealingMaterializer = MaterializeHealingView;
+            Attraction = new PickupAttractionSystem(run, player, settings.PickupPolicy, upgrades, relics);
             pools.Register(bossKey, PoolFamily.Enemy, () => Instantiate(settings.BossPrefab, transform).GetComponent<FrogKingController>(), 1);
             // Warm the boss's own hazard pools before gameplay, then return the actor.
             var warm = pools.Acquire<FrogKingController>(bossKey);
@@ -226,6 +229,7 @@ namespace QuackQuack.Systems.Run
             if (run.IsSimulating) { Physics2D.SyncTransforms(); weapons.Advance(seconds); }
             if (run.IsSimulating && Boss != null) Boss.Advance(seconds);
             if (run.IsSimulating) MaterializeRewards();
+            if (run.IsSimulating) Attraction.Advance(seconds, pickups, healingPickups);
             if (run.IsSimulating && player.State.Health <= 0) run.TryTransition(RunPhase.Lost);
             if (ending) Finish();
         }

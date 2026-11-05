@@ -36,7 +36,7 @@ Heal(fração): jogador vivo, valor aplicado min(falta, MaxHealth × fração). 
 
 ## C5 — Atração compartilhada (FR-011)
 
-Distância de captura centro-centro <=3 × raio físico escalado do Pato (base 1,26). Cura cheia não captura. Capturado → seguir a 1,25 × velocidade efetiva na água, base 7,5, mesmo que distância aumente. Sem oclusão por obstáculos durante atração; coleta final usa contato/limiar existente sem conceder remotamente. Pausa/seleção suspendem; morte/fim cancelam. Se cura já capturada fica sem vida faltante, acompanha sem claim até haver falta. Reset pooled limpa todo estado e preserva concessão única.
+Distância de captura centro-centro <=3 × raio físico escalado do Pato (base 1,26). Cura cheia não captura. Capturado → seguir a 1,25 × velocidade efetiva na água, base 7,5, mesmo que distância aumente. Sem oclusão por obstáculos durante atração; coleta final usa contato/limiar existente sem conceder remotamente. Pausa/seleção suspendem; morte/fim cancelam. Se cura já capturada fica sem vida faltante, é descartada sem aplicar cura nem reenfileirar a recompensa (revisão do usuário na T029, 05/11/2026). Reset pooled limpa todo estado e preserva concessão única.
 
 ## C6 — HUD e dicas (FR-003–005/012/017)
 

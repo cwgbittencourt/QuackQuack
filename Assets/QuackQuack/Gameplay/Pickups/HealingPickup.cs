@@ -8,7 +8,7 @@ using UnityEngine;
 namespace QuackQuack.Gameplay.Pickups
 {
     [RequireComponent(typeof(CircleCollider2D))]
-    public sealed class HealingPickup : MonoBehaviour, IPoolLifecycle
+    public sealed class HealingPickup : MonoBehaviour, IPoolLifecycle, IPickupAttractionView
     {
         private PoolService pools;
         private RewardLedger ledger;
@@ -21,7 +21,22 @@ namespace QuackQuack.Gameplay.Pickups
         public RewardId BoundRewardId => rewardId;
         public RewardState ViewState { get; private set; } = RewardState.Released;
         public Transform AttractionTarget { get; private set; }
-        private void Awake() { gameObject.layer = ExperiencePickup.PhysicsLayer; GetComponent<CircleCollider2D>().isTrigger = true; }
+        private CircleCollider2D shape;
+        public bool IsHealing => true;
+        public Transform PickupTransform => transform;
+        public CircleCollider2D PickupCollider => shape;
+        public AttractionState Attraction { get; set; }
+        public void CancelAttraction()
+        {
+            ledger?.CancelAttraction(rewardId); AttractionTarget = null; Attraction = default;
+            if (ViewState == RewardState.Attracted) ViewState = RewardState.Grounded;
+        }
+        void IPickupAttractionView.CollectContact(Collider2D player) => TryCollect(player);
+        void IPickupAttractionView.DiscardCapturedHealing()
+        {
+            if (ledger != null && ledger.TryDiscardCapturedHealing(rewardId)) pools.Release(this);
+        }
+        private void Awake() { gameObject.layer = ExperiencePickup.PhysicsLayer; shape = GetComponent<CircleCollider2D>(); shape.isTrigger = true; }
 
         public void Initialize(PoolService owner, RewardLedger rewards, RewardId id, PlayerController target, RunState state)
         {
@@ -58,6 +73,7 @@ namespace QuackQuack.Gameplay.Pickups
             pools = null; ledger = null; rewardId = default; player = null; run = null;
             AttractionTarget = null; acquired = claimed = false; ViewState = RewardState.Released;
             activeLease = 0;
+            Attraction = default;
         }
     }
 }
