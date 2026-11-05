@@ -10,6 +10,65 @@ namespace QuackQuack.Tests.EditMode
 {
     public class RewardLedgerTests
     {
+        [TestCase(-0.1d)] [TestCase(1.1d)] [TestCase(double.NaN)] [TestCase(double.PositiveInfinity)]
+        public void InvalidChanceIsRejectedAtConstruction(double chance)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new RewardLedger(1, () => 0, chance, 0.15f, 0.5f, 2));
+        }
+
+        [TestCase(-0.1d)] [TestCase(1d)] [TestCase(double.NaN)] [TestCase(double.PositiveInfinity)]
+        public void InvalidRandomCannotPartiallyCommitDefeat(double roll)
+        {
+            bool invalid = true;
+            var ledger = new RewardLedger(1, () => invalid ? roll : 0, 0.1, 0.15f, 0.5f, 1);
+            Assert.Throws<InvalidOperationException>(() => ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true));
+            Assert.That(ledger.Entries, Is.Empty);
+            invalid = false;
+            Assert.That(ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true), Is.True);
+            Assert.That(ledger.Entries.Count, Is.EqualTo(2));
+        }
+
+        [TestCase(0d, 1)] [TestCase(1d, 2)]
+        public void AuthoredChanceEndpointsAndFractionsAreConsumed(double chance, int count)
+        {
+            var ledger = new RewardLedger(1, () => 0, chance, 0.2f, 0.7f, 2);
+            ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true);
+            Assert.That(ledger.Entries.Count, Is.EqualTo(count));
+            if (count == 2) Assert.That(ledger.Entries[1].Fraction, Is.EqualTo(0.2f));
+            ledger.ProcessDefeat(8, 1, RewardOrigin.MiniBoss, 9, 0, 0, true);
+            Assert.That(ledger.Entries[ledger.Entries.Count - 1].Fraction, Is.EqualTo(0.7f));
+        }
+
+        [Test]
+        public void TechnicalCapacityFailsBeforeRollInsteadOfSuppressingOrPartiallyRecording()
+        {
+            int rolls = 0;
+            var ledger = new RewardLedger(1, () => { rolls++; return 0; }, 0.1, 0.15f, 0.5f, 1);
+            ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true);
+            Assert.That(ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true), Is.False);
+            Assert.Throws<InvalidOperationException>(() => ledger.ProcessDefeat(7, 2, RewardOrigin.Common, 9, 0, 0, true));
+            Assert.That(ledger.Entries.Count, Is.EqualTo(2)); Assert.That(rolls, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void WrongKindForeignIdAndExperienceOverflowCannotConsumeRewards()
+        {
+            var ledger = new RewardLedger(1, () => 0, 0.1, 0.15f, 0.5f, 1);
+            ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true);
+            var xpId = ledger.Entries[0].Id; var healId = ledger.Entries[1].Id;
+            ledger.TryMaterialize(xpId, true); ledger.TryMaterialize(healId, true);
+            var player = RewardPolicyTests.Player(100, 50);
+            var xp = new ExperienceState(new[] { 10 }); xp.TryAdd(int.MaxValue, out _);
+            Assert.That(ledger.TryCollectHeal(xpId, player), Is.Zero);
+            Assert.That(ledger.TryCollectExperience(healId, xp), Is.False);
+            Assert.That(ledger.TryCollectExperience(xpId, xp), Is.False);
+            Assert.That(ledger.Entries[0].State, Is.EqualTo(RewardState.Grounded));
+            var foreign = new RewardId(2, xpId.SourceId, xpId.LeaseId, xpId.Kind);
+            Assert.That(ledger.TryMaterialize(foreign, true), Is.False);
+            Assert.That(ledger.TryCollectHeal(foreign, player), Is.Zero);
+            Assert.That(player.Health, Is.EqualTo(50));
+        }
+
         [Test]
         public void ReplayOfFailedRollCannotRetryLotteryOrReplaceOriginalRewardData()
         {
@@ -178,16 +237,12 @@ namespace QuackQuack.Tests.EditMode
         }
     }
 
-    // Proposed pure API seam: no simulated reward implementation or production stubs.
+    // Test adapter over the pure production ledger; no simulated rewards or production stubs.
     internal static class RewardContract
     {
         internal static object Create(long run, Func<double> random)
         {
-            var type = typeof(PlayerState).Assembly.GetType("QuackQuack.Core.Progression.RewardLedger");
-            Assert.That(type, Is.Not.Null, "T025/T027 pending: pure RewardLedger is missing.");
-            var constructor = type.GetConstructor(new[] { typeof(long), typeof(Func<double>), typeof(double), typeof(float), typeof(float) });
-            Assert.That(constructor, Is.Not.Null, "Missing proposed RewardLedger constructor; adapt test seam if production API differs.");
-            return constructor.Invoke(new object[] { run, random, 0.1d, 0.15f, 0.5f });
+            return new RewardLedger(run, random, 0.1d, 0.15f, 0.5f, 512);
         }
         internal static bool Defeat(object ledger, int source, long lease, string origin, int xp = 9, float x = 0, float y = 0, bool defeated = true)
         {

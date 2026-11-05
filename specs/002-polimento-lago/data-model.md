@@ -25,6 +25,8 @@ Transições: Due → WaitingForView → Grounded → Attracted → Claimed → 
 
 XP de cada derrota deve ser positivo em dados aprovados; despawn/expiração não é derrota. Chefe final usa origem própria e valor editável positivo, concedido uma vez antes do resultado terminal; zero cura automática. Autoria da quantidade de XP de chefe é revisão de dados em T026, sem número escondido no código.
 
+**Nota de implementação T025 (05/11/2026):** `RewardLedger` puro recebe partida, RNG dedicado, chance/frações e capacidade explícita de derrotas; pré-aloca até duas recompensas por derrota. Capacidade insuficiente falha antes de RNG/mutação e deve ser dimensionada na integração T027. Identidade implementada inclui origem e ordinal zero por tipo. Estados iniciais Due/WaitingForView/Grounded/Claimed e claims positivos são lógicos; views, Attracted/Released e teardown permanecem nas próximas tasks. Ver `test-report-t025.md`.
+
 ## 3. AttractionState (novo Core/Progression)
 
 Campos: RewardId, posição atual, estado Grounded/Following/AwaitingMissingHealth, alvo, velocidade derivada. Captura usa distância entre centro do Pato e centro do pickup <= 3 × raio físico do Pato, inclusive igualdade. Base atual: 0,42 → 1,26. Escala física autorada uniforme positiva; mudanças invalidam cache do raio. Sprite/animação não alteram captura.

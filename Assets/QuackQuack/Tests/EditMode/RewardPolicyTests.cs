@@ -7,6 +7,17 @@ namespace QuackQuack.Tests.EditMode
 {
     public class RewardPolicyTests
     {
+        [Test]
+        public void HealingPreservesDamageInvulnerabilityAndCannotClaimRoundedAwayGain()
+        {
+            var player = new PlayerState(100, 100, 12, 24);
+            player.TakeDamage(40, 1, 5);
+            Assert.That(player.Heal(float.Epsilon), Is.Zero);
+            Assert.That(player.Health, Is.EqualTo(60));
+            Assert.That(player.Heal(0.15f), Is.EqualTo(15).Within(0.00001f));
+            Assert.That(player.InvulnerableUntil, Is.EqualTo(6));
+            Assert.That(player.TakeDamage(1, 2, 0), Is.False);
+        }
         [TestCase(100f, 40f, 0.15f, 15f)]
         [TestCase(100f, 40f, 0.50f, 40f)]
         [TestCase(200f, 80f, 0.15f, 30f)]
@@ -85,9 +96,7 @@ namespace QuackQuack.Tests.EditMode
 
         internal static float Heal(PlayerState player, float fraction)
         {
-            var method = typeof(PlayerState).GetMethod("Heal", new[] { typeof(float) });
-            Assert.That(method, Is.Not.Null, "T025 pending: PlayerState.Heal(float) is missing.");
-            return (float)method.Invoke(player, new object[] { fraction });
+            return player.Heal(fraction);
         }
     }
 }

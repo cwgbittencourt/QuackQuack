@@ -28,6 +28,17 @@ namespace QuackQuack.Core.Run
             MaxHealth = Health = health;
             Breath = new BreathSystem(breathCapacity, landRecovery, waterRecovery);
         }
+        public float Heal(float fraction)
+        {
+            if (Health <= 0 || float.IsNaN(fraction) || float.IsInfinity(fraction) || fraction <= 0 || fraction > 1)
+                return 0;
+            float before = Health;
+            float amount = Math.Min(MaxHealth - Health, MaxHealth * fraction);
+            Health = Math.Min(MaxHealth, Health + amount);
+            // Return the representable gain, so a rounded-away heal cannot consume a pickup.
+            return Health - before;
+        }
+
         public bool TakeDamage(float amount, double time, float invulnerability)
         {
             if (float.IsNaN(amount) || float.IsInfinity(amount) ||
