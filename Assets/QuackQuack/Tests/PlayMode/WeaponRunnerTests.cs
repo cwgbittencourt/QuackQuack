@@ -80,10 +80,9 @@ namespace QuackQuack.Tests.PlayMode
         [TestCase(WeaponBehavior.Boomerang)]
         [TestCase(WeaponBehavior.Eggs)]
         [TestCase(WeaponBehavior.FrontalQuack)]
-        [TestCase(WeaponBehavior.EnergyAura)]
         [TestCase(WeaponBehavior.Rockets)]
         [TestCase(WeaponBehavior.Bubbles)]
-        public void ObstaclesBlockDamageForEveryPattern(WeaponBehavior behavior)
+        public void ObstaclesBlockDamageForOtherPatterns(WeaponBehavior behavior)
         {
             var wall = new GameObject("Wall"); wall.transform.SetParent(root.transform);
             wall.transform.position = Vector3.right; wall.layer = 8;

@@ -8,6 +8,7 @@ using QuackQuack.Gameplay.Player;
 using QuackQuack.Systems.Combat;
 using QuackQuack.Systems.Pooling;
 using QuackQuack.Systems.Upgrades;
+using QuackQuack.Presentation.Weapons;
 using UnityEngine;
 
 namespace QuackQuack.Gameplay.Weapons
@@ -62,6 +63,7 @@ namespace QuackQuack.Gameplay.Weapons
         private long tick, correlation;
         private double clock;
         private bool initialized;
+        private WeaponVisuals visuals;
         public bool AutomaticTick { get; set; } = true;
         public RelicLoadout Relics { get; set; }
         public UpgradeSystem Upgrades { get; set; }
@@ -96,6 +98,9 @@ namespace QuackQuack.Gameplay.Weapons
             this.run = run; this.build = build; this.pools = pools; this.events = events; this.owner = owner;
             this.terrain = terrain; this.poolKey = poolKey; this.capacity = capacity;
             active = new List<WeaponProjectile>(capacity);
+            visuals = gameObject.AddComponent<WeaponVisuals>();
+            visuals.Initialize(slots.Length);
+            run.Changed += OnRunChanged;
             initialized = true;
         }
 
@@ -122,10 +127,11 @@ namespace QuackQuack.Gameplay.Weapons
                 { if (run.Outcome.HasValue) ReleaseAll(); return; }
             }
             RefreshSlots();
+            visuals.HideAll();
             for (int i = 0; i < slots.Length; i++)
             {
                 var slot = slots[i];
-                if (slot.Definition == null || clock < slot.Next) continue;
+                if (slot.Definition == null) continue;
                 var ground = terrain();
                 var stats = slot.Definition.GetLevel(slot.Level, ground);
                 float hitRadius = slot.Definition.HitRadius;
@@ -145,6 +151,10 @@ namespace QuackQuack.Gameplay.Weapons
                         Relics.ApplyEffects(stats.Range, RelicAttribute.Range, ground), stats.ProjectileCount,
                         Relics.ApplyEffects(stats.AreaRadius, RelicAttribute.Area, ground));
                 }
+                if (slot.Definition.Behavior == WeaponBehavior.EnergyAura)
+                    visuals.ShowAura(i, owner.position, Mathf.Max(stats.AreaRadius, slot.Definition.HitRadius),
+                        slot.Definition.ProjectileSprite, clock);
+                if (clock < slot.Next) continue;
                 var target = Nearest(owner.position, stats.Range);
                 Vector2 direction = Facing.sqrMagnitude > 0 && Finite(Facing) ? Facing.normalized : Vector2.right;
                 if (slot.Definition.TargetMode == WeaponTargetMode.NearestEnemy)
@@ -279,7 +289,8 @@ namespace QuackQuack.Gameplay.Weapons
                 if (!ValidTarget(target)) continue;
                 Vector2 delta = (Vector2)target.transform.position - position;
                 if (cone && Vector2.Angle(direction, delta) > definition.ConeAngle * 0.5f) continue;
-                if (Physics2D.Linecast(position, target.transform.position, 1 << 8).collider != null) continue;
+                if (definition.Behavior != WeaponBehavior.EnergyAura &&
+                    Physics2D.Linecast(position, target.transform.position, 1 << 8).collider != null) continue;
                 int id = target.GetInstanceID(); bool seen = false;
                 for (int j = 0; j < areaHitCount; j++) if (areaHits[j] == id) { seen = true; break; }
                 if (seen || (projectile != null && !projectile.MarkHit(id))) continue;
@@ -308,11 +319,20 @@ namespace QuackQuack.Gameplay.Weapons
         private static bool Finite(Vector2 v) => !float.IsNaN(v.x) && !float.IsNaN(v.y) && !float.IsInfinity(v.x) && !float.IsInfinity(v.y);
         private void ReleaseAll()
         {
+            visuals?.HideAll();
             if (active == null) return;
             foreach (var projectile in active) pools.Release(projectile);
             active.Clear();
         }
         private void OnDisable() { ReleaseAll(); }
-        private void OnDestroy() { ReleaseAll(); }
+        private void OnRunChanged(RunPhase phase)
+        {
+            if (run.Outcome.HasValue || phase == RunPhase.Results) visuals?.HideAll();
+        }
+        private void OnDestroy()
+        {
+            if (run != null) run.Changed -= OnRunChanged;
+            ReleaseAll();
+        }
     }
 }
