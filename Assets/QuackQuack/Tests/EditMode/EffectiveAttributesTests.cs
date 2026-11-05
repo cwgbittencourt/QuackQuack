@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using NUnit.Framework;
 using QuackQuack.Content.Characters;
 using QuackQuack.Content.Passives;
 using QuackQuack.Content.Weapons;
+using QuackQuack.Core.Combat;
 using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
 using UnityEditor;
@@ -13,8 +13,7 @@ using UnityEngine;
 
 namespace QuackQuack.Tests.EditMode
 {
-    // T015 is deliberately red until T016. Reflection keeps the existing assemblies
-    // compilable without a production stub or a dependency from Core to Content.
+    // Content extraction remains outside Core; production resolution is tested directly.
     public class EffectiveAttributesTests
     {
         private static readonly string[] PassiveIds = {
@@ -185,7 +184,101 @@ namespace QuackQuack.Tests.EditMode
 
         private static readonly string[] Fields = { "Damage", "AttackInterval", "MovementSpeed", "BreathCapacity", "BreathRecovery", "Range", "AreaRadius", "HitRadius", "ProjectileSpeed" };
 
-        // Proposed pure T016 seam: nine base scalars, bubble eligibility, six
+        [TestCase(0)] [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)]
+        [TestCase(5)] [TestCase(6)] [TestCase(7)] [TestCase(8)]
+        public void InvalidBasesAreRejected(int index)
+        {
+            foreach (float invalid in new[] { -1f, float.NaN, float.PositiveInfinity, float.NegativeInfinity })
+            {
+                var bases = Bases();
+                bases[index] = invalid;
+                Assert.Throws<ArgumentOutOfRangeException>(() => Raw(bases, new float[6]));
+            }
+        }
+
+        [TestCase(0)] [TestCase(1)] [TestCase(2)] [TestCase(3)]
+        [TestCase(5)] [TestCase(7)] [TestCase(8)]
+        public void RequiredPositiveBasesRejectZero(int index)
+        {
+            var bases = Bases(); bases[index] = 0;
+            Assert.Throws<ArgumentOutOfRangeException>(() => Raw(bases, new float[6]));
+        }
+
+        [TestCase(0)] [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)] [TestCase(5)]
+        public void InvalidPassiveBonusesAreRejected(int index)
+        {
+            foreach (float invalid in new[] { -1f, float.NaN, float.PositiveInfinity, float.NegativeInfinity })
+            {
+                var bonuses = new float[6]; bonuses[index] = invalid;
+                Assert.Throws<ArgumentOutOfRangeException>(() => Raw(Bases(), bonuses));
+            }
+        }
+
+        [Test]
+        public void InvalidBonusShapeAndTerrainAreRejected()
+        {
+            Assert.Throws<ArgumentNullException>(() => Raw(Bases(), null));
+            Assert.Throws<ArgumentException>(() => Raw(Bases(), new float[5]));
+            Assert.Throws<ArgumentException>(() => Raw(Bases(), new float[7]));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Raw(Bases(), new float[6], terrain: (TerrainType)42));
+        }
+
+        [Test]
+        public void OverflowAndIntervalUnderflowAreRejectedInsteadOfReturningInvalidAttributes()
+        {
+            var bases = Bases(); bases[0] = float.MaxValue;
+            Assert.Throws<ArgumentOutOfRangeException>(() => Raw(bases, new[] { 1f, 0, 0, 0, 0, 0 }));
+            bases = Bases(); bases[1] = float.Epsilon;
+            Assert.Throws<ArgumentOutOfRangeException>(() => Raw(bases, new[] { 0f, float.MaxValue, 0, 0, 0, 0 }));
+        }
+
+        [Test]
+        public void ZeroBonusesReturnAllBasesAndAllowAuthoredZeroAreaAndRecovery()
+        {
+            var bases = Bases(); bases[4] = 0; bases[6] = 0;
+            var result = Raw(bases, new float[6]);
+            for (int i = 0; i < Fields.Length; i++) AssertValue(result, Fields[i], bases[i]);
+        }
+
+        [Test]
+        public void CombinedPassivesDoNotMutateInputsOrAccumulateAndSnapshotsRemainStable()
+        {
+            var bases = Bases();
+            var bonuses = new[] { 0.8f, 0.4f, 0.2f, 0.4f, 0.4f, 0.4f };
+            var before = (float[])bonuses.Clone();
+            var relics = Relics(); Equip(relics, "damage-any", "speed", "area");
+            int version = relics.Version;
+            var first = Raw(bases, bonuses, relics);
+            AssertValue(first, "Damage", bases[0] * 1.8f * 1.1f);
+            AssertValue(first, "MovementSpeed", bases[2] * 1.2f);
+            for (int i = 0; i < 100; i++)
+            {
+                var next = Raw(bases, bonuses, relics);
+                foreach (string field in Fields) AssertValue(next, field, Value(first, field));
+            }
+            CollectionAssert.AreEqual(before, bonuses);
+            Assert.That(relics.Version, Is.EqualTo(version));
+            relics.Unequip("damage-any"); bonuses[0] = 0;
+            AssertValue(Raw(bases, bonuses, relics), "Damage", bases[0]);
+            AssertValue(first, "Damage", bases[0] * 1.8f * 1.1f);
+        }
+
+        [Test]
+        public void RelicAreaStillAffectsNonBubbleAreaWithoutChangingProjectileHitRadius()
+        {
+            var relics = Relics(); Equip(relics, "area");
+            var bases = Bases();
+            var result = Raw(bases, new[] { 0f, 0, 0, 0, 0, 0.4f }, relics, bubbles: false);
+            AssertValue(result, "AreaRadius", bases[6] * 1.1f);
+            AssertValue(result, "HitRadius", bases[7]);
+        }
+
+        private static float[] Bases() => new[] { 2f, 1.2f, 6f, 100f, 24f, 6f, 2f, 0.2f, 3f };
+        private static EffectiveAttributes Raw(float[] bases, float[] bonuses, RelicLoadout relics = null,
+            TerrainType terrain = TerrainType.Land, bool bubbles = true) =>
+            EffectiveAttributes.Resolve(bases[0], bases[1], bases[2], bases[3], bases[4], bases[5], bases[6], bases[7], bases[8], bubbles, bonuses, relics, terrain);
+
+        // Pure T016 seam: nine base scalars, bubble eligibility, six
         // authored bonuses in PassiveAttribute order, current relics and terrain.
         // Content/BuildState extraction stays on this side of the Core boundary.
         private object Resolve(WeaponDefinition weapon, int level, TerrainType terrain,
@@ -199,15 +292,9 @@ namespace QuackQuack.Tests.EditMode
             if (!originals.ContainsKey(character.Quack)) originals.Add(character.Quack, EditorJsonUtility.ToJson(character.Quack));
             float speed = terrain == TerrainType.Water ? character.WaterSpeed : character.LandSpeed;
             float recovery = terrain == TerrainType.Water ? character.Quack.WaterRecovery : character.Quack.LandRecovery;
-            var type = typeof(BuildState).Assembly.GetType("QuackQuack.Core.Combat.EffectiveAttributes");
-            Assert.That(type, Is.Not.Null, "T016 pending: pure EffectiveAttributes resolver is missing.");
-            var method = type.GetMethod("Resolve", BindingFlags.Public | BindingFlags.Static, null,
-                new[] { typeof(float), typeof(float), typeof(float), typeof(float), typeof(float), typeof(float),
-                    typeof(float), typeof(float), typeof(float), typeof(bool), typeof(float[]), typeof(RelicLoadout), typeof(TerrainType) }, null);
-            Assert.That(method, Is.Not.Null, "T016 pending: implement the scalar Resolve seam documented in T015.");
-            return method.Invoke(null, new object[] { stats.Damage, stats.Cooldown, speed, character.Quack.Capacity, recovery,
+            return EffectiveAttributes.Resolve(stats.Damage, stats.Cooldown, speed, character.Quack.Capacity, recovery,
                 stats.Range, stats.AreaRadius, weapon.HitRadius, weapon.ProjectileSpeed,
-                weapon.Behavior == WeaponBehavior.Bubbles, bonuses, relics, terrain });
+                weapon.Behavior == WeaponBehavior.Bubbles, bonuses, relics, terrain);
         }
 
         private T Load<T>(string path) where T : UnityEngine.Object
