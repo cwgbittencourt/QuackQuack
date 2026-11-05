@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 using QuackQuack.Content.Catalogs;
 using QuackQuack.Content.Characters;
@@ -14,6 +16,7 @@ using QuackQuack.Core.Run;
 using QuackQuack.Core.Shared;
 using QuackQuack.Gameplay.Bosses;
 using QuackQuack.Gameplay.Player;
+using QuackQuack.Gameplay.Pickups;
 using QuackQuack.Gameplay.Weapons;
 using QuackQuack.Platform.Input;
 using QuackQuack.Systems.Combat;
@@ -27,6 +30,12 @@ using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 namespace QuackQuack.Tests.PlayMode
 {
+    public sealed class RewardViewPoolProbe : MonoBehaviour, IPoolLifecycle
+    {
+        public void OnAcquire() { }
+        public void OnRelease() { }
+        public void ResetState() { }
+    }
     public class RunDirectorFlowTests
     {
         private sealed class NoInput : IPlayerInput { public PlayerCommand Read() => default; }
@@ -74,6 +83,90 @@ namespace QuackQuack.Tests.PlayMode
         }
         private void StaticTimeline() { director.Scheduler.enabled = false; weapons.enabled = false; }
         private void BossPhase() { StaticTimeline(); director.Advance(300, bounds); director.Advance(300, bounds); director.Advance(300, bounds); }
+
+        private void DeliverReward(long lease, string id = "formiga", int xp = 2, int coins = 1)
+        {
+            typeof(RunDirector).GetMethod("Reward", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(director,
+                new object[] { new EnemyReward(lease, id, xp, coins, new Vector2(8, 5)) });
+        }
+
+        [Test] public void SaturatedExperiencePoolKeepsObligationsAndRetriesWithoutGrantingRemotely()
+        {
+            StaticTimeline();
+            for (int i = 1; i <= settings.PickupCapacity + 3; i++) DeliverReward(100000 + i);
+            var xp = director.Rewards.Entries.Where(e => e.Kind == RewardKind.Experience).ToArray();
+            Assert.That(xp.Length, Is.EqualTo(settings.PickupCapacity + 3));
+            Assert.That(xp.Count(e => e.State == RewardState.Grounded), Is.EqualTo(settings.PickupCapacity));
+            var waiting = xp.First(e => e.State != RewardState.Grounded); var id = waiting.Id;
+            Assert.That(waiting.X, Is.EqualTo(8)); Assert.That(waiting.Y, Is.EqualTo(5));
+            Assert.That(upgrades.Experience, Is.Zero);
+            var view = root.GetComponentsInChildren<ExperiencePickup>().First(p => pools.IsActive(p, PoolFamily.Pickup));
+            pools.Release(view);
+            director.TogglePause(); director.Advance(0, bounds);
+            Assert.That(waiting.State, Is.Not.EqualTo(RewardState.Grounded));
+            director.TogglePause(); director.Advance(0, bounds);
+            Assert.That(waiting.State, Is.EqualTo(RewardState.Grounded)); Assert.That(waiting.Id, Is.EqualTo(id));
+            var replacement = root.GetComponentsInChildren<ExperiencePickup>().Single(p => pools.IsActive(p, PoolFamily.Pickup) && p.BoundRewardId.Equals(id));
+            Assert.That((Vector2)replacement.transform.position, Is.EqualTo(new Vector2(8, 5)));
+            Assert.That(upgrades.Experience, Is.Zero);
+            Assert.That(director.Rewards.DefeatCount, Is.EqualTo(settings.PickupCapacity + 3));
+        }
+
+        [Test] public void RealExperienceViewClaimsLedgerAndProgressionOnce()
+        {
+            StaticTimeline(); DeliverReward(200001);
+            var entry = director.Rewards.Entries.Single(e => e.Kind == RewardKind.Experience);
+            var pickup = root.GetComponentsInChildren<ExperiencePickup>().Single(p => p.BoundRewardId.Equals(entry.Id));
+            pickup.SendMessage("OnTriggerEnter2D", player.GetComponent<Collider2D>(), SendMessageOptions.RequireReceiver);
+            Assert.That(entry.State, Is.EqualTo(RewardState.Claimed)); Assert.That(upgrades.Experience, Is.EqualTo(2));
+            // Unity does not dispatch SendMessage to an inactive pooled object; invoke the stale callback directly.
+            typeof(ExperiencePickup).GetMethod("TryCollect", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(pickup, new object[] { player.GetComponent<Collider2D>() });
+            Assert.That(upgrades.Experience, Is.EqualTo(2));
+            director.Advance(0, bounds); Assert.That(entry.State, Is.EqualTo(RewardState.Claimed));
+        }
+
+        [Test] public void MiniHealingHasFirstAccessToSharedPoolAndUnavailableCommonHealingRemainsPending()
+        {
+            StaticTimeline();
+            for (int i = 1; i <= 100 && !director.Rewards.Entries.Any(e => e.Kind == RewardKind.HealCommon); i++) DeliverReward(300000 + i);
+            Assert.That(director.Rewards.Entries.Any(e => e.Kind == RewardKind.HealCommon), Is.True);
+            DeliverReward(400001, "libelula-alfa", 50, 15);
+            pools.Register("healing-probe", PoolFamily.Pickup, () =>
+            {
+                var obj = new GameObject("Healing pool probe"); obj.transform.SetParent(root.transform);
+                return obj.AddComponent<RewardViewPoolProbe>();
+            }, 1);
+            var attempted = new List<RewardKind>();
+            director.HealingMaterializer = entry => { attempted.Add(entry.Kind); return pools.Acquire<RewardViewPoolProbe>("healing-probe") != null; };
+            director.Advance(0, bounds);
+            Assert.That(attempted[0], Is.EqualTo(RewardKind.HealMiniBoss));
+            Assert.That(director.Rewards.Entries.Single(e => e.Kind == RewardKind.HealMiniBoss).State, Is.EqualTo(RewardState.Grounded));
+            Assert.That(director.Rewards.TryGetPending(RewardKind.HealCommon, out _), Is.True);
+            Assert.That(player.State.Health, Is.EqualTo(player.State.MaxHealth));
+            // The fixture view intentionally has no healing behavior: production view belongs to T028.
+            foreach (var probe in root.GetComponentsInChildren<RewardViewPoolProbe>()) pools.Release(probe);
+        }
+
+        [Test] public void AlreadyIssuedDefeatDeliveredDuringPauseWaitsForResume()
+        {
+            StaticTimeline(); director.TogglePause(); DeliverReward(450001);
+            var entry = director.Rewards.Entries.Single(e => e.Kind == RewardKind.Experience);
+            Assert.That(entry.State, Is.EqualTo(RewardState.Due));
+            Assert.That(root.GetComponentsInChildren<ExperiencePickup>(), Is.Empty);
+            director.TogglePause(); director.Advance(0, bounds);
+            Assert.That(entry.State, Is.EqualTo(RewardState.Grounded)); Assert.That(upgrades.Experience, Is.Zero);
+            director.TryAbandon(); Assert.That(director.Result.EnemiesDefeated, Is.EqualTo(1));
+            Assert.That(director.Result.EarnedCoins, Is.EqualTo(1));
+        }
+
+        [Test] public void ReplayedRewardDoesNotDuplicateExperienceCoinsOrDefeatStatistics()
+        {
+            StaticTimeline(); DeliverReward(500001); DeliverReward(500001);
+            Assert.That(director.Rewards.DefeatCount, Is.EqualTo(1));
+            Assert.That(director.Rewards.Entries.Count(e => e.Kind == RewardKind.Experience), Is.EqualTo(1));
+            director.TryAbandon(); Assert.That(director.Result.EnemiesDefeated, Is.EqualTo(1));
+            Assert.That(director.Result.EarnedCoins, Is.EqualTo(1));
+        }
 
         [Test] public void TimelineRequestsBothMinibossesBeforeSingleBossAndStopsCommonWaves()
         {

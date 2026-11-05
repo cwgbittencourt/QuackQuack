@@ -54,10 +54,24 @@ namespace QuackQuack.Core.Run
         public bool RecordDefeat(string enemyId)
         {
             if (!CanRecord || !ValidId(enemyId) || defeats == int.MaxValue) return false;
+            CommitDefeat(enemyId);
+            return true;
+        }
+
+        // The ledger has accepted this already-issued death before a callback paused the run.
+        // This records facts only; it does not allow new attacks, XP collection or remote pickups.
+        public bool RecordIssuedDefeat(string enemyId, int earnedCoins)
+        {
+            if (!CanRecordSummary || !ValidId(enemyId) || defeats == int.MaxValue ||
+                earnedCoins < 0 || earnedCoins > int.MaxValue - coins) return false;
+            CommitDefeat(enemyId); coins += earnedCoins; return true;
+        }
+
+        private void CommitDefeat(string enemyId)
+        {
             defeatsByEnemy.TryGetValue(enemyId, out int count);
             defeatsByEnemy[enemyId] = count + 1; defeats++;
             streak++; longestStreak = Math.Max(longestStreak, streak);
-            return true;
         }
 
         // The caller decides what breaks a streak (e.g. accepted damage to the player).

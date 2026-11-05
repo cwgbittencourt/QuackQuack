@@ -41,6 +41,8 @@ namespace QuackQuack.Core.Progression
         public float X { get; internal set; }
         public float Y { get; internal set; }
         public RewardState State { get; internal set; }
+        internal int Slot, Next = -1, Previous = -1;
+        internal bool Collecting;
     }
 
     // Per-run obligations, independent of GameObjects, pools, proximity and offer RNG.
@@ -55,7 +57,11 @@ namespace QuackQuack.Core.Progression
         private readonly RewardEntry[] storage;
         private readonly List<RewardEntry> entries;
         private readonly Dictionary<RewardId, RewardEntry> byId;
+        private readonly int[] heads = { -1, -1, -1 }, tails = { -1, -1, -1 };
         public IReadOnlyList<RewardEntry> Entries { get; }
+        public int DefeatCapacity => defeatCapacity;
+        public int DefeatCount => defeats;
+        public int PendingCount { get; private set; }
 
         public RewardLedger(long runId, Func<double> nextDropRoll, double commonChance,
             float commonFraction, float miniBossFraction, int defeatCapacity)
@@ -73,7 +79,7 @@ namespace QuackQuack.Core.Progression
             this.defeatCapacity = defeatCapacity;
             int capacity = defeatCapacity * 2;
             storage = new RewardEntry[capacity];
-            for (int i = 0; i < capacity; i++) storage[i] = new RewardEntry();
+            for (int i = 0; i < capacity; i++) storage[i] = new RewardEntry { Slot = i };
             entries = new List<RewardEntry>(capacity);
             Entries = entries.AsReadOnly();
             byId = new Dictionary<RewardId, RewardEntry>(capacity);
@@ -112,6 +118,34 @@ namespace QuackQuack.Core.Progression
             entry.Id = id; entry.Origin = origin; entry.Experience = xp; entry.Fraction = fraction;
             entry.X = x; entry.Y = y; entry.State = RewardState.Due;
             entries.Add(entry); byId.Add(id, entry);
+            Enqueue(entry);
+        }
+
+        private void Enqueue(RewardEntry entry)
+        {
+            int kind = (int)entry.Kind;
+            entry.Previous = tails[kind]; entry.Next = -1;
+            if (tails[kind] >= 0) storage[tails[kind]].Next = entry.Slot;
+            else heads[kind] = entry.Slot;
+            tails[kind] = entry.Slot; PendingCount++;
+        }
+        private void RemovePending(RewardEntry entry)
+        {
+            int kind = (int)entry.Kind;
+            if (entry.Previous >= 0) storage[entry.Previous].Next = entry.Next; else heads[kind] = entry.Next;
+            if (entry.Next >= 0) storage[entry.Next].Previous = entry.Previous; else tails[kind] = entry.Previous;
+            entry.Next = entry.Previous = -1; PendingCount--;
+        }
+        public bool TryGetPending(RewardKind kind, out RewardEntry entry)
+        {
+            int index = (int)kind;
+            entry = index >= 0 && index < heads.Length && heads[index] >= 0 ? storage[heads[index]] : null;
+            return entry != null;
+        }
+        public bool ReturnToPending(RewardId id)
+        {
+            if (!byId.TryGetValue(id, out var entry) || entry.State != RewardState.Grounded || entry.Collecting) return false;
+            entry.State = RewardState.WaitingForView; Enqueue(entry); return true;
         }
 
         // Pure availability acknowledgement. The caller must actually secure a view first;
@@ -121,7 +155,22 @@ namespace QuackQuack.Core.Progression
             if (!byId.TryGetValue(id, out var entry) ||
                 (entry.State != RewardState.Due && entry.State != RewardState.WaitingForView)) return false;
             entry.State = hasViewSlot ? RewardState.Grounded : RewardState.WaitingForView;
+            if (hasViewSlot) RemovePending(entry);
             return hasViewSlot;
+        }
+
+        // Uses the real UpgradeSystem consumer so level offers remain in its existing flow.
+        public bool TryClaimExperience(RewardId id, Func<int, bool> collect)
+        {
+            if (collect == null || !byId.TryGetValue(id, out var entry) || entry.Kind != RewardKind.Experience ||
+                entry.State != RewardState.Grounded || entry.Collecting) return false;
+            entry.Collecting = true;
+            try
+            {
+                if (!collect(entry.Experience)) return false;
+                entry.State = RewardState.Claimed; return true;
+            }
+            finally { entry.Collecting = false; }
         }
 
         public float TryCollectHeal(RewardId id, PlayerState player)

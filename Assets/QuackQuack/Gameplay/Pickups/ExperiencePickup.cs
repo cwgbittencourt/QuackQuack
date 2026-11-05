@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using QuackQuack.Core.Combat;
+using QuackQuack.Core.Progression;
 using QuackQuack.Systems.Combat;
 using QuackQuack.Gameplay.Player;
 using QuackQuack.Systems.Pooling;
@@ -16,6 +17,16 @@ namespace QuackQuack.Gameplay.Pickups
         private PoolService pools;
         private UpgradeSystem upgrades;
         private int amount;
+        private RewardLedger ledger;
+        private RewardId rewardId;
+        private Func<int, bool> collect;
+        public RewardId BoundRewardId => rewardId;
+        public void BindReward(RewardLedger owner, RewardId id, Func<int, bool> consumer)
+        {
+            if (owner == null || consumer == null || upgrades == null || ledger != null || id.Kind != RewardKind.Experience)
+                throw new ArgumentException("An initialized XP view and unique ledger binding are required.");
+            ledger = owner; rewardId = id; collect = consumer;
+        }
         private bool acquired, claimed;
         private GameplayEventBus rareEvents;
         private long rareId;
@@ -54,7 +65,8 @@ namespace QuackQuack.Gameplay.Pickups
             if (player == null || !player.isActiveAndEnabled || player.State == null || player.State.Health <= 0) return;
             claimed = true;
             var acceptedEvents = rareEvents; long acceptedId = rareId; Vector2 acceptedPosition = transform.position;
-            if (!upgrades.TryCollectExperience(amount)) { claimed = false; return; }
+            bool accepted = ledger == null ? upgrades.TryCollectExperience(amount) : ledger.TryClaimExperience(rewardId, collect);
+            if (!accepted) { claimed = false; return; }
             pools.Release(this);
             acceptedEvents?.Publish(new PresentationEvent(acceptedId, acceptedId, PresentationEventType.RareReward,
                 EventPriority.Feedback, 2, acceptedPosition));
@@ -62,7 +74,12 @@ namespace QuackQuack.Gameplay.Pickups
 
         public void OnAcquire() { acquired = true; claimed = false; }
         public void OnRelease() { acquired = false; }
-        public void ResetState() { pools = null; upgrades = null; rareEvents = null; rareId = 0; amount = 0; acquired = claimed = false; }
+        public void ResetState()
+        {
+            ledger?.ReturnToPending(rewardId);
+            ledger = null; rewardId = default; collect = null;
+            pools = null; upgrades = null; rareEvents = null; rareId = 0; amount = 0; acquired = claimed = false;
+        }
 
         // Composition helpers: creation happens only inside the pool's initial warmup.
         public static void RegisterPool(PoolService owner, string key, int capacity, Transform parent = null)

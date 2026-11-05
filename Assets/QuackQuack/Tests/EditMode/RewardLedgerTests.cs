@@ -10,6 +10,45 @@ namespace QuackQuack.Tests.EditMode
 {
     public class RewardLedgerTests
     {
+        [Test]
+        public void PendingQueuesSupportOutOfOrderRemovalAndReturnedViewWithoutReroll()
+        {
+            int rolls = 0;
+            var ledger = new RewardLedger(1, () => { rolls++; return 0; }, 1, 0.15f, 0.5f, 3);
+            for (int i = 1; i <= 3; i++) ledger.ProcessDefeat(7, i, RewardOrigin.Common, 1, i, 2, true);
+            Assert.That(ledger.PendingCount, Is.EqualTo(6));
+            var middle = ledger.Entries[2];
+            ledger.TryMaterialize(middle.Id, true); Assert.That(ledger.PendingCount, Is.EqualTo(5));
+            Assert.That(ledger.ReturnToPending(middle.Id), Is.True);
+            Assert.That(ledger.ReturnToPending(middle.Id), Is.False);
+            Assert.That(ledger.PendingCount, Is.EqualTo(6));
+            foreach (long lease in new long[] { 1, 3, 2 })
+            {
+                Assert.That(ledger.TryGetPending(RewardKind.Experience, out var entry), Is.True);
+                Assert.That(entry.Id.LeaseId, Is.EqualTo(lease)); ledger.TryMaterialize(entry.Id, true);
+            }
+            Assert.That(ledger.TryGetPending(RewardKind.Experience, out _), Is.False);
+            Assert.That(ledger.PendingCount, Is.EqualTo(3)); Assert.That(rolls, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void RealExperienceConsumerFailureAndReentryCannotDoubleClaim()
+        {
+            var ledger = new RewardLedger(1, () => 0.9, 0.1, 0.15f, 0.5f, 1);
+            ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true);
+            var id = ledger.Entries[0].Id; ledger.TryMaterialize(id, true);
+            Assert.That(ledger.TryClaimExperience(id, _ => false), Is.False);
+            int calls = 0;
+            Assert.That(ledger.TryClaimExperience(id, amount =>
+            {
+                calls++; Assert.That(amount, Is.EqualTo(9));
+                Assert.That(ledger.TryClaimExperience(id, _ => { calls++; return true; }), Is.False);
+                return true;
+            }), Is.True);
+            Assert.That(ledger.TryClaimExperience(id, _ => { calls++; return true; }), Is.False);
+            Assert.That(calls, Is.EqualTo(1)); Assert.That(ledger.ReturnToPending(id), Is.False);
+        }
+
         [TestCase(-0.1d)] [TestCase(1.1d)] [TestCase(double.NaN)] [TestCase(double.PositiveInfinity)]
         public void InvalidChanceIsRejectedAtConstruction(double chance)
         {

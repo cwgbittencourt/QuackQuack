@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using QuackQuack.Content.Catalogs;
 using QuackQuack.Content.Encounters;
 using QuackQuack.Core.Combat;
@@ -41,7 +42,10 @@ namespace QuackQuack.Systems.Run
         public LakeRunSettings RunSettings => settings;
         public SaveOperationResult LastSave { get; private set; }
         public int BossRequests { get; private set; }
-        public int SuppressedPickups { get; private set; }
+        public RewardLedger Rewards { get; private set; }
+        public int PendingRewards => Rewards?.PendingCount ?? 0;
+        // T028 supplies the healing view. Returning false preserves its obligation.
+        public Func<RewardEntry, bool> HealingMaterializer { get; set; }
         public event Action<string> EncounterStarted;
         public event Action<RunResult> ResultAvailable;
         private RunState run;
@@ -65,6 +69,10 @@ namespace QuackQuack.Systems.Run
         private readonly bool[] requested = new bool[2], delivered = new bool[2];
         private readonly long[] retry = new long[2];
         private ExperiencePickup[] pickups;
+        private readonly Dictionary<string, int> rewardSources = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly HashSet<string> miniRewardSources = new HashSet<string>(StringComparer.Ordinal);
+        private Func<int, bool> collectExperience;
+        private static long nextRewardRun;
         private string xpKey, bossKey;
         private Camera view;
         private GameBootstrap bootstrap;
@@ -130,6 +138,13 @@ namespace QuackQuack.Systems.Run
             { var d = catalogWaves[i]; waves[i] = new Wave { Definition = d, Ids = new List<string>(d.EnemyIds).ToArray(), Quantities = new List<int>(d.Quantities).ToArray() }; }
             minis = new List<EncounterDefinition>(settings.Catalog.MiniBossEncounters).ToArray();
             miniIds = new[] { minis[0].EnemyIds[0], minis[1].EnemyIds[0] };
+            foreach (string id in miniIds) miniRewardSources.Add(id);
+            var rewardDefinitions = settings.Catalog.GetAllEnemies();
+            for (int i = 0; i < rewardDefinitions.Length; i++) rewardSources.Add(rewardDefinitions[i].Id, i + 1);
+            var dropRandom = new System.Random(unchecked(run.Seed ^ 0x52dce729));
+            Rewards = settings.PickupPolicy.CreateLedger(Interlocked.Increment(ref nextRewardRun), dropRandom.NextDouble,
+                settings.CalculateRewardDefeatCapacity());
+            collectExperience = upgrades.TryCollectExperience;
             recipes = new List<QuackQuack.Content.Weapons.EvolutionDefinition>(catalog.Evolutions).ToArray();
             foreach (var d in settings.Catalog.GetAllEncounters()) encounters.Add(d.Id, d);
             timeline = settings.Catalog.CreateSchedule(run);
@@ -204,6 +219,7 @@ namespace QuackQuack.Systems.Run
             }
             if (run.IsSimulating) { Physics2D.SyncTransforms(); weapons.Advance(seconds); }
             if (run.IsSimulating && Boss != null) Boss.Advance(seconds);
+            if (run.IsSimulating) MaterializeRewards();
             if (run.IsSimulating && player.State.Health <= 0) run.TryTransition(RunPhase.Lost);
             if (ending) Finish();
         }
@@ -224,14 +240,47 @@ namespace QuackQuack.Systems.Run
         }
         private void Reward(EnemyReward reward)
         {
-            if (!run.IsSimulating || disposed) return;
-            results.RecordDefeat(reward.DefinitionId); results.AddCoins(reward.Coins);
-            if (reward.Experience <= 0) return;
-            for (int i = 0; i < pickups.Length; i++) if (pickups[i] != null && !pools.IsActive(pickups[i], PoolFamily.Pickup)) pickups[i] = null;
-            var pickup = ExperiencePickup.Spawn(pools, xpKey, upgrades, reward.Experience, reward.Position);
-            if (pickup == null) { SuppressedPickups++; return; }
-            for (int i = 0; i < pickups.Length; i++) if (pickups[i] == null) { pickups[i] = pickup; return; }
-            pools.Release(pickup); SuppressedPickups++;
+            // The death was validated by PooledEnemy before combat callbacks. A callback may
+            // pause/open a modal before the sink runs; retain that already-issued obligation.
+            if (run.Outcome.HasValue || disposed) return;
+            if (!rewardSources.TryGetValue(reward.DefinitionId, out int source)) return;
+            var origin = miniRewardSources.Contains(reward.DefinitionId) ? RewardOrigin.MiniBoss : RewardOrigin.Common;
+            if (!Rewards.ProcessDefeat(source, reward.LeaseId, origin, reward.Experience, reward.Position.x, reward.Position.y, true)) return;
+            results.RecordIssuedDefeat(reward.DefinitionId, reward.Coins);
+            MaterializeRewards();
+        }
+        private bool MaterializeHealing(RewardKind kind)
+        {
+            while (Rewards.TryGetPending(kind, out var entry))
+            {
+                bool available = HealingMaterializer != null && HealingMaterializer(entry);
+                Rewards.TryMaterialize(entry.Id, available);
+                if (!available) return false;
+            }
+            return true;
+        }
+        private void MaterializeRewards()
+        {
+            if (!run.IsSimulating || disposed || pools.IsDisposed) return;
+            // Mini healing has first access to the future shared healing pool; XP is independent.
+            if (MaterializeHealing(RewardKind.HealMiniBoss)) MaterializeHealing(RewardKind.HealCommon);
+            int free = 0;
+            for (int i = 0; i < pickups.Length; i++)
+            {
+                if (pickups[i] != null && !pools.IsActive(pickups[i], PoolFamily.Pickup)) pickups[i] = null;
+                if (pickups[i] == null) free++;
+            }
+            int slot = 0;
+            while (free > 0 && Rewards.TryGetPending(RewardKind.Experience, out var entry))
+            {
+                var pickup = ExperiencePickup.Spawn(pools, xpKey, upgrades, entry.Experience, new Vector2(entry.X, entry.Y));
+                if (pickup == null) { Rewards.TryMaterialize(entry.Id, false); return; }
+                while (pickups[slot] != null) slot++;
+                pickup.BindReward(Rewards, entry.Id, collectExperience);
+                Rewards.TryMaterialize(entry.Id, true);
+                pickups[slot] = pickup; free--;
+            }
+            if (Rewards.TryGetPending(RewardKind.Experience, out var waiting)) Rewards.TryMaterialize(waiting.Id, false);
         }
         private void OnCombat(CombatEvent value)
         {
