@@ -5,6 +5,7 @@ using QuackQuack.Core.Combat;
 using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
 using QuackQuack.Gameplay.Player;
+using QuackQuack.Gameplay.Enemies;
 using QuackQuack.Systems.Combat;
 using QuackQuack.Systems.Pooling;
 using QuackQuack.Systems.Upgrades;
@@ -50,6 +51,7 @@ namespace QuackQuack.Gameplay.Weapons
         private readonly Dictionary<string, WeaponDefinition> catalog = new Dictionary<string, WeaponDefinition>(StringComparer.Ordinal);
         private readonly Collider2D[] overlaps = new Collider2D[128];
         private readonly RaycastHit2D[] contacts = new RaycastHit2D[128];
+        private readonly long[] contactLeases = new long[128];
         private readonly int[] areaHits = new int[128];
         private List<WeaponProjectile> active;
         private PoolService pools;
@@ -203,6 +205,7 @@ namespace QuackQuack.Gameplay.Weapons
             {
                 float outbound = half - p.Age;
                 if (StepSegment(p, outbound)) return true;
+                p.BeginInbound();
                 return StepSegment(p, seconds - outbound);
             }
             return StepSegment(p, seconds);
@@ -212,8 +215,14 @@ namespace QuackQuack.Gameplay.Weapons
         {
             if (p.Definition == null) return true;
             float step = Mathf.Min(seconds, p.Definition.ProjectileLifetime - p.Age);
+            if (p.Motion == ProjectileMotion.Returning)
+            {
+                // A zero-time refresh must not consume the inbound passage or deal damage.
+                if (step <= 0) return p.Age >= p.Definition.ProjectileLifetime;
+                if (p.Age >= p.Definition.ProjectileLifetime * 0.5f) p.BeginInbound();
+            }
             Vector2 from = p.transform.position;
-            if (p.Motion == ProjectileMotion.Returning && p.Age >= p.Definition.ProjectileLifetime * 0.5f)
+            if (p.Motion == ProjectileMotion.Returning && p.Passage == ProjectilePassage.Inbound)
                 p.Direction = ((Vector2)owner.position - from).normalized;
             if (p.Motion == ProjectileMotion.Homing)
             {
@@ -227,7 +236,7 @@ namespace QuackQuack.Gameplay.Weapons
                 }
             }
             Vector2 to = p.Motion == ProjectileMotion.Trap ? from :
-                p.Motion == ProjectileMotion.Returning && p.Age >= p.Definition.ProjectileLifetime * 0.5f ?
+                p.Motion == ProjectileMotion.Returning && p.Passage == ProjectilePassage.Inbound ?
                 Vector2.MoveTowards(from, owner.position, p.Definition.ProjectileSpeed * step) :
                 from + p.Direction * (p.Definition.ProjectileSpeed * step);
             p.Age += step;
@@ -247,6 +256,13 @@ namespace QuackQuack.Gameplay.Weapons
                     while (j >= 0 && contacts[j].distance > value.distance) { contacts[j + 1] = contacts[j]; j--; }
                     contacts[j + 1] = value;
                 }
+                // Capture identity before damage callbacks can despawn/reuse an actor.
+                if (p.Motion == ProjectileMotion.Returning)
+                    for (int i = 0; i < count; i++)
+                    {
+                        var enemy = contacts[i].collider.GetComponentInParent<PooledEnemy>();
+                        contactLeases[i] = enemy != null ? enemy.LeaseId : 0;
+                    }
                 for (int i = 0; i < count; i++)
                 {
                     var contact = contacts[i];
@@ -255,7 +271,10 @@ namespace QuackQuack.Gameplay.Weapons
                     if (!ValidTarget(target)) continue;
                     if (p.Motion == ProjectileMotion.Homing)
                     { AreaHit(p.Definition, p.Stats, contact.point, p.Direction, false, p); return true; }
-                    if (p.MarkHit(target.GetInstanceID())) Hit(p.Definition, p.Stats.Damage, target);
+                    var enemy = p.Motion == ProjectileMotion.Returning ? target.GetComponentInParent<PooledEnemy>() : null;
+                    long targetLease = enemy != null ? enemy.LeaseId : 0;
+                    if (p.Motion == ProjectileMotion.Returning && contactLeases[i] != targetLease) continue;
+                    if (p.MarkHit(target.GetInstanceID(), targetLease)) Hit(p.Definition, p.Stats.Damage, target);
                     if (!pools.IsActive(p, PoolFamily.Projectile) || !run.IsSimulating) return true;
                 }
             }

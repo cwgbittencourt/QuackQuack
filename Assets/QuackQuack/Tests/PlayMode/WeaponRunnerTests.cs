@@ -139,6 +139,44 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         [Test]
+        public void ZeroTimeAtTurnDoesNotAdvancePassageOrClearInboundHistoryAgain()
+        {
+            StartRunner(WeaponBehavior.Boomerang);
+            runner.Advance(0); runner.Advance(0.5f);
+            var projectile = root.GetComponentInChildren<WeaponProjectile>();
+            Assert.That(projectile.Passage, Is.EqualTo(ProjectilePassage.Outbound));
+            runner.Advance(0);
+            Assert.That(projectile.Passage, Is.EqualTo(ProjectilePassage.Outbound));
+            Assert.That(target.Health, Is.EqualTo(17));
+            runner.Advance(0.25f); // Return from x=4 to x=2 before asserting the hit.
+            Assert.That(projectile.Passage, Is.EqualTo(ProjectilePassage.Inbound));
+            Assert.That(target.Health, Is.EqualTo(14));
+            runner.Advance(0); runner.Advance(0.125f);
+            Assert.That(target.Health, Is.EqualTo(14));
+            Assert.That(events.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ProjectileLeaseAndPassageResetBeforeReusingCompletedInboundEmission()
+        {
+            StartRunner(WeaponBehavior.Boomerang, 1); runner.Advance(0);
+            var projectile = root.GetComponentInChildren<WeaponProjectile>();
+            long firstLease = projectile.LeaseId; Assert.That(firstLease, Is.GreaterThan(0));
+            runner.Advance(0.75f);
+            Assert.That(projectile.Passage, Is.EqualTo(ProjectilePassage.Inbound));
+            runner.Advance(0.25f);
+            Assert.That(projectile.LeaseId, Is.Zero);
+            Assert.That(projectile.Passage, Is.EqualTo(ProjectilePassage.Outbound));
+            runner.Advance(9);
+            Assert.That(root.GetComponentInChildren<WeaponProjectile>(), Is.SameAs(projectile));
+            Assert.That(projectile.LeaseId, Is.GreaterThan(firstLease));
+            Assert.That(projectile.Passage, Is.EqualTo(ProjectilePassage.Outbound));
+            Assert.That(projectile.Age, Is.Zero);
+            runner.Advance(0.25f);
+            Assert.That(target.Health, Is.EqualTo(11));
+        }
+
+        [Test]
         public void BoomerangTargetAtTurnCanBeHitOnceOnEachSideOfTheTurn()
         {
             target.transform.position = Vector2.right * 4; Physics2D.SyncTransforms();
@@ -217,6 +255,29 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         [Test]
+        public void ReentrantTargetReuseDoesNotApplyOldCastContactsToNewLife()
+        {
+            target.gameObject.SetActive(false);
+            RegisterPooledTarget(); SetEnemy("health", 3f);
+            StartRunner(WeaponBehavior.Boomerang); runner.Advance(0);
+            PooledEnemy next = null;
+            var first = SpawnPooledTarget(Vector2.right, _ =>
+            {
+                next = SpawnPooledTarget(new Vector2(2.5f, 0));
+                Assert.That(next.ConfigureEncounter(10, 1), Is.True);
+            });
+            first.gameObject.AddComponent<BoxCollider2D>().isTrigger = true;
+            Physics2D.SyncTransforms(); long oldLease = first.LeaseId;
+            runner.Advance(0.25f);
+            Assert.That(next, Is.SameAs(first));
+            Assert.That(next.LeaseId, Is.GreaterThan(oldLease));
+            Assert.That(next.State.Health, Is.EqualTo(30), "Contacts captured from the old lease must not damage its replacement.");
+            runner.Advance(0.125f);
+            Assert.That(next.State.Health, Is.EqualTo(27), "The new lease can be hit by a fresh sweep in the same passage.");
+            Assert.That(events.FindAll(e => e.Type == CombatEventType.DamageApplied).Count, Is.EqualTo(2));
+        }
+
+        [Test]
         public void PausingAtTurnPreservesMovementAndDoesNotConsumeInboundHit()
         {
             StartRunner(WeaponBehavior.Boomerang); runner.Advance(0); runner.Advance(0.5f);
@@ -262,9 +323,9 @@ namespace QuackQuack.Tests.PlayMode
             PooledEnemy.RegisterPool(pools, pooledDefinition, root.transform);
         }
         private void SetEnemy(string field, object value) => typeof(EnemyDefinition).GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(pooledDefinition, value);
-        private PooledEnemy SpawnPooledTarget(Vector2 position)
+        private PooledEnemy SpawnPooledTarget(Vector2 position, System.Action<EnemyReward> sink = null)
         {
-            var enemy = PooledEnemy.Spawn(pools, pooledDefinition, run, bus, root.transform, position, _ => { });
+            var enemy = PooledEnemy.Spawn(pools, pooledDefinition, run, bus, root.transform, position, sink ?? (_ => { }));
             Assert.That(enemy, Is.Not.Null);
             long lease = enemy.LeaseId;
             enemy.GetComponent<QuackTarget>().BindCombat(() => enemy.State.Health,
