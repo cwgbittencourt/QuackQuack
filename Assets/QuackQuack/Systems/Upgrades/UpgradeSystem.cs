@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using QuackQuack.Content.Passives;
+using QuackQuack.Content.Characters;
+using QuackQuack.Core.Combat;
 using QuackQuack.Content.Weapons;
 using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
@@ -36,6 +38,8 @@ namespace QuackQuack.Systems.Upgrades
         private ExperienceState experience;
         private string[] levelCandidates;
         private int pendingLevels;
+        private readonly float[] passiveBonuses = new float[6];
+        private int attributeHistory = -1;
         public int Experience => experience == null ? 0 : experience.Experience;
         public int Level => experience == null ? 1 : experience.Level;
         public int PendingLevels => pendingLevels;
@@ -48,6 +52,43 @@ namespace QuackQuack.Systems.Upgrades
         public event Action<UpgradeOffer> OfferChanged;
         public event Action<string> OfferResolved;
         public event Action<UpgradeConfirmation> ChoiceConfirmed;
+
+        private void RefreshPassiveBonuses()
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(UpgradeSystem));
+            if (attributeHistory == build.History.Count) return;
+            Array.Clear(passiveBonuses, 0, passiveBonuses.Length);
+            foreach (var entry in build.Passives)
+            {
+                if (!passives.TryGetValue(entry.Key, out var definition))
+                    throw new InvalidOperationException("Build passive is absent from the bound catalog: " + entry.Key);
+                passiveBonuses[(int)definition.Attribute] += definition.GetModifier(entry.Value);
+            }
+            attributeHistory = build.History.Count;
+        }
+
+        public EffectiveAttributes ResolveWeaponAttributes(WeaponDefinition definition, int level,
+            TerrainType terrain, RelicLoadout relics)
+        {
+            if (definition == null) throw new ArgumentNullException(nameof(definition));
+            RefreshPassiveBonuses();
+            var stats = definition.GetLevel(level, terrain);
+            // Neutral player bases are unused by this weapon-only consumer.
+            return EffectiveAttributes.Resolve(stats.Damage, stats.Cooldown, 1, 1, 0,
+                stats.Range, stats.AreaRadius, definition.HitRadius, definition.ProjectileSpeed,
+                definition.Behavior == WeaponBehavior.Bubbles, passiveBonuses, relics, terrain);
+        }
+
+        public EffectiveAttributes ResolvePlayerAttributes(CharacterDefinition definition,
+            TerrainType terrain, RelicLoadout relics)
+        {
+            if (definition == null) throw new ArgumentNullException(nameof(definition));
+            RefreshPassiveBonuses();
+            var quack = definition.Quack;
+            return EffectiveAttributes.ResolvePlayer(terrain == TerrainType.Water ? definition.WaterSpeed : definition.LandSpeed,
+                quack.Capacity, terrain == TerrainType.Water ? quack.WaterRecovery : quack.LandRecovery,
+                passiveBonuses, relics, terrain);
+        }
 
         // Prefiltered-ID boundary, also usable before authored catalogs exist.
         public UpgradeSystem(int seed) : this(seed, new BuildState()) { }

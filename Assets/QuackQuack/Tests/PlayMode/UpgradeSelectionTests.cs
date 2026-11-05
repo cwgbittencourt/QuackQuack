@@ -38,6 +38,19 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(view.IsVisible, Is.False);
         }
         private Button Button(string name) => view.GetComponentsInChildren<Button>(true).Single(b => b.name == name);
+
+        [UnityTest]
+        public IEnumerator ConfirmedCapacityPassiveReachesRealScenePlayerThroughSharedBuild()
+        {
+            var player = Object.FindAnyObjectByType<PlayerController>();
+            Assert.That(player.Upgrades, Is.SameAs(progression.Upgrades));
+            Assert.That(progression.Runner.Upgrades, Is.SameAs(progression.Upgrades));
+            float baseline = player.Definition.Quack.Capacity;
+            Open("pulmao-poderoso");
+            Button("Choose 0").onClick.Invoke();
+            yield return new WaitForFixedUpdate();
+            Assert.That(player.State.Breath.Capacity, Is.EqualTo(baseline * 1.08f).Within(0.001f));
+        }
         private void Open(params string[] ids)
         {
             progression.Upgrades.GenerateOffer("test", ids); view.Refresh();

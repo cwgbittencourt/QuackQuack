@@ -53,13 +53,7 @@ namespace QuackQuack.Core.Combat
             NonNegative(areaRadius, nameof(areaRadius));
             Positive(hitRadius, nameof(hitRadius));
             Positive(projectileSpeed, nameof(projectileSpeed));
-            if (terrain != TerrainType.Land && terrain != TerrainType.Water)
-                throw new ArgumentOutOfRangeException(nameof(terrain));
-            if (passiveBonuses == null) throw new ArgumentNullException(nameof(passiveBonuses));
-            if (passiveBonuses.Length != 6)
-                throw new ArgumentException("Exactly six attribute bonuses are required.", nameof(passiveBonuses));
-            for (int i = 0; i < passiveBonuses.Length; i++)
-                NonNegative(passiveBonuses[i], nameof(passiveBonuses));
+            ValidateBonuses(passiveBonuses, terrain);
 
             return new EffectiveAttributes(
                 Scale(damage, passiveBonuses[0], Bonus(relics, RelicAttribute.Damage, terrain)),
@@ -75,6 +69,31 @@ namespace QuackQuack.Core.Combat
 
         private static float Bonus(RelicLoadout relics, RelicAttribute attribute, TerrainType terrain) =>
             relics?.GetBonus(attribute, terrain) ?? 0;
+
+        public static EffectiveAttributes ResolvePlayer(float movementSpeed, float breathCapacity,
+            float breathRecovery, float[] passiveBonuses, RelicLoadout relics, TerrainType terrain)
+        {
+            Positive(movementSpeed, nameof(movementSpeed));
+            Positive(breathCapacity, nameof(breathCapacity));
+            NonNegative(breathRecovery, nameof(breathRecovery));
+            ValidateBonuses(passiveBonuses, terrain);
+            return new EffectiveAttributes(0, 0,
+                Scale(movementSpeed, passiveBonuses[2], Bonus(relics, RelicAttribute.MovementSpeed, terrain)),
+                Scale(breathCapacity, passiveBonuses[3], 0),
+                Scale(breathRecovery, passiveBonuses[4], Bonus(relics, RelicAttribute.BreathRecovery, terrain)),
+                0, 0, 0, 0);
+        }
+
+        private static void ValidateBonuses(float[] passiveBonuses, TerrainType terrain)
+        {
+            if (terrain != TerrainType.Land && terrain != TerrainType.Water)
+                throw new ArgumentOutOfRangeException(nameof(terrain));
+            if (passiveBonuses == null) throw new ArgumentNullException(nameof(passiveBonuses));
+            if (passiveBonuses.Length != 6)
+                throw new ArgumentException("Exactly six attribute bonuses are required.", nameof(passiveBonuses));
+            for (int i = 0; i < passiveBonuses.Length; i++)
+                NonNegative(passiveBonuses[i], nameof(passiveBonuses));
+        }
 
         private static float Scale(float baseline, float passive, float relic) =>
             Result((double)baseline * (1d + passive) * (1d + relic), baseline == 0);

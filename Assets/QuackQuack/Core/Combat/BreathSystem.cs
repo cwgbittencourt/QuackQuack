@@ -5,7 +5,7 @@ namespace QuackQuack.Core.Combat
 {
     public sealed class BreathSystem
     {
-        public float Capacity { get; }
+        public float Capacity { get; private set; }
         public float Current { get; private set; }
         public bool IsFull => Current >= Capacity;
         private readonly float landRecovery, waterRecovery;
@@ -37,7 +37,23 @@ namespace QuackQuack.Core.Combat
         {
             if (float.IsNaN(seconds) || float.IsInfinity(seconds) || seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds));
             if (terrain != TerrainType.Land && terrain != TerrainType.Water) throw new ArgumentOutOfRangeException(nameof(terrain));
-            Current = Math.Min(Capacity, Current + seconds * (terrain == TerrainType.Water ? waterRecovery : landRecovery));
+            RecoverAtRate(seconds, terrain == TerrainType.Water ? waterRecovery : landRecovery);
+        }
+
+        // Increasing capacity does not grant breath; shrinking clamps excess reserve.
+        public void SetCapacity(float capacity)
+        {
+            if (float.IsNaN(capacity) || float.IsInfinity(capacity) || capacity <= 0)
+                throw new ArgumentOutOfRangeException(nameof(capacity));
+            Capacity = capacity;
+            Current = Math.Min(Current, capacity);
+        }
+
+        public void RecoverAtRate(float seconds, float rate)
+        {
+            if (float.IsNaN(seconds) || float.IsInfinity(seconds) || seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds));
+            if (float.IsNaN(rate) || float.IsInfinity(rate) || rate < 0) throw new ArgumentOutOfRangeException(nameof(rate));
+            Current = (float)Math.Min(Capacity, (double)Current + (double)seconds * rate);
         }
     }
 }

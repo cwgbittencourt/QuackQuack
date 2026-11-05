@@ -57,6 +57,8 @@ namespace QuackQuack.Gameplay.Upgrades
             runner = gameObject.AddComponent<WeaponRunner>();
             runner.Initialize(bootstrap.Run, build, bootstrap.Pools, bootstrap.Events, player.transform,
                 () => player.State.Terrain, catalog.GetAllWeapons(), key, projectileCapacity);
+            player.Upgrades = Upgrades;
+            runner.Upgrades = Upgrades;
             if (trainingPickups)
             {
             string xpKey = key + "-xp";
@@ -84,8 +86,9 @@ namespace QuackQuack.Gameplay.Upgrades
         {
             Ready = false;
             if (view != null) view.Unbind();
-            Upgrades?.Dispose();
+            if (player != null && ReferenceEquals(player.Upgrades, Upgrades)) player.Upgrades = null;
             if (runner != null) runner.enabled = false;
+            Upgrades?.Dispose();
             if (bootstrap != null && pickups != null) foreach (var pickup in pickups) bootstrap.Pools.Release(pickup);
             if (bootstrap != null) bootstrap.Pools.Release(rarePickup);
         }

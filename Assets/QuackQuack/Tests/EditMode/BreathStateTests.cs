@@ -7,6 +7,44 @@ namespace QuackQuack.Tests.EditMode
     public class BreathStateTests
     {
         [Test]
+        public void CapacityReconfigurationPreservesReserveAndClampsOnlyWhenShrinking()
+        {
+            var breath = new BreathSystem(100, 10, 20);
+            breath.TryConsume(35, out _);
+            breath.SetCapacity(140);
+            Assert.That(breath.Current, Is.EqualTo(65));
+            breath.RecoverAtRate(1, 24);
+            Assert.That(breath.Current, Is.EqualTo(89));
+            breath.SetCapacity(80);
+            Assert.That(breath.Current, Is.EqualTo(80));
+            Assert.That(breath.IsFull, Is.True);
+        }
+
+        [TestCase(0f)] [TestCase(-1f)] [TestCase(float.NaN)] [TestCase(float.PositiveInfinity)]
+        public void InvalidEffectiveCapacityDoesNotMutateReserve(float value)
+        {
+            var breath = new BreathSystem(100, 10, 20);
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => breath.SetCapacity(value));
+            Assert.That(breath.Capacity, Is.EqualTo(100));
+            Assert.That(breath.Current, Is.EqualTo(100));
+        }
+
+        [Test]
+        public void EffectiveRecoveryRejectsInvalidInputsAndCapsLargeFiniteProduct()
+        {
+            var breath = new BreathSystem(100, 10, 20);
+            breath.TryConsume(100, out _);
+            foreach (float value in new[] { -1f, float.NaN, float.PositiveInfinity })
+            {
+                Assert.Throws<System.ArgumentOutOfRangeException>(() => breath.RecoverAtRate(value, 1));
+                Assert.Throws<System.ArgumentOutOfRangeException>(() => breath.RecoverAtRate(1, value));
+                Assert.That(breath.Current, Is.Zero);
+            }
+            breath.RecoverAtRate(0, 0); Assert.That(breath.Current, Is.Zero);
+            breath.RecoverAtRate(float.MaxValue, float.MaxValue);
+            Assert.That(breath.Current, Is.EqualTo(100));
+        }
+        [Test]
         public void EnhancedActivationRequiresFullBreathAndCanReturnAfterRecovery()
         {
             var breath = new BreathSystem(100, 10, 20);

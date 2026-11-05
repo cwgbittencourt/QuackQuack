@@ -7,6 +7,7 @@ using QuackQuack.Core.Run;
 using QuackQuack.Gameplay.Player;
 using QuackQuack.Systems.Combat;
 using QuackQuack.Systems.Pooling;
+using QuackQuack.Systems.Upgrades;
 using UnityEngine;
 
 namespace QuackQuack.Gameplay.Weapons
@@ -63,6 +64,7 @@ namespace QuackQuack.Gameplay.Weapons
         private bool initialized;
         public bool AutomaticTick { get; set; } = true;
         public RelicLoadout Relics { get; set; }
+        public UpgradeSystem Upgrades { get; set; }
         public Vector2 Facing { get; set; } = Vector2.right;
         public int ActiveProjectileCount => active == null ? 0 : active.Count;
         private static ContactFilter2D TargetFilter => new ContactFilter2D { useTriggers = true, useLayerMask = true, layerMask = 1 << 9 };
@@ -125,7 +127,13 @@ namespace QuackQuack.Gameplay.Weapons
                 var slot = slots[i];
                 if (slot.Definition == null || clock < slot.Next) continue;
                 var stats = slot.Definition.GetLevel(slot.Level, terrain());
-                if (Relics != null)
+                if (Upgrades != null)
+                {
+                    var effective = Upgrades.ResolveWeaponAttributes(slot.Definition, slot.Level, terrain(), Relics);
+                    stats = new WeaponLevel(effective.Damage, effective.AttackInterval, effective.Range,
+                        stats.ProjectileCount, effective.AreaRadius);
+                }
+                else if (Relics != null)
                 {
                     var ground = terrain();
                     stats = new WeaponLevel(Relics.ApplyEffects(stats.Damage, RelicAttribute.Damage, ground),

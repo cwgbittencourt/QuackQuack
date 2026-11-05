@@ -7,6 +7,7 @@ using QuackQuack.Gameplay.Terrain;
 using QuackQuack.Platform.Input;
 using QuackQuack.Systems.Run;
 using QuackQuack.Systems.Combat;
+using QuackQuack.Systems.Upgrades;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -39,6 +40,7 @@ namespace QuackQuack.Gameplay.Player
         private bool menuInputBlocked;
         public void SetMenuInputBlocked(bool blocked) { menuInputBlocked = blocked; RefreshInputContext(); ClearCommands(); }
         public RelicLoadout Relics { get; set; }
+        public UpgradeSystem Upgrades { get; set; }
         public float EnemySlowMultiplier {get;private set;}=1;
         public void SetEnemySlow(float multiplier)
         {
@@ -123,11 +125,24 @@ namespace QuackQuack.Gameplay.Player
                 State.Terrain = terrain;
                 events.Publish(new PresentationEvent(tick, wave, PresentationEventType.TerrainChanged, EventPriority.Essential, 1, body.position));
             }
-            body.linearVelocity = move * TerrainAffinity.Select(definition.LandSpeed, definition.WaterSpeed, terrain);
-            if (Relics != null) body.linearVelocity *= 1 + Relics.GetBonus(RelicAttribute.MovementSpeed, terrain);
+            float speed = TerrainAffinity.Select(definition.LandSpeed, definition.WaterSpeed, terrain);
+            float recovery = terrain == TerrainType.Water ? definition.Quack.WaterRecovery : definition.Quack.LandRecovery;
+            if (Upgrades != null)
+            {
+                var effective = Upgrades.ResolvePlayerAttributes(definition, terrain, Relics);
+                State.Breath.SetCapacity(effective.BreathCapacity);
+                speed = effective.MovementSpeed; recovery = effective.BreathRecovery;
+            }
+            else
+            {
+                State.Breath.SetCapacity(definition.Quack.Capacity);
+                speed *= 1 + (Relics?.GetBonus(RelicAttribute.MovementSpeed, terrain) ?? 0);
+                recovery *= 1 + (Relics?.GetBonus(RelicAttribute.BreathRecovery, terrain) ?? 0);
+            }
+            body.linearVelocity = move * speed;
             body.linearVelocity*=EnemySlowMultiplier;
             bool wasFull = State.Breath.IsFull;
-            State.Breath.Recover(Time.fixedDeltaTime * (1 + (Relics?.GetBonus(RelicAttribute.BreathRecovery, terrain) ?? 0)), terrain);
+            State.Breath.RecoverAtRate(Time.fixedDeltaTime, recovery);
             if (!wasFull && State.Breath.IsFull)
                 events.Publish(new PresentationEvent(tick, wave, PresentationEventType.BreathReady, EventPriority.Essential, 1, body.position));
             if (requestedQuack) { ActivateQuack(); requestedQuack = false; }
