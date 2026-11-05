@@ -15,19 +15,19 @@ namespace QuackQuack.Gameplay.Weapons
     public sealed class WeaponRunner : MonoBehaviour
     {
         private interface IAttackPattern
-        { void Fire(WeaponRunner runner, WeaponDefinition definition, WeaponLevel stats, Vector2 direction, QuackTarget target); }
+        { void Fire(WeaponRunner runner, WeaponDefinition definition, WeaponLevel stats, float hitRadius, Vector2 direction, QuackTarget target); }
         private sealed class ProjectilePattern : IAttackPattern
         {
             private readonly ProjectileMotion motion;
             public ProjectilePattern(ProjectileMotion motion) { this.motion = motion; }
-            public void Fire(WeaponRunner r, WeaponDefinition d, WeaponLevel s, Vector2 direction, QuackTarget target)
+            public void Fire(WeaponRunner r, WeaponDefinition d, WeaponLevel s, float hitRadius, Vector2 direction, QuackTarget target)
             {
                 int count = Mathf.Min(s.ProjectileCount, r.capacity - r.active.Count);
                 for (int i = 0; i < count; i++)
                 {
                     float angle = count <= 1 ? 0 : d.ConeAngle * (i / (float)(count - 1) - 0.5f);
                     Vector2 shotDirection = Quaternion.Euler(0, 0, angle) * direction;
-                    r.Launch(d, s, motion, shotDirection, target);
+                    r.Launch(d, s, hitRadius, motion, shotDirection, target);
                 }
             }
         }
@@ -35,7 +35,7 @@ namespace QuackQuack.Gameplay.Weapons
         {
             private readonly bool cone;
             public AreaPattern(bool cone) { this.cone = cone; }
-            public void Fire(WeaponRunner r, WeaponDefinition d, WeaponLevel s, Vector2 direction, QuackTarget target) =>
+            public void Fire(WeaponRunner r, WeaponDefinition d, WeaponLevel s, float hitRadius, Vector2 direction, QuackTarget target) =>
                 r.AreaHit(d, s, r.owner.position, direction, cone, null);
         }
         private static readonly IAttackPattern[] patterns =
@@ -126,16 +126,20 @@ namespace QuackQuack.Gameplay.Weapons
             {
                 var slot = slots[i];
                 if (slot.Definition == null || clock < slot.Next) continue;
-                var stats = slot.Definition.GetLevel(slot.Level, terrain());
+                var ground = terrain();
+                var stats = slot.Definition.GetLevel(slot.Level, ground);
+                float hitRadius = slot.Definition.HitRadius;
                 if (Upgrades != null)
                 {
-                    var effective = Upgrades.ResolveWeaponAttributes(slot.Definition, slot.Level, terrain(), Relics);
+                    var effective = Upgrades.ResolveWeaponAttributes(slot.Definition, slot.Level, ground, Relics);
+                    hitRadius = effective.HitRadius;
                     stats = new WeaponLevel(effective.Damage, effective.AttackInterval, effective.Range,
                         stats.ProjectileCount, effective.AreaRadius);
                 }
                 else if (Relics != null)
                 {
-                    var ground = terrain();
+                    if (slot.Definition.Behavior == WeaponBehavior.Bubbles)
+                        hitRadius = Relics.ApplyEffects(hitRadius, RelicAttribute.Area, ground);
                     stats = new WeaponLevel(Relics.ApplyEffects(stats.Damage, RelicAttribute.Damage, ground),
                         stats.Cooldown / (1 + Relics.GetBonus(RelicAttribute.AttackSpeed, ground)),
                         Relics.ApplyEffects(stats.Range, RelicAttribute.Range, ground), stats.ProjectileCount,
@@ -148,7 +152,7 @@ namespace QuackQuack.Gameplay.Weapons
                     if (target == null) continue;
                     direction = ((Vector2)target.transform.position - (Vector2)owner.position).normalized;
                 }
-                patterns[(int)slot.Definition.Behavior].Fire(this, slot.Definition, stats, direction, target);
+                patterns[(int)slot.Definition.Behavior].Fire(this, slot.Definition, stats, hitRadius, direction, target);
                 slot.Next = clock + stats.Cooldown; slots[i] = slot;
                 if (!isActiveAndEnabled || !run.IsSimulating)
                 { if (run.Outcome.HasValue) ReleaseAll(); return; }
@@ -172,12 +176,12 @@ namespace QuackQuack.Gameplay.Weapons
             }
         }
 
-        private void Launch(WeaponDefinition definition, WeaponLevel stats, ProjectileMotion motion, Vector2 direction, QuackTarget target)
+        private void Launch(WeaponDefinition definition, WeaponLevel stats, float hitRadius, ProjectileMotion motion, Vector2 direction, QuackTarget target)
         {
             if (active.Count >= capacity) return;
             var projectile = pools.Acquire<WeaponProjectile>(poolKey);
             if (projectile == null) return;
-            projectile.Begin(definition, stats, motion, owner.position, direction, target);
+            projectile.Begin(definition, stats, motion, owner.position, direction, target, hitRadius);
             active.Add(projectile);
         }
 
@@ -225,7 +229,7 @@ namespace QuackQuack.Gameplay.Weapons
             else
             {
                 Vector2 delta = to - from;
-                int count = Physics2D.CircleCast(from, p.Definition.HitRadius, delta.normalized, TravelFilter, contacts, delta.magnitude);
+                int count = Physics2D.CircleCast(from, p.HitRadius, delta.normalized, TravelFilter, contacts, delta.magnitude);
                 // Stable nearest-first order, so an obstacle blocks targets behind it.
                 for (int i = 1; i < count; i++)
                 {
