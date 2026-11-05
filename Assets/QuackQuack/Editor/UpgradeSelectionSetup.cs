@@ -91,6 +91,7 @@ namespace QuackQuack.Editor
                 var banish = Button("Banish " + i, card, new Vector2(145, -285), new Vector2(150, 55), "BANIR");
                 entry.FindPropertyRelative("choose").objectReferenceValue = choose;
                 entry.FindPropertyRelative("banish").objectReferenceValue = banish;
+                ConfigureCardPreview(entry, card);
             }
             var resources = Label("Resources", panel, new Vector2(0, -375), new Vector2(1600, 45), 24, ""); resources.alignment = TextAnchor.MiddleCenter;
             data.FindProperty("resources").objectReferenceValue = resources;
@@ -105,6 +106,64 @@ namespace QuackQuack.Editor
             var text = Label(name, parent, new Vector2(20, y), new Vector2(420, height), size, "");
             var rect = text.rectTransform; rect.anchorMin = rect.anchorMax = new Vector2(0, 1); rect.pivot = new Vector2(0, 1);
             text.color = color; entry.FindPropertyRelative(field).objectReferenceValue = text;
+        }
+
+        [MenuItem("QuackQuack/Update T022 area preview")]
+        public static void UpdateAreaPreview()
+        {
+            var root = PrefabUtility.LoadPrefabContents(PrefabPath);
+            try
+            {
+                var data = new SerializedObject(root.GetComponent<UpgradeSelectionView>());
+                var cards = data.FindProperty("cards");
+                for (int i = 0; i < cards.arraySize; i++)
+                {
+                    var entry = cards.GetArrayElementAtIndex(i);
+                    ConfigureCardPreview(entry, ((GameObject)entry.FindPropertyRelative("root").objectReferenceValue).GetComponent<RectTransform>());
+                }
+                data.ApplyModifiedPropertiesWithoutUndo();
+                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+                AssetDatabase.SaveAssets();
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+
+        private static void ConfigureCardPreview(SerializedProperty entry, RectTransform card)
+        {
+            Layout(entry, "kind", -18, 30, 22); Layout(entry, "title", -55, 60, 30);
+            Layout(entry, "current", -125, 70, 20); Layout(entry, "next", -200, 70, 20);
+            Layout(entry, "synergy", -455, 44, 18); Layout(entry, "requirement", -505, 60, 17);
+            if (entry.FindPropertyRelative("effects").objectReferenceValue == null)
+                CardText(entry, "effects", "Active effects", card, -385, 66, 17, new Color(0.68f, 0.9f, 0.86f));
+            if (entry.FindPropertyRelative("areaPreview").objectReferenceValue != null) return;
+            var panel = Rect("Area preview", card, new Vector2(0, 1), new Vector2(0, 1), new Vector2(20, -275), new Vector2(420, 100));
+            panel.pivot = new Vector2(0, 1);
+            var preview = panel.gameObject.AddComponent<UpgradeAreaPreview>();
+            var data = new SerializedObject(preview);
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/QuackQuack/Art/Prototype/Circle.png");
+            foreach (bool next in new[] { false, true })
+            {
+                var circle = Rect(next ? "Next radius" : "Current radius", panel, new Vector2(0, 1), new Vector2(0, 1),
+                    new Vector2(next ? 315 : 105, -36), new Vector2(72, 72));
+                var image = circle.gameObject.AddComponent<Image>(); image.sprite = sprite; image.raycastTarget = false;
+                image.color = next ? new Color(1, 0.83f, 0.36f, 0.75f) : new Color(0.43f, 0.9f, 0.88f, 0.65f);
+                data.FindProperty(next ? "next" : "current").objectReferenceValue = image;
+            }
+            var caption = Label("Radius comparison", panel, new Vector2(0, -76), new Vector2(420, 24), 17, "");
+            caption.rectTransform.anchorMin = caption.rectTransform.anchorMax = new Vector2(0, 1);
+            caption.rectTransform.pivot = new Vector2(0, 1); caption.alignment = TextAnchor.MiddleCenter;
+            data.FindProperty("caption").objectReferenceValue = caption;
+            data.ApplyModifiedPropertiesWithoutUndo();
+            entry.FindPropertyRelative("areaPreview").objectReferenceValue = preview;
+            panel.gameObject.SetActive(false);
+        }
+
+        private static void Layout(SerializedProperty entry, string field, float y, float height, int size)
+        {
+            var text = (Text)entry.FindPropertyRelative(field).objectReferenceValue;
+            text.rectTransform.anchoredPosition = new Vector2(20, y);
+            text.rectTransform.sizeDelta = new Vector2(420, height);
+            text.fontSize = size;
         }
         private static Button Button(string name, Transform parent, Vector2 position, Vector2 size, string label)
         {

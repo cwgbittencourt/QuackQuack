@@ -8,6 +8,10 @@ namespace QuackQuack.Presentation.Weapons
     {
         private SpriteRenderer[] auras;
 
+        // Both circles share a scale; the diagram compares radii, not area percentages.
+        public static float PreviewDiameter(float radius, float maxRadius, float maxPixels) =>
+            2 * radius * (maxPixels / (2 * maxRadius));
+
         public void Initialize(int slots)
         {
             if (auras != null) throw new InvalidOperationException("Weapon visuals are already initialized.");

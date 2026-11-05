@@ -12,6 +12,8 @@ namespace QuackQuack.Presentation.UI
     {
         public GameObject root;
         public Text title, kind, current, next, synergy, requirement;
+        public Text effects;
+        public UpgradeAreaPreview areaPreview;
         public Button choose, banish;
     }
 
@@ -81,6 +83,8 @@ namespace QuackQuack.Presentation.UI
                 ui.title.text = card.Title; ui.kind.text = card.Kind;
                 ui.current.text = "ATUAL\n" + card.Current; ui.next.text = "PRÓXIMO\n" + card.Next;
                 ui.synergy.text = "SINERGIA\n" + card.Synergy; ui.requirement.text = "EVOLUÇÃO\n" + card.Requirement;
+                if (ui.effects != null) ui.effects.text = card.ActiveEffects;
+                if (ui.areaPreview != null) ui.areaPreview.Render(card);
                 ui.choose.interactable = true; ui.banish.interactable = value.Banishes > 0;
             }
             reroll.interactable = value.Rerolls > 0; skip.interactable = true;

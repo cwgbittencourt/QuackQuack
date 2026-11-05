@@ -51,7 +51,7 @@ namespace QuackQuack.Gameplay.Upgrades
             foreach (var evolution in catalog.Evolutions) choices.Add(evolution.Id);
             Upgrades.InitializeProgression(bootstrap.Run, experienceThresholds, choices.ToArray());
             UpgradeUiEventSystem.Ensure(transform);
-            Bridge = gameObject.AddComponent<UpgradeSelectionBridge>(); Bridge.Initialize(catalog, Upgrades, bootstrap.Run, view);
+            Bridge = gameObject.AddComponent<UpgradeSelectionBridge>(); Bridge.Initialize(catalog, Upgrades, bootstrap.Run, view, player);
             string key = "lake-build-" + GetInstanceID();
             WeaponRunner.RegisterProjectilePool(bootstrap.Pools, key, projectileCapacity, transform);
             runner = gameObject.AddComponent<WeaponRunner>();

@@ -23,6 +23,7 @@ namespace QuackQuack.Tests.PlayMode
         private MenuRegressionInput menuInput;
         private static readonly string[] CancelTargets = { "Choose 0", "Banish 0", "Reroll", "Skip" };
         private static readonly int[] CardCounts = { 1, 3 };
+        private static readonly Vector2Int[] PreviewSizes = { new Vector2Int(1920, 1080), new Vector2Int(2160, 1080), new Vector2Int(2340, 1080), new Vector2Int(1440, 1080) };
         private LakeBuildProgression progression;
         private UpgradeSelectionView view;
         [UnitySetUp]
@@ -38,6 +39,132 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(view.IsVisible, Is.False);
         }
         private Button Button(string name) => view.GetComponentsInChildren<Button>(true).Single(b => b.name == name);
+
+        private static float PreviewRadius(object card, string name)
+        {
+            var property = card.GetType().GetProperty(name);
+            Assert.That(property, Is.Not.Null, "T022: numeric area preview is missing.");
+            return (float)property.GetValue(card);
+        }
+
+        [TestCase(0, 0.2f, 0.216f)] [TestCase(4, 0.264f, 0.28f)]
+        public void SoapCardPreviewsActualCurrentAndNextRadiusWithoutMutatingBuild(int current, float before, float after)
+        {
+            var build = progression.Upgrades.Build;
+            Assert.That(build.TryAddWeapon("bolhas"), Is.True);
+            if (current > 0)
+            {
+                Assert.That(build.TryAddPassive("sabao-magico"), Is.True);
+                for (int i = 1; i < current; i++) Assert.That(build.TryUpgradePassive("sabao-magico", 5), Is.True);
+            }
+            int history = build.History.Count;
+            Open("sabao-magico");
+            var card = view.Displayed.Cards[0];
+            Assert.That(PreviewRadius(card, "CurrentRadius"), Is.EqualTo(before).Within(0.00001f));
+            Assert.That(PreviewRadius(card, "NextRadius"), Is.EqualTo(after).Within(0.00001f));
+            StringAssert.Contains("raio", card.Next); StringAssert.DoesNotContain("área", card.Next);
+            Assert.That(build.History.Count, Is.EqualTo(history));
+            Assert.That(progression.Bridge.Snapshot(), Is.SameAs(view.Displayed));
+            var images = view.GetComponentsInChildren<Image>().Where(i => i.name == "Current radius" || i.name == "Next radius").ToArray();
+            Assert.That(images.Length, Is.EqualTo(2), "The generated prefab must contain the preview.");
+            Assert.That(images.Single(i => i.name == "Current radius").rectTransform.sizeDelta.x /
+                images.Single(i => i.name == "Next radius").rectTransform.sizeDelta.x, Is.EqualTo(before / after).Within(0.0001f));
+            Button("Choose 0").onClick.Invoke();
+            var bubble = progression.Catalog.Weapons.Single(w => w.Id == "bolhas");
+            var player = Object.FindAnyObjectByType<PlayerController>();
+            Assert.That(progression.Upgrades.ResolveWeaponAttributes(bubble, 1, player.State.Terrain, player.Relics).HitRadius,
+                Is.EqualTo(after).Within(0.00001f));
+        }
+
+        [Test]
+        public void SoapPreviewWithoutBubbleWeaponIsExplicitlyProspective()
+        {
+            Open("sabao-magico");
+            var card = view.Displayed.Cards[0];
+            Assert.That(PreviewRadius(card, "NextRadius"), Is.EqualTo(0.216f).Within(0.00001f));
+            StringAssert.Contains("Ao adquirir Bolhas", card.Synergy);
+            Assert.That(progression.Upgrades.Build.Weapons.ContainsKey("bolhas"), Is.False);
+        }
+
+        [Test]
+        public void RelicChangesInvalidatePreviewWithoutChangingOfferOrBuild()
+        {
+            progression.Upgrades.Build.TryAddWeapon("bolhas");
+            Open("sabao-magico"); var original = view.Displayed;
+            var modifiers = new QuackQuack.Core.Progression.RelicModifier[10];
+            for (int i = 0; i < 10; i++) modifiers[i] = new QuackQuack.Core.Progression.RelicModifier("area" + i,
+                QuackQuack.Core.Progression.RelicAttribute.Area, QuackQuack.Core.Progression.RelicTerrain.Any, 0.1f);
+            var relics = new QuackQuack.Core.Progression.RelicLoadout(modifiers);
+            var player = Object.FindAnyObjectByType<PlayerController>(); player.Relics = relics;
+            view.Refresh(); var before = view.Displayed;
+            relics.Unlock("area0"); relics.Equip("area0"); view.Refresh();
+            Assert.That(view.Displayed, Is.Not.SameAs(before));
+            Assert.That(view.Displayed.OfferId, Is.EqualTo(original.OfferId));
+            Assert.That(PreviewRadius(view.Displayed.Cards[0], "CurrentRadius"), Is.EqualTo(0.22f).Within(0.00001f));
+            Assert.That(PreviewRadius(view.Displayed.Cards[0], "NextRadius"), Is.EqualTo(0.2376f).Within(0.00001f));
+        }
+
+        [Test]
+        public void CardsCommunicateAggregatedActivePassiveEffects()
+        {
+            progression.Upgrades.Build.TryAddPassive("ninho-reforcado");
+            progression.Upgrades.Build.TryAddPassive("oculos-aviador");
+            Open("pulmao-poderoso");
+            var property = view.Displayed.Cards[0].GetType().GetProperty("ActiveEffects");
+            Assert.That(property, Is.Not.Null, "T022: active passive effects are missing.");
+            StringAssert.Contains("Dano +16%", (string)property.GetValue(view.Displayed.Cards[0]));
+        }
+
+        [UnityTest]
+        public IEnumerator DensePassiveCardsAndPreviewFitAndRender([ValueSource(nameof(PreviewSizes))] Vector2Int size)
+        {
+            var build = progression.Upgrades.Build; build.TryAddWeapon("bolhas");
+            foreach (var passive in progression.Catalog.Passives)
+            {
+                Assert.That(build.TryAddPassive(passive.Id), Is.True);
+                for (int i = 1; i < 4; i++) Assert.That(build.TryUpgradePassive(passive.Id, passive.MaxLevel), Is.True);
+            }
+            Open("sabao-magico", "pulmao-poderoso", "ovos");
+            var canvas = view.GetComponent<Canvas>();
+            var mode = canvas.renderMode; var previousCamera = canvas.worldCamera;
+            var cameraObject = new GameObject("T022 preview camera"); var camera = cameraObject.AddComponent<Camera>();
+            camera.enabled = false; camera.orthographic = true; camera.transform.position = new Vector3(0, 0, -20);
+            var target = new RenderTexture(size.x, size.y, 24); target.Create(); camera.targetTexture = target;
+            camera.aspect = (float)size.x / size.y;
+            canvas.renderMode = RenderMode.ScreenSpaceCamera; canvas.worldCamera = camera; canvas.planeDistance = 10;
+            var areas = view.GetComponentsInChildren<SafeAreaController>(true);
+            foreach (var area in areas) area.SetViewportProvider(() => new Vector2(size.x, size.y), () => new Rect(0, 0, size.x, size.y));
+            try
+            {
+                yield return null; yield return null; Canvas.ForceUpdateCanvases();
+                foreach (var text in view.GetComponentsInChildren<Text>())
+                    Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 0.1f), text.name + ": " + text.text);
+                foreach (var preview in view.GetComponentsInChildren<UpgradeAreaPreview>())
+                {
+                    var card = preview.transform.parent.GetComponent<RectTransform>();
+                    var previewRect = preview.GetComponent<RectTransform>();
+                    var corners = new Vector3[4]; previewRect.GetWorldCorners(corners);
+                    foreach (var corner in corners) Assert.That(card.rect.Contains(card.InverseTransformPoint(corner)), Is.True);
+                }
+                var previous = RenderTexture.active; var pixels = new Texture2D(size.x, size.y, TextureFormat.RGB24, false);
+                try
+                {
+                    camera.Render(); RenderTexture.active = target;
+                    pixels.ReadPixels(new Rect(0, 0, size.x, size.y), 0, 0); pixels.Apply();
+                    string folder = Application.isEditor ? System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "../Logs/Polimento002/T022")) :
+                        System.IO.Path.Combine(Application.temporaryCachePath, "QuackQuack-T022");
+                    System.IO.Directory.CreateDirectory(folder);
+                    System.IO.File.WriteAllBytes(System.IO.Path.Combine(folder, "preview-" + size.x + "x" + size.y + ".png"), pixels.EncodeToPNG());
+                }
+                finally { RenderTexture.active = previous; Object.Destroy(pixels); }
+            }
+            finally
+            {
+                foreach (var area in areas) area.SetViewportProvider(null, null);
+                canvas.renderMode = mode; canvas.worldCamera = previousCamera;
+                camera.targetTexture = null; target.Release(); Object.Destroy(target); Object.Destroy(cameraObject);
+            }
+        }
 
         [UnityTest]
         public IEnumerator ConfirmedCapacityPassiveReachesRealScenePlayerThroughSharedBuild()

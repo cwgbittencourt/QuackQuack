@@ -8,6 +8,7 @@ using QuackQuack.Content.Weapons;
 using QuackQuack.Core.Combat;
 using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
+using QuackQuack.Systems.Upgrades;
 using UnityEditor;
 using UnityEngine;
 
@@ -183,6 +184,44 @@ namespace QuackQuack.Tests.EditMode
         }
 
         private static readonly string[] Fields = { "Damage", "AttackInterval", "MovementSpeed", "BreathCapacity", "BreathRecovery", "Range", "AreaRadius", "HitRadius", "ProjectileSpeed" };
+
+        [TestCase(0, 1)] [TestCase(4, 5)] [TestCase(5, 5)]
+        public void ProspectiveRadiusUsesSameResolutionAndAuthoredCapWithoutChangingOwnedLevels(int current, int proposed)
+        {
+            var bubble = Weapon("bolhas"); var soap = Passive("sabao-magico");
+            var build = new BuildState(); build.TryAddWeapon(bubble.Id);
+            if (current > 0)
+            {
+                build.TryAddPassive(soap.Id);
+                for (int i = 1; i < current; i++) build.TryUpgradePassive(soap.Id, soap.MaxLevel);
+            }
+            using (var upgrades = new UpgradeSystem(22, build, new[] { bubble }, new[] { soap }, new EvolutionDefinition[0]))
+            {
+                int history = build.History.Count;
+                var before = upgrades.ResolveWeaponAttributes(bubble, 1, TerrainType.Water, null);
+                var preview = upgrades.PreviewWeaponAttributes(bubble, 1, TerrainType.Water, null, soap.Id, proposed);
+                Assert.That(preview.HitRadius, Is.EqualTo(bubble.HitRadius * (1 + soap.GetModifier(proposed))).Within(0.00001f));
+                Assert.That(preview.Damage, Is.EqualTo(before.Damage));
+                Assert.That(preview.Range, Is.EqualTo(before.Range));
+                Assert.That(preview.ProjectileSpeed, Is.EqualTo(before.ProjectileSpeed));
+                Assert.That(build.History.Count, Is.EqualTo(history));
+                Assert.That(upgrades.GetPassiveBonus(PassiveAttribute.AreaRadius), Is.EqualTo(soap.GetModifier(current)));
+                Assert.That(upgrades.ResolveWeaponAttributes(bubble, 1, TerrainType.Water, null).HitRadius, Is.EqualTo(before.HitRadius));
+            }
+        }
+
+        [TestCase(-1)] [TestCase(6)]
+        public void InvalidPreviewLevelCannotChangeBuildOrCachedBonuses(int level)
+        {
+            var bubble = Weapon("bolhas"); var soap = Passive("sabao-magico"); var build = new BuildState();
+            using (var upgrades = new UpgradeSystem(22, build, new[] { bubble }, new[] { soap }, new EvolutionDefinition[0]))
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(() => upgrades.PreviewWeaponAttributes(bubble, 1, TerrainType.Land, null, soap.Id, level));
+                Assert.That(build.History, Is.Empty);
+                Assert.That(upgrades.GetPassiveBonus(PassiveAttribute.AreaRadius), Is.Zero);
+                Assert.That(upgrades.ResolveWeaponAttributes(bubble, 1, TerrainType.Land, null).HitRadius, Is.EqualTo(bubble.HitRadius));
+            }
+        }
 
         [TestCase(0)] [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)]
         [TestCase(5)] [TestCase(6)] [TestCase(7)] [TestCase(8)]

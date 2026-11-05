@@ -12,8 +12,19 @@ namespace QuackQuack.Core.Shared
         public string Next { get; }
         public string Synergy { get; }
         public string Requirement { get; }
-        public UpgradeCardSnapshot(string id, string title, string kind, string current, string next, string synergy, string requirement)
-        { Id = id; Title = title; Kind = kind; Current = current; Next = next; Synergy = synergy; Requirement = requirement; }
+        public float CurrentRadius { get; }
+        public float NextRadius { get; }
+        public bool HasAreaPreview => CurrentRadius > 0 && NextRadius > 0;
+        public string ActiveEffects { get; }
+        public UpgradeCardSnapshot(string id, string title, string kind, string current, string next, string synergy, string requirement,
+            float currentRadius = 0, float nextRadius = 0, string activeEffects = null)
+        {
+            if (float.IsNaN(currentRadius) || float.IsInfinity(currentRadius) || currentRadius < 0 ||
+                float.IsNaN(nextRadius) || float.IsInfinity(nextRadius) || nextRadius < 0 || (currentRadius == 0) != (nextRadius == 0))
+                throw new ArgumentOutOfRangeException(nameof(currentRadius));
+            Id = id; Title = title; Kind = kind; Current = current; Next = next; Synergy = synergy; Requirement = requirement;
+            CurrentRadius = currentRadius; NextRadius = nextRadius; ActiveEffects = activeEffects ?? "";
+        }
     }
     public sealed class UpgradeSelectionSnapshot
     {

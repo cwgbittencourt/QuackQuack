@@ -72,11 +72,37 @@ namespace QuackQuack.Systems.Upgrades
         {
             if (definition == null) throw new ArgumentNullException(nameof(definition));
             RefreshPassiveBonuses();
+            return ResolveWeapon(definition, level, terrain, relics, passiveBonuses);
+        }
+
+        public float GetPassiveBonus(PassiveAttribute attribute)
+        {
+            if (!Enum.IsDefined(typeof(PassiveAttribute), attribute)) throw new ArgumentOutOfRangeException(nameof(attribute));
+            RefreshPassiveBonuses();
+            return passiveBonuses[(int)attribute];
+        }
+
+        // Occasional UI projection; never edits the owned build or authored definitions.
+        public EffectiveAttributes PreviewWeaponAttributes(WeaponDefinition definition, int level, TerrainType terrain,
+            RelicLoadout relics, string passiveId, int proposedLevel)
+        {
+            if (definition == null) throw new ArgumentNullException(nameof(definition));
+            RefreshPassiveBonuses();
+            if (!passives.TryGetValue(passiveId, out var passive)) throw new ArgumentException("Unknown passive.", nameof(passiveId));
+            build.Passives.TryGetValue(passiveId, out int current);
+            var proposed = (float[])passiveBonuses.Clone();
+            proposed[(int)passive.Attribute] += passive.GetModifier(proposedLevel) - passive.GetModifier(current);
+            return ResolveWeapon(definition, level, terrain, relics, proposed);
+        }
+
+        private static EffectiveAttributes ResolveWeapon(WeaponDefinition definition, int level, TerrainType terrain,
+            RelicLoadout relics, float[] bonuses)
+        {
             var stats = definition.GetLevel(level, terrain);
             // Neutral player bases are unused by this weapon-only consumer.
             return EffectiveAttributes.Resolve(stats.Damage, stats.Cooldown, 1, 1, 0,
                 stats.Range, stats.AreaRadius, definition.HitRadius, definition.ProjectileSpeed,
-                definition.Behavior == WeaponBehavior.Bubbles, passiveBonuses, relics, terrain);
+                definition.Behavior == WeaponBehavior.Bubbles, bonuses, relics, terrain);
         }
 
         public EffectiveAttributes ResolvePlayerAttributes(CharacterDefinition definition,
