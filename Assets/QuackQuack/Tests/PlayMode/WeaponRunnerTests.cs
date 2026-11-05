@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
+using QuackQuack.Content.Enemies;
 using QuackQuack.Content.Shared;
 using QuackQuack.Content.Weapons;
 using QuackQuack.Core.Combat;
 using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
 using QuackQuack.Gameplay.Player;
+using QuackQuack.Gameplay.Enemies;
 using QuackQuack.Gameplay.Weapons;
 using QuackQuack.Systems.Combat;
 using QuackQuack.Systems.Pooling;
@@ -28,6 +30,8 @@ namespace QuackQuack.Tests.PlayMode
         private GameplayEventBus bus;
         private readonly List<CombatEvent> events = new List<CombatEvent>();
         private TerrainType terrain;
+        private EnemyDefinition pooledDefinition;
+        private GameObject pooledPrefab;
 
         [SetUp]
         public void SetUp()
@@ -95,17 +99,177 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         [Test]
-        public void BoomerangTravelsOutAndBackWithoutHittingSameTargetTwice()
+        public void BoomerangHitsOncePerPassageAcrossSmallStepsWithoutResettingEveryFrame()
         {
             StartRunner(WeaponBehavior.Boomerang);
-            runner.Advance(0); runner.Advance(0.5f);
+            runner.Advance(0);
+            for (int i = 0; i < 4; i++) runner.Advance(0.125f);
             var projectile = root.GetComponentInChildren<WeaponProjectile>();
-            Assert.That(projectile.transform.position.x, Is.GreaterThan(3));
-            runner.Advance(0.25f);
-            Assert.That(projectile.transform.position.x, Is.LessThan(3));
-            runner.Advance(0.25f);
+            Assert.That(projectile.transform.position.x, Is.EqualTo(4).Within(0.001f));
+            Assert.That(target.Health, Is.EqualTo(17), "Only one outbound hit, even while overlapping across steps.");
+            for (int i = 0; i < 4; i++) runner.Advance(0.125f);
             Assert.That(runner.ActiveProjectileCount, Is.Zero);
+            Assert.That(target.Health, Is.EqualTo(14), "The same target must receive exactly one inbound hit.");
+            Assert.That(events.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void BoomerangStepCrossingTurnPreservesOutboundAndInboundHits()
+        {
+            StartRunner(WeaponBehavior.Boomerang);
+            runner.Advance(0); runner.Advance(0.75f);
+            var projectile = root.GetComponentInChildren<WeaponProjectile>();
+            Assert.That(projectile.transform.position.x, Is.EqualTo(2).Within(0.001f));
+            Assert.That(target.Health, Is.EqualTo(14));
+            Assert.That(events.Count, Is.EqualTo(2));
+            runner.Advance(0.25f);
+            Assert.That(target.Health, Is.EqualTo(14));
+            Assert.That(runner.ActiveProjectileCount, Is.Zero);
+        }
+
+        [Test]
+        public void BoomerangStepBeyondLifetimePreservesBothPassagesAndExpiresOnce()
+        {
+            StartRunner(WeaponBehavior.Boomerang, 1);
+            runner.Advance(0); runner.Advance(2);
+            Assert.That(target.Health, Is.EqualTo(14));
+            Assert.That(events.Count, Is.EqualTo(2));
+            Assert.That(runner.ActiveProjectileCount, Is.Zero);
+            Assert.That(pools.GetActiveCount(PoolFamily.Projectile), Is.Zero);
+        }
+
+        [Test]
+        public void BoomerangTargetAtTurnCanBeHitOnceOnEachSideOfTheTurn()
+        {
+            target.transform.position = Vector2.right * 4; Physics2D.SyncTransforms();
+            StartRunner(WeaponBehavior.Boomerang);
+            runner.Advance(0); runner.Advance(0.5f);
             Assert.That(target.Health, Is.EqualTo(17));
+            runner.Advance(0.125f);
+            Assert.That(target.Health, Is.EqualTo(14), "Initial overlap at the start of inbound is a new passage.");
+            runner.Advance(0.375f);
+            Assert.That(target.Health, Is.EqualTo(14));
+            Assert.That(events.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void BoomerangCanHitTargetThatEntersOnlyDuringReturn()
+        {
+            target.transform.position = new Vector2(2, 3); Physics2D.SyncTransforms();
+            StartRunner(WeaponBehavior.Boomerang);
+            runner.Advance(0); runner.Advance(0.5f);
+            Assert.That(target.Health, Is.EqualTo(20));
+            target.transform.position = new Vector2(2, 0); Physics2D.SyncTransforms();
+            runner.Advance(0.25f); runner.Advance(0.25f);
+            Assert.That(target.Health, Is.EqualTo(17));
+            Assert.That(events.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void BoomerangDeduplicatesRootAndChildCollidersSeparatelyInEachPassage()
+        {
+            var extra = new GameObject("Second collider"); extra.transform.SetParent(target.transform, false); extra.layer = 9;
+            extra.AddComponent<BoxCollider2D>().isTrigger = true;
+            Physics2D.SyncTransforms(); StartRunner(WeaponBehavior.Boomerang);
+            runner.Advance(0); runner.Advance(0.5f);
+            Assert.That(target.Health, Is.EqualTo(17));
+            runner.Advance(0.5f);
+            Assert.That(target.Health, Is.EqualTo(14));
+            Assert.That(events.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ReusedBoomerangProjectileDoesNotRetainPreviousEmissionHitHistory()
+        {
+            StartRunner(WeaponBehavior.Boomerang, 1);
+            runner.Advance(0); var first = root.GetComponentInChildren<WeaponProjectile>();
+            runner.Advance(0.25f); Assert.That(target.Health, Is.EqualTo(17));
+            target.transform.position = new Vector2(2, 3); Physics2D.SyncTransforms();
+            runner.Advance(0.75f);
+            Assert.That(first.Definition, Is.Null); Assert.That(first.Age, Is.Zero);
+            target.transform.position = new Vector2(2, 0); Physics2D.SyncTransforms();
+            runner.Advance(9);
+            Assert.That(root.GetComponentInChildren<WeaponProjectile>(), Is.SameAs(first));
+            runner.Advance(0.25f);
+            Assert.That(target.Health, Is.EqualTo(14));
+            Assert.That(events.Count, Is.EqualTo(2));
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void ReusedTargetLeaseCanBeHitAgainWithinTheSamePassage(bool inbound)
+        {
+            target.gameObject.SetActive(false);
+            RegisterPooledTarget(); StartRunner(WeaponBehavior.Boomerang);
+            runner.Advance(0);
+            if (inbound) runner.Advance(0.5f);
+            var first = SpawnPooledTarget(new Vector2(inbound ? 3 : 1, 0));
+            int instance = first.gameObject.GetInstanceID(); long firstLease = first.LeaseId;
+            runner.Advance(0.125f);
+            Assert.That(first.State.Health, Is.EqualTo(17));
+            Assert.That(first.Despawn(firstLease), Is.True);
+            var second = SpawnPooledTarget(new Vector2(2, 0));
+            Assert.That(second, Is.SameAs(first));
+            Assert.That(second.gameObject.GetInstanceID(), Is.EqualTo(instance));
+            Assert.That(second.LeaseId, Is.GreaterThan(firstLease));
+            runner.Advance(0.125f);
+            Assert.That(second.State.Health, Is.EqualTo(17), "A new lease must not inherit the former life immunity.");
+            Assert.That(events.FindAll(e => e.Type == CombatEventType.DamageApplied).Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void PausingAtTurnPreservesMovementAndDoesNotConsumeInboundHit()
+        {
+            StartRunner(WeaponBehavior.Boomerang); runner.Advance(0); runner.Advance(0.5f);
+            var projectile = root.GetComponentInChildren<WeaponProjectile>();
+            run.TryTransition(RunPhase.Paused); runner.Advance(10);
+            Assert.That(projectile.Age, Is.EqualTo(0.5f));
+            Assert.That(projectile.transform.position.x, Is.EqualTo(4).Within(0.001f));
+            Assert.That(target.Health, Is.EqualTo(17));
+            run.TryResume(); runner.Advance(0.5f);
+            Assert.That(target.Health, Is.EqualTo(14));
+            Assert.That(events.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ObstacleInsertedOnReturnStopsBoomerangBeforeSecondHit()
+        {
+            StartRunner(WeaponBehavior.Boomerang); runner.Advance(0); runner.Advance(0.5f);
+            Assert.That(target.Health, Is.EqualTo(17));
+            var wall = new GameObject("Return wall"); wall.transform.SetParent(root.transform);
+            wall.layer = 8; wall.transform.position = Vector2.right * 3;
+            wall.AddComponent<BoxCollider2D>().size = new Vector2(0.2f, 4); Physics2D.SyncTransforms();
+            runner.Advance(0.5f);
+            Assert.That(target.Health, Is.EqualTo(17));
+            Assert.That(runner.ActiveProjectileCount, Is.Zero);
+            Assert.That(events.Count, Is.EqualTo(1));
+        }
+
+        private void RegisterPooledTarget()
+        {
+            pooledPrefab = new GameObject("Pooled target prefab"); pooledPrefab.transform.SetParent(root.transform); pooledPrefab.layer = 9;
+            pooledPrefab.AddComponent<PooledEnemy>();
+            pooledPrefab.AddComponent<QuackTarget>();
+            pooledPrefab.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+            pooledPrefab.GetComponent<CircleCollider2D>().isTrigger = true;
+            pooledPrefab.GetComponent<CircleCollider2D>().radius = 0.1f;
+            pooledPrefab.SetActive(false);
+            pooledDefinition = ScriptableObject.CreateInstance<EnemyDefinition>();
+            typeof(ContentDefinition).GetField("id", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(pooledDefinition, "lease-target");
+            typeof(ContentDefinition).GetField("displayName", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(pooledDefinition, "Lease target");
+            SetEnemy("prefab", pooledPrefab); SetEnemy("health", 20f);
+            SetEnemy("poolInitialSize", 1); SetEnemy("poolMaxSize", 1);
+            Assert.That(pooledDefinition.IsValid(out var reason), Is.True, reason);
+            PooledEnemy.RegisterPool(pools, pooledDefinition, root.transform);
+        }
+        private void SetEnemy(string field, object value) => typeof(EnemyDefinition).GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(pooledDefinition, value);
+        private PooledEnemy SpawnPooledTarget(Vector2 position)
+        {
+            var enemy = PooledEnemy.Spawn(pools, pooledDefinition, run, bus, root.transform, position, _ => { });
+            Assert.That(enemy, Is.Not.Null);
+            long lease = enemy.LeaseId;
+            enemy.GetComponent<QuackTarget>().BindCombat(() => enemy.State.Health,
+                (amount, source, step, attacker) => enemy.TakeDamage(lease, amount, source, step), (push, interruption) => { });
+            Physics2D.SyncTransforms(); return enemy;
         }
 
         [Test]
@@ -210,6 +374,7 @@ namespace QuackQuack.Tests.PlayMode
             if (runner != null) runner.enabled = false;
             pools.Dispose();
             Object.Destroy(root); Object.Destroy(definition);
+            if (pooledDefinition != null) Object.Destroy(pooledDefinition);
             yield return null;
         }
     }
