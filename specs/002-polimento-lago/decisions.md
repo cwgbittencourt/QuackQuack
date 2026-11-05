@@ -1,5 +1,7 @@
 # Decisões de produto — 03/11/2026
 
+> Revisão D7 aprovada em 05/11/2026 durante T023: Sabão passa a +16% de raio por nível, teto +80%, somente Bolhas. Os valores 8%/40% abaixo registram a decisão anterior, substituída por esta revisão.
+
 Respostas e complementos aprovados pelo usuário em 03/11/2026. As alternativas históricas não são requisitos. Nenhum parâmetro foi aprovado por silêncio.
 
 ## Histórico anterior às respostas — substituído pelo Conjunto A
@@ -63,3 +65,11 @@ As oito decisões estão resolvidas. A revisão artística da amostra e as medi�
 - Melhorias.md externo lido em C:/Users/lucas/Desktop/Melhorias.md, não copiado/versionado. Caminhos E: nele são contexto histórico; o workspace atual é válido.
 - [Imagem anexada](references/decisoes-anexadas.jpeg) contém decisões, não referência artística.
 - [Partida cartoon candidata](references/direcao-cartoon-candidata.png) e [corações/penas](references/hud-coracoes-penas-referencia.png) vieram da conversa. Não são assets finais nem autorizam espécies novas; requisitos escritos prevalecem.
+
+## Revisão D7 — 05/11/2026, aceite comparativo T023
+
+O usuário aprovou explicitamente: “Dobrar somente o bônus do Sabão: base 0,20; 16% por nível e teto de 80%, dando N1 0,232 e N5 0,36”.
+
+Mantém-se o raio base 0,20; o multiplicador é `1 + min(0,16 × nível, 0,80)`. N0/N1/N5: raios 0,20/0,232/0,36 e diâmetros 0,40/0,464/0,72. O aumento de área correspondente é 34,56% em N1 e 224% em N5. Visual e colisão usam o mesmo raio; dano, velocidade, aquisição e demais armas não mudam por Sabão. As outras cinco passivas mantêm seus dados anteriores. Os relatórios T015–T022 são evidências históricas do balanceamento anterior; o reteste vigente pertence à T023.
+
+Durante a comparação, o usuário também relatou ausência de feedback visível do ataque da arma Quack frontal. T023 acrescenta um pulso temporário do setor nominal, com alcance/ângulo autorados e relógio de simulação; não altera resolução de dano ou oclusão e não substitui a futura direção de arte.

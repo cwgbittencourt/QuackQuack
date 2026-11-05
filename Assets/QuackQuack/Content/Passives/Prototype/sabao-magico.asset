@@ -15,7 +15,7 @@ MonoBehaviour:
   id: sabao-magico
   displayName: "Sab\xE3o m\xE1gico"
   attribute: 5
-  modifierPerLevel: 0.08
-  modifierLimit: 0.4
+  modifierPerLevel: 0.16
+  modifierLimit: 0.8
   maxLevel: 5
   compatibleWeaponId: bolhas

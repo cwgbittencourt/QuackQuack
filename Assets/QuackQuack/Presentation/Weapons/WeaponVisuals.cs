@@ -7,6 +7,11 @@ namespace QuackQuack.Presentation.Weapons
     public sealed class WeaponVisuals : MonoBehaviour
     {
         private SpriteRenderer[] auras;
+        private LineRenderer[] frontals;
+        private Vector3[][] frontalPoints;
+        private double[] frontalStarted;
+        private const int FrontalSegments = 20;
+        private const double FrontalDuration = 0.25;
 
         // Both circles share a scale; the diagram compares radii, not area percentages.
         public static float PreviewDiameter(float radius, float maxRadius, float maxPixels) =>
@@ -17,6 +22,9 @@ namespace QuackQuack.Presentation.Weapons
             if (auras != null) throw new InvalidOperationException("Weapon visuals are already initialized.");
             if (slots <= 0) throw new ArgumentOutOfRangeException(nameof(slots));
             auras = new SpriteRenderer[slots];
+            frontals = new LineRenderer[slots];
+            frontalPoints = new Vector3[slots][];
+            frontalStarted = new double[slots];
             for (int i = 0; i < slots; i++)
             {
                 var view = new GameObject("Aura " + i);
@@ -24,6 +32,41 @@ namespace QuackQuack.Presentation.Weapons
                 auras[i] = view.AddComponent<SpriteRenderer>();
                 auras[i].sortingOrder = -1;
                 auras[i].enabled = false;
+                var cone = new GameObject("Frontal " + i);
+                cone.transform.SetParent(transform, false);
+                var line = cone.AddComponent<LineRenderer>();
+                line.sharedMaterial = auras[i].sharedMaterial;
+                line.useWorldSpace = true; line.loop = false; line.sortingOrder = 14;
+                line.startWidth = line.endWidth = 0.045f; line.enabled = false;
+                frontals[i] = line; frontalPoints[i] = new Vector3[FrontalSegments + 3];
+            }
+        }
+
+        public void PulseFrontal(int slot, Vector2 origin, Vector2 direction, float radius, float angle, double time)
+        {
+            if (!isActiveAndEnabled) return;
+            var points = frontalPoints[slot];
+            points[0] = origin; points[points.Length - 1] = origin;
+            float facing = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            for (int i = 0; i <= FrontalSegments; i++)
+            {
+                float radians = (facing - angle * 0.5f + angle * i / FrontalSegments) * Mathf.Deg2Rad;
+                points[i + 1] = origin + new Vector2(Mathf.Cos(radians), Mathf.Sin(radians)) * radius;
+            }
+            var line = frontals[slot]; line.positionCount = points.Length; line.SetPositions(points);
+            line.startColor = line.endColor = new Color(1, 0.86f, 0.3f, 0.9f);
+            frontalStarted[slot] = time; line.enabled = true;
+        }
+
+        public void Advance(double time)
+        {
+            if (frontals == null) return;
+            for (int i = 0; i < frontals.Length; i++)
+            {
+                var line = frontals[i]; if (!line.enabled) continue;
+                double elapsed = time - frontalStarted[i];
+                if (elapsed >= FrontalDuration) { line.enabled = false; continue; }
+                line.startColor = line.endColor = new Color(1, 0.86f, 0.3f, 0.9f * (1 - (float)(elapsed / FrontalDuration)));
             }
         }
 
@@ -48,6 +91,12 @@ namespace QuackQuack.Presentation.Weapons
         }
 
         public void HideAll()
+        {
+            HideAuras();
+            if (frontals == null) return;
+            for (int i = 0; i < frontals.Length; i++) if (frontals[i] != null) frontals[i].enabled = false;
+        }
+        public void HideAuras()
         {
             if (auras == null) return;
             for (int i = 0; i < auras.Length; i++) if (auras[i] != null) auras[i].enabled = false;

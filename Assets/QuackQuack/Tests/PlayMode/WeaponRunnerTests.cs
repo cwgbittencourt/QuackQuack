@@ -429,6 +429,27 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         private void Set(string name, object value) => typeof(WeaponDefinition).GetField(name, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(definition, value);
+
+        [TestCase(60f)] [TestCase(120f)]
+        public void FrontalAttackHasVisibleCueAndFreezesWithPause(float angle)
+        {
+            Set("coneAngle", angle);
+            StartRunner(WeaponBehavior.FrontalQuack); runner.Advance(0);
+            var line = System.Array.Find(root.GetComponentsInChildren<LineRenderer>(true), l => l.name == "Frontal 0");
+            Assert.That(line, Is.Not.Null, "Frontal attack needs a visible emission cue.");
+            Assert.That(line.enabled, Is.True);
+            float farthest = 0;
+            for (int i = 0; i < line.positionCount; i++) farthest = Mathf.Max(farthest, ((Vector2)line.GetPosition(i)).magnitude);
+            Assert.That(farthest, Is.EqualTo(definition.GetLevel(1).Range).Within(0.001f));
+            Assert.That(target.Health, Is.EqualTo(17));
+            float alpha = line.startColor.a;
+            run.TryTransition(RunPhase.Paused); runner.Advance(1);
+            Assert.That(line.enabled, Is.True); Assert.That(line.startColor.a, Is.EqualTo(alpha));
+            run.TryResume(); runner.Advance(0.3f);
+            Assert.That(line.enabled, Is.False);
+            runner.Advance(10); Assert.That(line.enabled, Is.True);
+            runner.enabled = false; Assert.That(line.enabled, Is.False);
+        }
         [UnityTearDown]
         public IEnumerator TearDown()
         {

@@ -139,6 +139,10 @@ namespace QuackQuack.Tests.PlayMode
             yield return new WaitForFixedUpdate();
             Assert.That(player.GetComponent<Rigidbody2D>().linearVelocity.x, Is.EqualTo(4).Within(0.001f));
             Choose(movement.Id, "move-1");
+            Assert.That(player.GetComponent<Rigidbody2D>().linearVelocity, Is.EqualTo(Vector2.zero), "Closing the modal flushes gameplay commands.");
+            // Resume clears input deliberately. Allow Update to poll the next command
+            // before sampling physics; FixedUpdate may run first on a native player.
+            yield return null;
             yield return new WaitForFixedUpdate();
             Assert.That(player.GetComponent<Rigidbody2D>().linearVelocity.x, Is.EqualTo(4.4f).Within(0.001f));
             var modifiers = new RelicModifier[10];

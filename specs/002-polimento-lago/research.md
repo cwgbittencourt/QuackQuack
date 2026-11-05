@@ -1,5 +1,7 @@
 # Pesquisa local — 03/11/2026
 
+> Revisão D7 aprovada em 05/11/2026 durante T023: Sabão passa a +16% de raio por nível, teto +80%, somente Bolhas. Os valores 8%/40% abaixo registram a decisão anterior, substituída por esta revisão.
+
 Inspeção estática somente; nenhum teste, gameplay ou profiling executado nesta rodada documental. Respostas D1–D8 e complementos aprovados em [decisions.md](decisions.md); Phase 0 concluída para o design, sem alegar causa física reproduzida. Pesquisa paralela anterior realizada conforme speckit-plan.
 
 ## Arena: causa ainda não confirmada

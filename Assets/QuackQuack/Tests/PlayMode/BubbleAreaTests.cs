@@ -52,7 +52,7 @@ namespace QuackQuack.Tests.PlayMode
             soap = ScriptableObject.CreateInstance<PassiveDefinition>();
             typeof(ContentDefinition).GetField("id", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(soap, "sabao-magico");
             Set(soap, "compatibleWeaponId", "bolhas"); Set(soap, "attribute", PassiveAttribute.AreaRadius);
-            Set(soap, "modifierPerLevel", 0.08f); Set(soap, "modifierLimit", 0.4f);
+            Set(soap, "modifierPerLevel", 0.16f); Set(soap, "modifierLimit", 0.8f);
             build = new BuildState(); build.TryAddWeapon("bolhas");
             run = new RunState(18); run.TryTransition(RunPhase.Playing);
             upgrades = new UpgradeSystem(18, build, new[] { definition }, new[] { soap }, new EvolutionDefinition[0]);
@@ -85,7 +85,7 @@ namespace QuackQuack.Tests.PlayMode
             target.Health = 20; Physics2D.SyncTransforms(); return target;
         }
 
-        [TestCase(0, 1f)] [TestCase(1, 1.08f)] [TestCase(5, 1.4f)]
+        [TestCase(0, 1f)] [TestCase(1, 1.16f)] [TestCase(5, 1.8f)]
         public void RendererDiameterMatchesEffectiveHitRadius(int level, float multiplier)
         {
             StartRunner(level); runner.Advance(0);
@@ -97,8 +97,8 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         [TestCase(0, 0.27f, true)] [TestCase(0, 0.33f, false)]
-        [TestCase(1, 0.286f, true)] [TestCase(1, 0.346f, false)]
-        [TestCase(5, 0.35f, true)] [TestCase(5, 0.41f, false)]
+        [TestCase(1, 0.302f, true)] [TestCase(1, 0.362f, false)]
+        [TestCase(5, 0.43f, true)] [TestCase(5, 0.49f, false)]
         [TestCase(0, 0.32f, false)] [TestCase(5, 0.32f, true)]
         public void SweptCollisionUsesEffectiveRadiusAtInsideAndOutsideBoundary(int level, float lateral, bool hit)
         {
@@ -164,7 +164,7 @@ namespace QuackQuack.Tests.PlayMode
             var relics = new RelicLoadout(modifiers); relics.Unlock("area0"); relics.Equip("area0");
             runner.Relics = relics; runner.Advance(0);
             var bounds = Shot().GetComponent<SpriteRenderer>().bounds;
-            Assert.That(bounds.size.x, Is.EqualTo(0.2f * 1.4f * 1.1f * 2).Within(0.0001f));
+            Assert.That(bounds.size.x, Is.EqualTo(0.2f * 1.8f * 1.1f * 2).Within(0.0001f));
             Assert.That(bounds.size.y, Is.EqualTo(bounds.size.x).Within(0.0001f));
         }
 
@@ -188,9 +188,9 @@ namespace QuackQuack.Tests.PlayMode
             runner.Advance(0); var first = Shot();
             for (int i = 1; i < 5; i++) Assert.That(build.TryUpgradePassive(soap.Id, soap.MaxLevel), Is.True);
             runner.Advance(0.1f);
-            Assert.That(first.GetComponent<SpriteRenderer>().bounds.size.x, Is.EqualTo(0.432f).Within(0.0001f));
+            Assert.That(first.GetComponent<SpriteRenderer>().bounds.size.x, Is.EqualTo(0.464f).Within(0.0001f));
             runner.Advance(0.91f); runner.Advance(1.1f);
-            Assert.That(Shot().GetComponent<SpriteRenderer>().bounds.size.x, Is.EqualTo(0.56f).Within(0.0001f));
+            Assert.That(Shot().GetComponent<SpriteRenderer>().bounds.size.x, Is.EqualTo(0.72f).Within(0.0001f));
             Assert.That(JsonUtility.ToJson(definition), Is.EqualTo(before));
         }
 

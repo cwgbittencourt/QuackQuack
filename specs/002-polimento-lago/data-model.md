@@ -39,7 +39,7 @@ Heal aceita fração finita positiva e jogador vivo: applied = min(MaxHealth - H
 
 EffectiveAttributes agrupa atributos base, níveis de passivas, relíquias e terreno sem mutar definições. Recomputar do estado base após mudança, não reaplicar cumulativamente. Manter ordem/composição de relíquias existentes e testar cada passiva autorada. Speed/Capacity/Recovery/Damage/AttackInterval e raio de Bolhas são positivos/finitos; limites de passiva seguem dados.
 
-BubbleHitRadius = authored HitRadius × (1 + Sabão.GetModifier(level)), combinado com modificadores relevantes de área existentes sem duplicar. Sabão só atua em Bolhas; 0 níveis retorna base, 1 nível 1,08 × base, 5 níveis 1,40 × base. Diâmetro visual = 2 × raio efetivo em unidades mundiais. Aquisição, dano e velocidade não mudam por Sabão. AreaRadius zero de Bolhas não pode anular o bônus.
+BubbleHitRadius = authored HitRadius × (1 + Sabão.GetModifier(level)), combinado com modificadores relevantes de área existentes sem duplicar. Sabão só atua em Bolhas; 0 níveis retorna base, 1 nível 1,16 × base, 5 níveis 1,80 × base. Diâmetro visual = 2 × raio efetivo em unidades mundiais. Aquisição, dano e velocidade não mudam por Sabão. AreaRadius zero de Bolhas não pode anular o bônus.
 
 ## 5. ProjectilePassage
 
@@ -51,7 +51,7 @@ Campos: projectile lease, fase Outbound/Inbound, alvos atingidos por identidade 
 - ResourceSnapshot: Health01, Breath01, Ready, Empowered/cooldown e ícones/estados. Vida/Fôlego sem números/textos de terreno; progresso/nível e avisos de pausa/fim continuam em áreas próprias.
 - SpecialEnemySnapshot: encounter/lease, posição âncora, Health01 e categoria. Registro aceita ciclo EnemyState e FrogKingController; remove ao morrer/desativar/reusar. View segue acima do alvo e não representa alvo fora da tela em outra posição.
 - HintWindow: elapsedSimulationSeconds em [0,10], família/bindings; inicia a cada partida, pausa suspende, troca entrada não reseta, após 10 não reaparece.
-- UpgradePreview: raio atual/previsto de Bolhas, nível de Sabão e grandeza descrita como raio, sem exagerar 8% de raio como 8% de área.
+- UpgradePreview: raio atual/previsto de Bolhas, nível de Sabão e grandeza descrita como raio, sem exagerar 16% de raio como 16% de área.
 
 ## 7. InputAvailability e ControlProfile
 

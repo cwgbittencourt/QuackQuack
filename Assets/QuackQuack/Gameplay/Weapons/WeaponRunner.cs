@@ -116,6 +116,7 @@ namespace QuackQuack.Gameplay.Weapons
             if (owner == null || run.Outcome.HasValue || run.Phase == RunPhase.Results) { ReleaseAll(); return; }
             if (!run.IsSimulating) return;
             clock += seconds; tick++;
+            visuals.Advance(clock);
             for (int i = active.Count - 1; i >= 0; i--)
             {
                 if (i >= active.Count) continue;
@@ -129,7 +130,7 @@ namespace QuackQuack.Gameplay.Weapons
                 { if (run.Outcome.HasValue) ReleaseAll(); return; }
             }
             RefreshSlots();
-            visuals.HideAll();
+            visuals.HideAuras();
             for (int i = 0; i < slots.Length; i++)
             {
                 var slot = slots[i];
@@ -164,6 +165,8 @@ namespace QuackQuack.Gameplay.Weapons
                     if (target == null) continue;
                     direction = ((Vector2)target.transform.position - (Vector2)owner.position).normalized;
                 }
+                if (slot.Definition.Behavior == WeaponBehavior.FrontalQuack)
+                    visuals.PulseFrontal(i, owner.position, direction, stats.Range, slot.Definition.ConeAngle, clock);
                 patterns[(int)slot.Definition.Behavior].Fire(this, slot.Definition, stats, hitRadius, direction, target);
                 slot.Next = clock + stats.Cooldown; slots[i] = slot;
                 if (!isActiveAndEnabled || !run.IsSimulating)

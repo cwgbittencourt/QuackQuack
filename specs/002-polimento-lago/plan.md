@@ -21,7 +21,7 @@ setup-plan.ps1 -Json executado para esta feature. O resolvedor reporta BRANCH 00
 **Performance Goals**: 60 FPS Windows/intermediário com opção 30; entrada Android 30 estáveis; 200/400 inimigos com efeitos/coleta novos.
 **Constraints**: quatro proporções, Safe Area, pooling, sem alocações recorrentes evitáveis; assets/cenas via Unity e .meta preservados; elenco fechado.
 **Scale/Scope**: MEL-001–016; seis armas/seis passivas/três evoluções, cinco comuns/dois minibosses/chefe e dez relíquias existentes.
-**Product decisions**: D1–D8 resolvidas em [decisions.md](decisions.md). Cura comum 10% de chance/15% de vida, miniboss 50% garantido, XP sempre; coleta XP/cura a 3 vezes raio físico e velocidade 1,25 vezes velocidade efetiva na água, persistente após captura. Dicas 10s de simulação; barras sobre cada especial; todas as famílias; Sabão apenas Bolhas (+8%/nível, teto 40% no raio). Cartoon/ordem de assets aprovados.
+**Product decisions**: D1–D8 resolvidas em [decisions.md](decisions.md). Cura comum 10% de chance/15% de vida, miniboss 50% garantido, XP sempre; coleta XP/cura a 3 vezes raio físico e velocidade 1,25 vezes velocidade efetiva na água, persistente após captura. Dicas 10s de simulação; barras sobre cada especial; todas as famílias; Sabão apenas Bolhas (+16%/nível, teto 80% no raio; revisão D7 em 05/11/2026). Cartoon/ordem de assets aprovados.
 
 ## Constitution Check
 

@@ -40,8 +40,8 @@ namespace QuackQuack.Editor
                 Identity(passive, passiveIds[i], passiveNames[i]);
                 Set(passive, "compatibleWeaponId", p => p.stringValue = weapons[i].Id);
                 Set(passive, "attribute", p => p.enumValueIndex = (int)attributes[i]);
-                Set(passive, "modifierPerLevel", p => p.floatValue = 0.08f);
-                Set(passive, "modifierLimit", p => p.floatValue = 0.4f);
+                Set(passive, "modifierPerLevel", p => p.floatValue = passiveIds[i] == "sabao-magico" ? 0.16f : 0.08f);
+                Set(passive, "modifierLimit", p => p.floatValue = passiveIds[i] == "sabao-magico" ? 0.8f : 0.4f);
                 Set(passive, "maxLevel", p => p.intValue = 5);
                 passives[i] = passive;
             }
@@ -69,6 +69,18 @@ namespace QuackQuack.Editor
             if (!catalog.IsValid(out var reason)) throw new InvalidOperationException(reason);
             AssetDatabase.SaveAssets();
             Debug.Log("T043 catalog validated: 6 basic weapons, 6 passives, 3 evolutions and 3 result weapons.");
+        }
+
+        [MenuItem("QuackQuack/Update Soap balance (002 T023)")]
+        public static void UpdateSoapBalance()
+        {
+            var soap = AssetDatabase.LoadAssetAtPath<PassiveDefinition>(Root + "/Passives/Prototype/sabao-magico.asset");
+            if (soap == null) throw new InvalidOperationException("Missing Soap definition.");
+            Set(soap, "modifierPerLevel", p => p.floatValue = 0.16f);
+            Set(soap, "modifierLimit", p => p.floatValue = 0.8f);
+            if (!soap.IsValid(out var reason)) throw new InvalidOperationException(reason);
+            AssetDatabase.SaveAssets();
+            Debug.Log("T023_SOAP_BALANCE_OK perLevel=0.16 limit=0.8");
         }
 
         private static WeaponDefinition Weapon(string id, string name, WeaponBehavior behavior, WeaponTargetMode mode,

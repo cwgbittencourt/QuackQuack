@@ -22,7 +22,7 @@ ResolveEffective(base, passives, relics, terrain) é idempotente para mesmos arg
 
 Aura: pulso consulta inimigos no raio efetivo, inclui fronteira, deduplica múltiplos colliders e ignora obstrução para dano. Continua sem collider sólido; paredes seguem bloqueando movimento. Outros ataques mantêm suas políticas de oclusão. VFX translúcido animado representa raio real e pausa/desativa com regra.
 
-Sabão Mágico: elegível somente Bolhas, raio = base × (1 + min(0,08 × nível, 0,40)), níveis 0–5 conforme dados atuais. Fonte numérica é PassiveDefinition, não constante duplicada no runner/view. HitRadius de colisão e diâmetro visual usam o mesmo valor efetivo; não alterar dano/aquisição/velocidade nem outras armas. Preview antes/depois usa a mesma resolução.
+Sabão Mágico: elegível somente Bolhas, raio = base × (1 + min(0,16 × nível, 0,80)), níveis 0–5 conforme dados atuais. Fonte numérica é PassiveDefinition, não constante duplicada no runner/view. HitRadius de colisão e diâmetro visual usam o mesmo valor efetivo; não alterar dano/aquisição/velocidade nem outras armas. Preview antes/depois usa a mesma resolução.
 
 Bumerangue: cada lease de alvo recebe no máximo um acerto por passagem Outbound e Inbound do mesmo lease de projétil. Passo cruzando retorno preserva ambas as fases; reset não acontece por frame. Reuso de alvo não herda imunidade da vida anterior. Substituir teste antigo que proíbe segundo acerto total.
 

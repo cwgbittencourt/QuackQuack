@@ -47,7 +47,7 @@ namespace QuackQuack.Tests.PlayMode
             return (float)property.GetValue(card);
         }
 
-        [TestCase(0, 0.2f, 0.216f)] [TestCase(4, 0.264f, 0.28f)]
+        [TestCase(0, 0.2f, 0.232f)] [TestCase(4, 0.328f, 0.36f)]
         public void SoapCardPreviewsActualCurrentAndNextRadiusWithoutMutatingBuild(int current, float before, float after)
         {
             var build = progression.Upgrades.Build;
@@ -81,7 +81,7 @@ namespace QuackQuack.Tests.PlayMode
         {
             Open("sabao-magico");
             var card = view.Displayed.Cards[0];
-            Assert.That(PreviewRadius(card, "NextRadius"), Is.EqualTo(0.216f).Within(0.00001f));
+            Assert.That(PreviewRadius(card, "NextRadius"), Is.EqualTo(0.232f).Within(0.00001f));
             StringAssert.Contains("Ao adquirir Bolhas", card.Synergy);
             Assert.That(progression.Upgrades.Build.Weapons.ContainsKey("bolhas"), Is.False);
         }
@@ -101,7 +101,7 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(view.Displayed, Is.Not.SameAs(before));
             Assert.That(view.Displayed.OfferId, Is.EqualTo(original.OfferId));
             Assert.That(PreviewRadius(view.Displayed.Cards[0], "CurrentRadius"), Is.EqualTo(0.22f).Within(0.00001f));
-            Assert.That(PreviewRadius(view.Displayed.Cards[0], "NextRadius"), Is.EqualTo(0.2376f).Within(0.00001f));
+            Assert.That(PreviewRadius(view.Displayed.Cards[0], "NextRadius"), Is.EqualTo(0.2552f).Within(0.00001f));
         }
 
         [Test]

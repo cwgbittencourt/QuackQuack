@@ -37,7 +37,7 @@ Como jogador, quero distinguir armas, alcance e modificadores ativos.
 
 1. **Given** armas simultâneas, **When** atacam, **Then** forma, animação ou trajetória as distinguem além da cor.
 2. **Given** aura, **When** alvo está dentro do raio mesmo atrás de obstáculo, **Then** recebe dano; fora não recebe e o obstáculo continua bloqueando movimento.
-3. **Given** Sabão Mágico e Bolhas, **When** aplicar bônus, **Then** raio de acerto e tamanho visual aumentam juntos em 8% por nível, até 40%, sem acumulação indevida; outras armas não recebem esse bônus nesta entrega.
+3. **Given** Sabão Mágico e Bolhas, **When** aplicar bônus, **Then** raio de acerto e tamanho visual aumentam juntos em 16% por nível, até 80%, sem acumulação indevida; outras armas não recebem esse bônus nesta entrega.
 4. **Given** mesmo bumerangue e alvo, **When** atravessa ida e volta, **Then** permite um acerto em cada trecho e nenhum duplicado na mesma passagem.
 
 ### User Story 4 — Sobreviver e coletar (Priority: P2)
@@ -95,7 +95,7 @@ Como jogador, quero reconhecer personagens, armas, recompensas e bloqueios na di
 | FR-005 | MEL-005 | Mostrar instruções nos primeiros 10 segundos de simulação; pausa suspende contador, troca de entrada atualiza símbolos sem reiniciar, sem repetição automática após a janela. |
 | FR-006 | MEL-006 | Distinguir armas/projéteis por forma, animação ou trajetória além da cor. |
 | FR-007 | MEL-007 | Animar aura translúcida no alcance real; dano ignora obstáculos nesse alcance e preserva sua colisão de movimento. |
-| FR-008 | MEL-008 | Aplicar e comunicar as seis passivas. Sabão somente em Bolhas: +8% no raio por nível, até +40%; raio real de acerto e tamanho visual crescem juntos, com prévia antes/depois; não aumenta dano, velocidade ou alcance de aquisição. |
+| FR-008 | MEL-008 | Aplicar e comunicar as seis passivas. Sabão somente em Bolhas: +16% no raio por nível, até +80%; raio real de acerto e tamanho visual crescem juntos, com prévia antes/depois; não aumenta dano, velocidade ou alcance de aquisição. |
 | FR-009 | MEL-009 | Permitir um acerto por alvo por trecho de ida/volta do mesmo bumerangue. |
 | FR-010 | MEL-010 + resposta | Cada derrota comum tem chance independente de 10% de deixar cura de 15% da vida máxima, limitada à falta, sem cooldown ou teto de gameplay que reduza a chance. Não são 100% das mortes nem garantia de um drop a cada dez. Cura pode cair junto do XP. |
 | FR-011 | MEL-011 + resposta | Toda derrota de inimigo deixa XP sem sorteio, sem supressão por pool cheio. XP e cura capturam a um diâmetro de espaço livre além da borda física do Pato (raio centro-centro de 3 vezes seu raio físico; hoje 1,26 unidades), movem a 1,25 vezes sua velocidade efetiva na água, continuam após afastamento, ignoram obstáculos na atração e concedem uma vez. Cura cheia é preservada; pausa suspende e morte/fim cancelam atração. XP do chefe final é liquidado antes do encerramento. |

@@ -49,7 +49,7 @@ namespace QuackQuack.Tests.EditMode
             var weapon = Weapon("bolhas");
             var stats = weapon.GetLevel(1, TerrainType.Land);
             var result = Resolve(weapon, 1, TerrainType.Land, new[] { passive }, new[] { level });
-            float bonus = Math.Min(level * 0.08f, 0.40f);
+            float bonus = id == "sabao-magico" ? Math.Min(level * 0.16f, 0.80f) : Math.Min(level * 0.08f, 0.40f);
             AssertValue(result, "Damage", stats.Damage * (passive.Attribute == PassiveAttribute.Damage ? 1 + bonus : 1));
             AssertValue(result, "AttackInterval", stats.Cooldown / (passive.Attribute == PassiveAttribute.AttackSpeed ? 1 + bonus : 1));
             AssertValue(result, "MovementSpeed", 4 * (passive.Attribute == PassiveAttribute.MovementSpeed ? 1 + bonus : 1));
@@ -62,8 +62,8 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(passive.GetModifier(level), Is.EqualTo(bonus).Within(0.00001f));
         }
 
-        [TestCase(1, 1.08f)]
-        [TestCase(5, 1.40f)]
+        [TestCase(1, 1.16f)]
+        [TestCase(5, 1.80f)]
         public void SoapUsesBubbleHitRadiusDespiteZeroArea(int level, float multiplier)
         {
             var weapon = Weapon("bolhas");
@@ -102,7 +102,7 @@ namespace QuackQuack.Tests.EditMode
             {
                 var result = Resolve(weapon, 3, terrain, passives, levels);
                 AssertValue(result, "Damage", weapon.GetLevel(3, terrain).Damage * 1.4f);
-                AssertValue(result, "HitRadius", weapon.HitRadius * 1.4f);
+                AssertValue(result, "HitRadius", weapon.HitRadius * 1.8f);
                 AssertValue(result, "MovementSpeed", terrain == TerrainType.Water ? 6 : 4);
                 AssertValue(result, "BreathRecovery", terrain == TerrainType.Water ? 24 : 12);
             }
@@ -124,7 +124,7 @@ namespace QuackQuack.Tests.EditMode
                 new[] { Passive("ninho-reforcado"), Passive("sabao-magico") }, new[] { 1, 5 }, relics);
             float relicDamage = terrain == TerrainType.Water ? 0.3f : 0.1f;
             AssertValue(result, "Damage", weapon.GetLevel(2, terrain).Damage * 1.08f * (1 + relicDamage));
-            AssertValue(result, "HitRadius", weapon.HitRadius * 1.4f * 1.1f);
+            AssertValue(result, "HitRadius", weapon.HitRadius * 1.8f * 1.1f);
             Assert.That(relics.EquippedIds.Count, Is.EqualTo(3));
             relics.Unequip("area");
             AssertValue(Resolve(weapon, 2, terrain, relics: relics), "HitRadius", weapon.HitRadius);
