@@ -99,12 +99,14 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(enemy.IsValid(out _), Is.True);
         }
 
-        [TestCase("experienceReward")]
-        [TestCase("coinReward")]
-        public void RewardsRejectNegativesAndAllowZero(string field)
+        [TestCase("experienceReward", false)]
+        [TestCase("coinReward", true)]
+        public void RewardsRequirePositiveExperienceButAllowZeroCoins(string field, bool zeroValid)
         {
             Set(field, p => p.intValue = -1); Invalid();
             Set(field, p => p.intValue = 0);
+            Assert.That(enemy.IsValid(out _), Is.EqualTo(zeroValid));
+            Set(field, p => p.intValue = 1);
             Assert.That(enemy.IsValid(out _), Is.True);
         }
 

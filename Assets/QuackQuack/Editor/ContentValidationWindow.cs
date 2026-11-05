@@ -6,6 +6,7 @@ using QuackQuack.Content.Characters;
 using QuackQuack.Content.Encounters;
 using QuackQuack.Content.Enemies;
 using QuackQuack.Content.Passives;
+using QuackQuack.Content.Pickups;
 using QuackQuack.Content.Relics;
 using QuackQuack.Content.Shared;
 using QuackQuack.Content.Weapons;
@@ -167,6 +168,7 @@ namespace QuackQuack.Editor
             string reason = null; bool valid = true;
             switch (asset)
             {
+                case PickupPolicyDefinition p: valid = p.IsValid(out reason); break;
                 case ContentDefinition d: valid = d.IsValid(out reason); break;
                 case LakeEncounterCatalog c: valid = c.IsValid(out reason); break;
                 case PrototypeRelicCatalog c: valid = c.IsValid(out reason); break;
@@ -187,6 +189,17 @@ namespace QuackQuack.Editor
                     break;
             }
             if (!valid) Add(report, asset, "InvalidAsset", reason ?? "Required references or authored limits are invalid.");
+            if (asset is EnemyDefinition enemy && enemy.ExperienceReward <= 0)
+                Add(report, asset, "NonPositiveExperience", "Every enemy defeat requires positive authored XP.", "experienceReward");
+            if (asset is LakeRunSettings run)
+            {
+                if (run.PickupPolicy == null)
+                    Add(report, asset, "MissingPickupPolicy", "A pickup policy is required.", "PickupPolicy");
+                else if (!run.PickupPolicy.IsValid(out var policyReason))
+                    Add(report, asset, "InvalidPickupPolicy", policyReason, "PickupPolicy");
+                if (run.BossExperience <= 0)
+                    Add(report, asset, "NonPositiveBossExperience", "The final boss requires positive authored XP.", "BossExperience");
+            }
         }
 
         private static void ValidateSerialized(ScriptableObject asset, ContentValidationReport report)

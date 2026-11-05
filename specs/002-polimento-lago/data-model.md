@@ -15,6 +15,8 @@ Design de 03/11/2026; nomes novos são contratos propostos, não APIs já implem
 
 Não há cooldown de cura comum nem teto de gameplay. Probabilidade 10% não é promessa de um sucesso em cada dez eventos. Fonte de RNG determinística dedicada a drops, separada de ofertas/spawn. Fronteira do sorteio: valor em [0,1) menor que 0,10 aceita; 0,10 rejeita.
 
+**Autoria T026 (05/11/2026):** política canônica em `Content/Pickups/LakePickupPolicy.asset`, vinculada por `LakeRunSettings.PickupPolicy`. `BossExperience = 50` foi autorado como valor inicial editável, reutilizando o patamar dos minibosses; a configuração exige valor positivo. XP de todos os EnemyDefinition também deve ser positivo, moedas permanecem não negativas. A fábrica da política preserva a fronteira 0,10 ao converter a chance float para o RNG double por round-trip invariante. Ver `test-report-t026.md`; integração efetiva permanece nas próximas tasks.
+
 ## 2. RewardId e RewardLedger (novos Core/Progression)
 
 RewardId = identidade de partida + lease da origem + espécie de recompensa + ordinal. Nunca somente GetInstanceID. Common/MiniBoss/FinalBoss são origens resolvidas pelo catálogo/contrato de encontro, não por nome de GameObject.

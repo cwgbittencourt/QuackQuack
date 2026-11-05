@@ -30,6 +30,7 @@ namespace QuackQuack.Editor
             settings.Catalog = catalog; settings.BossSettings = AssetDatabase.LoadAssetAtPath<FrogKingSettings>(FrogKingSetup.SettingsPath);
             settings.BossPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(FrogKingSetup.PrefabPath);
             settings.ExperiencePrefab = AssetDatabase.LoadAssetAtPath<ExperiencePickup>("Assets/QuackQuack/Prefabs/Prototype/ExperiencePickup.prefab");
+            PickupPolicySetup.Configure(settings);
             EditorUtility.SetDirty(settings); if (!settings.IsValid) throw new System.InvalidOperationException("Invalid run settings.");
             var scene = EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/Lake.unity");
             LakeArenaSetup.ConfigurePlayerPhysics(Object.FindAnyObjectByType<PlayerController>());

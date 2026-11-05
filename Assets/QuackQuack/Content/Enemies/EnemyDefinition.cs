@@ -62,7 +62,7 @@ namespace QuackQuack.Content.Enemies
                 reason = "Enemy health, speed and attack interval must be positive; contact damage nonnegative; all finite.";
             else if (!Unit(knockbackResistance) || !Unit(interruptionResistance))
                 reason = "Enemy resistances must be finite normalized values.";
-            else if (experienceReward < 0 || coinReward < 0) reason = "Enemy rewards cannot be negative.";
+            else if (experienceReward <= 0 || coinReward < 0) reason = "Enemy XP must be positive and coins nonnegative.";
             else if (poolInitialSize <= 0 || poolMaxSize < poolInitialSize) reason = "Enemy pool requires 0 < initial <= maximum.";
             else if (prefab == null || !HasPoolLifecycle(prefab)) reason = "Enemy prefab requires a root IPoolLifecycle component.";
             else if (HasTelegraphedAttack && (!Positive(attackInterval) || !Positive(attackRange) || !Nonnegative(attackDamage)))
