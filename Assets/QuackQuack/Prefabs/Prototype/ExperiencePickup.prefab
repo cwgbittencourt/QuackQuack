@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5864441442349642386}
   - component: {fileID: 1907994707541191547}
   - component: {fileID: 2018905575233332764}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: ExperiencePickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}

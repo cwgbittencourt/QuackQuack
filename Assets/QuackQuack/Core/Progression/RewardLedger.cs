@@ -6,7 +6,7 @@ namespace QuackQuack.Core.Progression
 {
     public enum RewardOrigin { Common, MiniBoss, FinalBoss }
     public enum RewardKind { Experience, HealCommon, HealMiniBoss }
-    public enum RewardState { Due, WaitingForView, Grounded, Claimed }
+    public enum RewardState { Due, WaitingForView, Grounded, Claimed, Attracted, Released }
 
     public readonly struct RewardId : IEquatable<RewardId>
     {
@@ -43,6 +43,7 @@ namespace QuackQuack.Core.Progression
         public RewardState State { get; internal set; }
         internal int Slot, Next = -1, Previous = -1;
         internal bool Collecting;
+        internal bool ReleasedDuringClaim;
     }
 
     // Per-run obligations, independent of GameObjects, pools, proximity and offer RNG.
@@ -144,9 +145,17 @@ namespace QuackQuack.Core.Progression
         }
         public bool ReturnToPending(RewardId id)
         {
-            if (!byId.TryGetValue(id, out var entry) || entry.State != RewardState.Grounded || entry.Collecting) return false;
+            if (!byId.TryGetValue(id, out var entry) || !Collectable(entry)) return false;
+            if (entry.Collecting) { entry.ReleasedDuringClaim = true; return false; }
             entry.State = RewardState.WaitingForView; Enqueue(entry); return true;
         }
+        public bool TryGetEntry(RewardId id, out RewardEntry entry) => byId.TryGetValue(id, out entry);
+        public bool TryMarkAttracted(RewardId id)
+        {
+            if (!byId.TryGetValue(id, out var entry) || entry.State != RewardState.Grounded) return false;
+            entry.State = RewardState.Attracted; return true;
+        }
+        private static bool Collectable(RewardEntry entry) => entry.State == RewardState.Grounded || entry.State == RewardState.Attracted;
 
         // Pure availability acknowledgement. The caller must actually secure a view first;
         // binding and retry scheduling with real pools belong to T027/T028.
@@ -163,19 +172,23 @@ namespace QuackQuack.Core.Progression
         public bool TryClaimExperience(RewardId id, Func<int, bool> collect)
         {
             if (collect == null || !byId.TryGetValue(id, out var entry) || entry.Kind != RewardKind.Experience ||
-                entry.State != RewardState.Grounded || entry.Collecting) return false;
+                !Collectable(entry) || entry.Collecting) return false;
             entry.Collecting = true;
             try
             {
                 if (!collect(entry.Experience)) return false;
                 entry.State = RewardState.Claimed; return true;
             }
-            finally { entry.Collecting = false; }
+            finally
+            {
+                entry.Collecting = false;
+                if (entry.ReleasedDuringClaim) { entry.ReleasedDuringClaim = false; ReturnToPending(id); }
+            }
         }
 
         public float TryCollectHeal(RewardId id, PlayerState player)
         {
-            if (player == null || !byId.TryGetValue(id, out var entry) || entry.State != RewardState.Grounded ||
+            if (player == null || !byId.TryGetValue(id, out var entry) || !Collectable(entry) ||
                 (entry.Kind != RewardKind.HealCommon && entry.Kind != RewardKind.HealMiniBoss)) return 0;
             float applied = player.Heal(entry.Fraction);
             if (applied > 0) entry.State = RewardState.Claimed;
@@ -185,7 +198,7 @@ namespace QuackQuack.Core.Progression
         public bool TryCollectExperience(RewardId id, ExperienceState experience)
         {
             if (experience == null || !byId.TryGetValue(id, out var entry) || entry.Kind != RewardKind.Experience ||
-                entry.State != RewardState.Grounded || !experience.TryAdd(entry.Experience, out _)) return false;
+                !Collectable(entry) || entry.Collecting || !experience.TryAdd(entry.Experience, out _)) return false;
             entry.State = RewardState.Claimed;
             return true;
         }

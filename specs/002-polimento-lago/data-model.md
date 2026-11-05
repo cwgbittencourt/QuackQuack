@@ -31,6 +31,8 @@ XP de cada derrota deve ser positivo em dados aprovados; despawn/expiração nã
 
 **Integração T027 (05/11/2026):** filas intrusivas por espécie preservam pendências sem alocações por emissão; o RunDirector registra antes de alugar XP, com RNG independente e cura de miniboss priorizada pelo adaptador de views. Capacidade derivada de ondas e reserva de pedidos especiais: 3.324 derrotas / 6.648 slots para o catálogo atual; pior caso medido 6.647 obrigações sem coleta, zero bytes no trecho de emissão do teste Editor. Pool físico XP continua 256 e esgotamento retém/reprocessa obrigações. Bind/reset de XP vincula claim e devolve registros não coletados; cura ainda aguarda view T028. Ver `test-report-t027.md` para cálculo e limites, sem aceite de FPS/plataformas.
 
+**Views T028 (05/11/2026):** HealingPickup e ExperiencePickup compartilham estados/ligações de pickup e lease ativa por aquisição. Released é o estado da view liberada; o registro lógico conserva Claimed para impedir repetição. Reset de view não coletada devolve Grounded/Attracted para WaitingForView e limpa alvo/ID/lease. Pool de cura pré-aquecido em 16, reserva de dois slots para minibosses, configuráveis no LakeRunSettings; chance e obrigação não são reduzidas quando não há slot. Captura e movimento ainda são T029. Ver `test-report-t028.md`.
+
 ## 3. AttractionState (novo Core/Progression)
 
 Campos: RewardId, posição atual, estado Grounded/Following/AwaitingMissingHealth, alvo, velocidade derivada. Captura usa distância entre centro do Pato e centro do pickup <= 3 × raio físico do Pato, inclusive igualdade. Base atual: 0,42 → 1,26. Escala física autorada uniforme positiva; mudanças invalidam cache do raio. Sprite/animação não alteram captura.

@@ -127,7 +127,7 @@ namespace QuackQuack.Tests.PlayMode
 
         [Test] public void MiniHealingHasFirstAccessToSharedPoolAndUnavailableCommonHealingRemainsPending()
         {
-            StaticTimeline();
+            StaticTimeline(); director.HealingMaterializer = null; // exercise the adapter independently of the production pool
             for (int i = 1; i <= 100 && !director.Rewards.Entries.Any(e => e.Kind == RewardKind.HealCommon); i++) DeliverReward(300000 + i);
             Assert.That(director.Rewards.Entries.Any(e => e.Kind == RewardKind.HealCommon), Is.True);
             DeliverReward(400001, "libelula-alfa", 50, 15);
@@ -166,6 +166,107 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(director.Rewards.Entries.Count(e => e.Kind == RewardKind.Experience), Is.EqualTo(1));
             director.TryAbandon(); Assert.That(director.Result.EnemiesDefeated, Is.EqualTo(1));
             Assert.That(director.Result.EarnedCoins, Is.EqualTo(1));
+        }
+
+        private HealingPickup DeliverHealing(long lease, bool mini)
+        {
+            if (mini) DeliverReward(lease, "libelula-alfa", 50, 15);
+            else
+                for (int i = 0; i < 100 && !director.Rewards.Entries.Any(e => e.Kind == RewardKind.HealCommon); i++) DeliverReward(lease + i);
+            var kind = mini ? RewardKind.HealMiniBoss : RewardKind.HealCommon;
+            return root.GetComponentsInChildren<HealingPickup>().First(p => p.BoundRewardId.Kind == kind);
+        }
+
+        [TestCase(false, 0.15f)] [TestCase(true, 0.5f)]
+        public void HealingViewAppliesAuthoredFractionOnceAndReleases(bool mini, float fraction)
+        {
+            StaticTimeline(); float max = player.State.MaxHealth;
+            player.State.TakeDamage(max * 0.6f, 1, 0);
+            var pickup = DeliverHealing(600001, mini); var id = pickup.BoundRewardId;
+            pickup.SendMessage("OnTriggerEnter2D", player.GetComponent<Collider2D>(), SendMessageOptions.RequireReceiver);
+            Assert.That(player.State.Health, Is.EqualTo(max * (0.4f + fraction)).Within(0.0001f));
+            Assert.That(pickup.ViewState, Is.EqualTo(RewardState.Released)); Assert.That(pickup.BoundRewardId, Is.EqualTo(default(RewardId)));
+            Assert.That(director.Rewards.TryGetEntry(id, out var entry), Is.True); Assert.That(entry.State, Is.EqualTo(RewardState.Claimed));
+            typeof(HealingPickup).GetMethod("TryCollect", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(pickup, new object[] { player.GetComponent<Collider2D>() });
+            Assert.That(player.State.Health, Is.EqualTo(max * (0.4f + fraction)).Within(0.0001f));
+        }
+
+        [TestCase("full")] [TestCase("paused")] [TestCase("dead")]
+        public void HealingIsPreservedForFullPausedOrDeadPlayer(string condition)
+        {
+            StaticTimeline(); var pickup = DeliverHealing(700001, true); var id = pickup.BoundRewardId;
+            if (condition == "dead") player.State.TakeDamage(player.State.MaxHealth, 1, 0);
+            if (condition == "paused") { player.State.TakeDamage(60, 1, 0); director.TogglePause(); }
+            float before = player.State.Health;
+            pickup.SendMessage("OnTriggerStay2D", player.GetComponent<Collider2D>(), SendMessageOptions.RequireReceiver);
+            Assert.That(player.State.Health, Is.EqualTo(before)); Assert.That(pools.IsActive(pickup, PoolFamily.Pickup), Is.True);
+            Assert.That(director.Rewards.TryGetEntry(id, out var entry), Is.True); Assert.That(entry.State, Is.EqualTo(RewardState.Grounded));
+            if (condition == "full") { Assert.That(pickup.TryMarkAttracted(player.transform), Is.False); player.State.TakeDamage(20, 2, 0); }
+            if (condition == "paused") director.TogglePause();
+            if (condition != "dead")
+            {
+                pickup.SendMessage("OnTriggerStay2D", player.GetComponent<Collider2D>(), SendMessageOptions.RequireReceiver);
+                Assert.That(entry.State, Is.EqualTo(RewardState.Claimed));
+            }
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void ReleasedAttractedViewClearsTargetAndReturnsObligationForReuse(bool heal)
+        {
+            StaticTimeline(); player.State.TakeDamage(60, 1, 0);
+            Component view; RewardId id;
+            if (heal)
+            {
+                var pickup = DeliverHealing(800001, true); view = pickup; id = pickup.BoundRewardId;
+                Assert.That(pickup.TryMarkAttracted(player.transform), Is.True);
+            }
+            else
+            {
+                DeliverReward(800001);
+                var pickup = root.GetComponentsInChildren<ExperiencePickup>().Single(); view = pickup; id = pickup.BoundRewardId;
+                Assert.That(pickup.TryMarkAttracted(player.transform), Is.True);
+            }
+            director.Rewards.TryGetEntry(id, out var entry); Assert.That(entry.State, Is.EqualTo(RewardState.Attracted));
+            pools.Release(view); Assert.That(entry.State, Is.EqualTo(RewardState.WaitingForView));
+            if (heal)
+            {
+                Assert.That(((HealingPickup)view).AttractionTarget, Is.Null); Assert.That(((HealingPickup)view).ViewState, Is.EqualTo(RewardState.Released));
+            }
+            else
+            {
+                Assert.That(((ExperiencePickup)view).AttractionTarget, Is.Null); Assert.That(((ExperiencePickup)view).ViewState, Is.EqualTo(RewardState.Released));
+            }
+            director.Advance(0, bounds); Assert.That(entry.State, Is.EqualTo(RewardState.Grounded));
+            if (heal) Assert.That(((HealingPickup)view).AttractionTarget, Is.Null);
+            else Assert.That(((ExperiencePickup)view).AttractionTarget, Is.Null);
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void ExperienceViewReleasedInsideConsumerCompletesWithoutStalePoolAccess(bool accepted)
+        {
+            StaticTimeline();
+            var ledger = new RewardLedger(1, () => 0.9, 0.1, 0.15f, 0.5f, 1);
+            ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 2, 0, 0, true);
+            var entry = ledger.Entries[0];
+            ExperiencePickup.RegisterPool(pools, "xp-release-callback", 1, root.transform);
+            var view = ExperiencePickup.Spawn(pools, "xp-release-callback", upgrades, 2, player.transform.position);
+            view.BindReward(ledger, entry.Id, _ => { pools.Release(view); return accepted; }); ledger.TryMaterialize(entry.Id, true);
+            view.SendMessage("OnTriggerEnter2D", player.GetComponent<Collider2D>(), SendMessageOptions.RequireReceiver);
+            Assert.That(entry.State, Is.EqualTo(accepted ? RewardState.Claimed : RewardState.WaitingForView));
+            Assert.That(view.ViewState, Is.EqualTo(RewardState.Released)); Assert.That(view.ViewLeaseId, Is.Zero);
+            Assert.That(view.BoundRewardId, Is.EqualTo(default(RewardId)));
+        }
+
+        [Test] public void CommonHealingCannotOccupyReservedMiniBossSlots()
+        {
+            StaticTimeline(); int target = settings.HealingCapacity - settings.MiniBossReservedHealingSlots;
+            for (int i = 1; i <= 500 && director.Rewards.Entries.Count(e => e.Kind == RewardKind.HealCommon) <= target; i++) DeliverReward(900000 + i);
+            Assert.That(root.GetComponentsInChildren<HealingPickup>().Length, Is.EqualTo(target));
+            Assert.That(director.Rewards.TryGetPending(RewardKind.HealCommon, out _), Is.True);
+            DeliverReward(950001, "libelula-alfa", 50, 15); DeliverReward(950002, "sapo-cururu", 50, 15);
+            Assert.That(root.GetComponentsInChildren<HealingPickup>().Length, Is.EqualTo(settings.HealingCapacity));
+            Assert.That(director.Rewards.Entries.Count(e => e.Kind == RewardKind.HealMiniBoss && e.State == RewardState.Grounded), Is.EqualTo(2));
+            Assert.That(root.GetComponentsInChildren<HealingPickup>(true).Length, Is.EqualTo(settings.HealingCapacity));
         }
 
         [Test] public void TimelineRequestsBothMinibossesBeforeSingleBossAndStopsCommonWaves()

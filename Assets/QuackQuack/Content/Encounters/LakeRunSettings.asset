@@ -16,6 +16,9 @@ MonoBehaviour:
   BossSettings: {fileID: 11400000, guid: c40af1ed7362fb748af4df059da0e25b, type: 2}
   BossPrefab: {fileID: 7634545742135283805, guid: 14d8e68641f0fdc46b062f0820a04afd, type: 3}
   ExperiencePrefab: {fileID: 1907994707541191547, guid: 45f232792e1004f4483a6ede2f28c3d0, type: 3}
+  HealingPrefab: {fileID: 4373968802815623023, guid: 138092d18621d38428c525be8b69f3d0, type: 3}
+  HealingCapacity: 16
+  MiniBossReservedHealingSlots: 2
   PickupPolicy: {fileID: 11400000, guid: 23c7b707115bb6b41b8e18dcc6978d87, type: 2}
   BossExperience: 50
   SpawnRegion:

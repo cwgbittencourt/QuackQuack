@@ -82,7 +82,19 @@ namespace QuackQuack.Tests.EditMode
             var settings = AssetDatabase.LoadAssetAtPath<LakeRunSettings>(LakeRunSetup.SettingsPath);
             Assert.That(settings.IsValid, Is.True); Assert.That(settings.PickupPolicy, Is.SameAs(policy));
             Assert.That(settings.BossExperience, Is.EqualTo(50));
+            Assert.That(settings.HealingPrefab, Is.Not.Null);
+            Assert.That(settings.HealingPrefab.GetComponent<CircleCollider2D>().isTrigger, Is.True);
+            Assert.That(settings.HealingPrefab.GetComponentsInChildren<SpriteRenderer>().Length, Is.EqualTo(3));
+            Assert.That(settings.HealingCapacity, Is.EqualTo(16)); Assert.That(settings.MiniBossReservedHealingSlots, Is.EqualTo(2));
             Assert.That(settings.Catalog.GetAllEnemies().All(e => e.ExperienceReward > 0), Is.True);
+        }
+
+        [TestCase(0, 0)] [TestCase(16, 17)] [TestCase(16, -1)]
+        public void InvalidHealingPoolCompositionIsRejected(int capacity, int reserve)
+        {
+            var settings = Clone(AssetDatabase.LoadAssetAtPath<LakeRunSettings>(LakeRunSetup.SettingsPath));
+            settings.HealingCapacity = capacity; settings.MiniBossReservedHealingSlots = reserve;
+            Assert.That(settings.IsValid, Is.False);
         }
 
         [TestCase(0)] [TestCase(-1)]

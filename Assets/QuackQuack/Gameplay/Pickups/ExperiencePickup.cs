@@ -20,10 +20,22 @@ namespace QuackQuack.Gameplay.Pickups
         private RewardLedger ledger;
         private RewardId rewardId;
         private Func<int, bool> collect;
+        private long acquisitionSequence, activeLease;
+        public long ViewLeaseId => activeLease;
         public RewardId BoundRewardId => rewardId;
+        public RewardState ViewState { get; private set; } = RewardState.Released;
+        public Transform AttractionTarget { get; private set; }
+        public bool TryMarkAttracted(Transform target)
+        {
+            if (target == null || ViewState != RewardState.Grounded || upgrades == null || !upgrades.CanCollectExperience) return false;
+            if (ledger != null && !ledger.TryMarkAttracted(rewardId)) return false;
+            AttractionTarget = target; ViewState = RewardState.Attracted; return true;
+        }
         public void BindReward(RewardLedger owner, RewardId id, Func<int, bool> consumer)
         {
-            if (owner == null || consumer == null || upgrades == null || ledger != null || id.Kind != RewardKind.Experience)
+            if (owner == null || consumer == null || upgrades == null || ledger != null || id.Kind != RewardKind.Experience ||
+                !owner.TryGetEntry(id, out var entry) || entry.Experience != amount ||
+                (entry.State != RewardState.Due && entry.State != RewardState.WaitingForView))
                 throw new ArgumentException("An initialized XP view and unique ledger binding are required.");
             ledger = owner; rewardId = id; collect = consumer;
         }
@@ -45,6 +57,7 @@ namespace QuackQuack.Gameplay.Pickups
                 throw new InvalidOperationException("XP pickups must be acquired from their owning pickup pool.");
             if (upgrades != null) throw new InvalidOperationException("Pickup is already initialized for this acquisition.");
             pools = owner; upgrades = progression; amount = experienceAmount;
+            ViewState = RewardState.Grounded;
         }
 
         public void InitializeRare(PoolService owner, UpgradeSystem progression, int experienceAmount, GameplayEventBus events)
@@ -64,20 +77,25 @@ namespace QuackQuack.Gameplay.Pickups
             var player = other.GetComponentInParent<PlayerController>();
             if (player == null || !player.isActiveAndEnabled || player.State == null || player.State.Health <= 0) return;
             claimed = true;
+            long acceptingLease = activeLease;
+            var acceptingPool = pools;
             var acceptedEvents = rareEvents; long acceptedId = rareId; Vector2 acceptedPosition = transform.position;
             bool accepted = ledger == null ? upgrades.TryCollectExperience(amount) : ledger.TryClaimExperience(rewardId, collect);
-            if (!accepted) { claimed = false; return; }
-            pools.Release(this);
+            if (!accepted) { if (activeLease == acceptingLease) claimed = false; return; }
+            if (activeLease == acceptingLease)
+            { ViewState = RewardState.Claimed; acceptingPool.Release(this); }
             acceptedEvents?.Publish(new PresentationEvent(acceptedId, acceptedId, PresentationEventType.RareReward,
                 EventPriority.Feedback, 2, acceptedPosition));
         }
 
-        public void OnAcquire() { acquired = true; claimed = false; }
-        public void OnRelease() { acquired = false; }
+        public void OnAcquire() { acquired = true; claimed = false; activeLease = ++acquisitionSequence; ViewState = RewardState.Due; }
+        public void OnRelease() { acquired = false; activeLease = 0; ViewState = RewardState.Released; }
         public void ResetState()
         {
             ledger?.ReturnToPending(rewardId);
             ledger = null; rewardId = default; collect = null;
+            AttractionTarget = null; ViewState = RewardState.Released;
+            activeLease = 0;
             pools = null; upgrades = null; rareEvents = null; rareId = 0; amount = 0; acquired = claimed = false;
         }
 

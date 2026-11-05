@@ -10,6 +10,17 @@ namespace QuackQuack.Tests.EditMode
 {
     public class RewardLedgerTests
     {
+        [TestCase(false)] [TestCase(true)]
+        public void ViewReleasedInsideExperienceConsumerDoesNotLoseOrReemitClaim(bool accepted)
+        {
+            var ledger = new RewardLedger(1, () => 0.9, 0.1, 0.15f, 0.5f, 1);
+            ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true);
+            var entry = ledger.Entries[0]; ledger.TryMaterialize(entry.Id, true); ledger.TryMarkAttracted(entry.Id);
+            Assert.That(ledger.TryClaimExperience(entry.Id, _ => { ledger.ReturnToPending(entry.Id); return accepted; }), Is.EqualTo(accepted));
+            Assert.That(entry.State, Is.EqualTo(accepted ? RewardState.Claimed : RewardState.WaitingForView));
+            Assert.That(ledger.PendingCount, Is.EqualTo(accepted ? 0 : 1));
+        }
+
         [Test]
         public void PendingQueuesSupportOutOfOrderRemovalAndReturnedViewWithoutReroll()
         {

@@ -69,6 +69,8 @@ namespace QuackQuack.Systems.Run
         private readonly bool[] requested = new bool[2], delivered = new bool[2];
         private readonly long[] retry = new long[2];
         private ExperiencePickup[] pickups;
+        private HealingPickup[] healingPickups;
+        private string healingKey;
         private readonly Dictionary<string, int> rewardSources = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly HashSet<string> miniRewardSources = new HashSet<string>(StringComparer.Ordinal);
         private Func<int, bool> collectExperience;
@@ -155,6 +157,10 @@ namespace QuackQuack.Systems.Run
             xpKey = "run-xp/" + GetInstanceID(); bossKey = "run-boss/" + GetInstanceID();
             pools.Register(xpKey, PoolFamily.Pickup, () => Instantiate(settings.ExperiencePrefab, transform), settings.PickupCapacity);
             pickups = new ExperiencePickup[settings.PickupCapacity];
+            healingKey = "run-healing/" + GetInstanceID();
+            pools.Register(healingKey, PoolFamily.Pickup, () => Instantiate(settings.HealingPrefab, transform), settings.HealingCapacity);
+            healingPickups = new HealingPickup[settings.HealingCapacity];
+            HealingMaterializer = MaterializeHealingView;
             pools.Register(bossKey, PoolFamily.Enemy, () => Instantiate(settings.BossPrefab, transform).GetComponent<FrogKingController>(), 1);
             // Warm the boss's own hazard pools before gameplay, then return the actor.
             var warm = pools.Acquire<FrogKingController>(bossKey);
@@ -249,6 +255,25 @@ namespace QuackQuack.Systems.Run
             results.RecordIssuedDefeat(reward.DefinitionId, reward.Coins);
             MaterializeRewards();
         }
+        private bool MaterializeHealingView(RewardEntry entry)
+        {
+            int commonActive = 0, free = -1;
+            for (int i = 0; i < healingPickups.Length; i++)
+            {
+                if (healingPickups[i] != null && !pools.IsActive(healingPickups[i], PoolFamily.Pickup)) healingPickups[i] = null;
+                if (healingPickups[i] == null) { if (free < 0) free = i; }
+                else if (healingPickups[i].BoundRewardId.Kind == RewardKind.HealCommon) commonActive++;
+            }
+            if (free < 0 || (entry.Kind == RewardKind.HealCommon && commonActive >= settings.HealingCapacity - settings.MiniBossReservedHealingSlots)) return false;
+            var pickup = pools.Acquire<HealingPickup>(healingKey);
+            if (pickup == null) return false;
+            try
+            {
+                pickup.Initialize(pools, Rewards, entry.Id, player, run);
+                pickup.transform.position = new Vector2(entry.X, entry.Y); healingPickups[free] = pickup; return true;
+            }
+            catch { pools.Release(pickup); throw; }
+        }
         private bool MaterializeHealing(RewardKind kind)
         {
             while (Rewards.TryGetPending(kind, out var entry))
@@ -322,7 +347,9 @@ namespace QuackQuack.Systems.Run
             Spawns.Dispose(); Scheduler.enabled = false; weapons.enabled = false;
             if (Boss != null) Boss.enabled = false;
             foreach (var pickup in pickups) pools.Release(pickup);
+            foreach (var pickup in healingPickups) pools.Release(pickup);
             Array.Clear(pickups, 0, pickups.Length);
+            Array.Clear(healingPickups, 0, healingPickups.Length);
         }
         private void Finish()
         {

@@ -13,6 +13,9 @@ namespace QuackQuack.Content.Encounters
         public FrogKingSettings BossSettings;
         public GameObject BossPrefab;
         public ExperiencePickup ExperiencePrefab;
+        public HealingPickup HealingPrefab;
+        public int HealingCapacity = 16;
+        public int MiniBossReservedHealingSlots = 2;
         public PickupPolicyDefinition PickupPolicy;
         public int BossExperience;
         public Rect SpawnRegion = new Rect(-11.5f, -6, 23, 12);
@@ -39,6 +42,7 @@ namespace QuackQuack.Content.Encounters
         }
         public bool IsValid => Catalog != null && Catalog.IsValid(out _) && BossSettings != null && BossSettings.IsValid(out _)
             && BossPrefab != null && BossPrefab.GetComponent<FrogKingController>() != null && ExperiencePrefab != null
+            && HealingPrefab != null && HealingCapacity > 0 && MiniBossReservedHealingSlots >= 0 && MiniBossReservedHealingSlots <= HealingCapacity
             && PickupPolicy != null && PickupPolicy.IsValid(out _) && BossExperience > 0
             && Core.Run.SpawnRequest.ValidRegion(SpawnRegion) && Core.Run.SpawnRequest.ValidRegion(CameraBounds) && MinimumSpawnDistance > 0 && !float.IsInfinity(MinimumSpawnDistance)
             && RequestLifetimeTicks > 0 && PickupCapacity > 0 && VictoryBonus >= 0 && BossCoins >= 0
