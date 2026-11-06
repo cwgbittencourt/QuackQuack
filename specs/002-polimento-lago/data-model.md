@@ -25,7 +25,7 @@ Registro contém ID, origem, posição mundial de derrota, tipo XP/HealCommon/He
 
 Transições: Due → WaitingForView → Grounded → Attracted → Claimed → Released. A ausência de slot visual retém Due/WaitingForView. Cada transição de claim aceita uma vez; recycle limpa alvo/velocidade/claim/lease. RNG ocorre só na derrota, não ao tentar materializar novamente. Ledger e views são prealocados/poolados; nenhuma perda silenciosa ou concessão remota para resolver saturação.
 
-XP de cada derrota deve ser positivo em dados aprovados; despawn/expiração não é derrota. Chefe final usa origem própria e valor editável positivo, concedido uma vez antes do resultado terminal; zero cura automática. Autoria da quantidade de XP de chefe é revisão de dados em T026, sem número escondido no código.
+XP de cada derrota comum/miniboss deve ser positivo em dados aprovados; despawn/expiração não é derrota. Chefe final não gera XP nem cura; moedas, vitória e registros são contabilizados uma única vez.
 
 **Nota de implementação T025 (05/11/2026):** `RewardLedger` puro recebe partida, RNG dedicado, chance/frações e capacidade explícita de derrotas; pré-aloca até duas recompensas por derrota. Capacidade insuficiente falha antes de RNG/mutação e deve ser dimensionada na integração T027. Identidade implementada inclui origem e ordinal zero por tipo. Estados iniciais Due/WaitingForView/Grounded/Claimed e claims positivos são lógicos; views, Attracted/Released e teardown permanecem nas próximas tasks. Ver `test-report-t025.md`.
 
@@ -39,7 +39,7 @@ Campos: RewardId, posição atual, estado Grounded/Following/Discarded, alvo, ve
 
 Após Following, sair do raio não cancela. Movimento contínuo até contato de coleta, velocidade = 1,25 × velocidade efetiva do jogador na água, incluindo modificadores vigentes e sem penalidade transitória de terreno terra. Atualizar referência quando modificadores mudam. Observar obstáculos não bloqueia movimento do pickup; isso não muda colisão do Pato/inimigos.
 
-Pause/ChoosingUpgrade: congelar posição/claim. Dead/terminal: cancelar following e limpar no teardown; não curar morto. Cura com vida cheia não inicia captura; se ficar cheia após captura, o pickup é descartado sem cura e sem voltar ao chão. Fim de partida não concede automaticamente curas/XP de chão; exceção explicitamente aprovada é XP devido do chefe final antes de encerrar.
+Pause/ChoosingUpgrade: congelar posição/claim. Dead/terminal: cancelar following e limpar no teardown; não curar morto. Cura com vida cheia não inicia captura; se ficar cheia após captura, o pickup é descartado sem cura e sem voltar ao chão. Fim de partida não concede automaticamente curas/XP de chão; não há exceção de coleta no encerramento.
 
 **Implementação T029 e revisão D3 (05/11/2026):** AttractionState puro conserva lease/fase; posição física e alvo ficam na view, e velocidade/raio são projeções atualizadas pelo driver central. Cura capturada com vida cheia termina em RewardState.Discarded, sem claim positivo ou reenfileiramento (correção explícita do usuário); cura no chão continua preservada. Ver decisions.md e test-report-t029.md. O driver utiliza as arrays já alocadas de pickups da partida, sem Update por view.
 
@@ -72,3 +72,6 @@ Bindings: Gameplay Move/Quack/Pause/Relics e UI Navigate/Submit/Cancel. Xbox Men
 ## 8. ArtManifest (documental)
 
 Cada asset: ID canônico, função, referência, origem/autoria/licença, arquivo-fonte/exportado, dimensão/escala/pivô, estados/animações, parâmetros de importação, camada/ordem, contraste, prioridade e evidência de aprovação. Ordem de lote aprovada em decisions.md. Cenário não pode redefinir colisão por decoração, nem acrescentar espécies. Fontes e assets finais duráveis no projeto; arquivos temporários/logs fora dos commits.
+
+
+**Revisão T030 (05/11/2026):** chefe final sem XP nem cura; moedas, vitória e registros preservados uma vez. Pickups pendentes são cancelados no término, sem coleta automática. Esta decisão substitui referências anteriores a XP do chefe; ver [decisions.md](decisions.md) e o relatório T030.

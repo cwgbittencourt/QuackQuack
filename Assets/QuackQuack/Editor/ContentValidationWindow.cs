@@ -197,8 +197,6 @@ namespace QuackQuack.Editor
                     Add(report, asset, "MissingPickupPolicy", "A pickup policy is required.", "PickupPolicy");
                 else if (!run.PickupPolicy.IsValid(out var policyReason))
                     Add(report, asset, "InvalidPickupPolicy", policyReason, "PickupPolicy");
-                if (run.BossExperience <= 0)
-                    Add(report, asset, "NonPositiveBossExperience", "The final boss requires positive authored XP.", "BossExperience");
             }
         }
 

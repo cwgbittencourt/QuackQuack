@@ -17,7 +17,6 @@ namespace QuackQuack.Content.Encounters
         public int HealingCapacity = 16;
         public int MiniBossReservedHealingSlots = 2;
         public PickupPolicyDefinition PickupPolicy;
-        public int BossExperience;
         public Rect SpawnRegion = new Rect(-11.5f, -6, 23, 12);
         public Rect CameraBounds = new Rect(-12.5f, -7, 25, 14);
         public float MinimumSpawnDistance = 5;
@@ -30,7 +29,7 @@ namespace QuackQuack.Content.Encounters
         {
             if (Catalog == null || !Catalog.IsValid(out _)) throw new System.InvalidOperationException("A valid encounter catalog is required.");
             // Inclusive endpoints add a spare batch per wave. No assumptions about kills/collection.
-            long capacity = checked(2L * Catalog.QueueCapacity + 1); // all queued mini requests, plus final boss
+            long capacity = checked(2L * Catalog.QueueCapacity); // all queued mini requests; final boss has no pickups
             foreach (var wave in Catalog.Waves)
             {
                 long batches = checked((long)System.Math.Ceiling((wave.EndSeconds - wave.StartSeconds) / wave.SpawnInterval) + 1);
@@ -43,7 +42,7 @@ namespace QuackQuack.Content.Encounters
         public bool IsValid => Catalog != null && Catalog.IsValid(out _) && BossSettings != null && BossSettings.IsValid(out _)
             && BossPrefab != null && BossPrefab.GetComponent<FrogKingController>() != null && ExperiencePrefab != null
             && HealingPrefab != null && HealingCapacity > 0 && MiniBossReservedHealingSlots >= 0 && MiniBossReservedHealingSlots <= HealingCapacity
-            && PickupPolicy != null && PickupPolicy.IsValid(out _) && BossExperience > 0
+            && PickupPolicy != null && PickupPolicy.IsValid(out _)
             && Core.Run.SpawnRequest.ValidRegion(SpawnRegion) && Core.Run.SpawnRequest.ValidRegion(CameraBounds) && MinimumSpawnDistance > 0 && !float.IsInfinity(MinimumSpawnDistance)
             && RequestLifetimeTicks > 0 && PickupCapacity > 0 && VictoryBonus >= 0 && BossCoins >= 0
             && AbandonmentFactor >= 0 && AbandonmentFactor <= 1;

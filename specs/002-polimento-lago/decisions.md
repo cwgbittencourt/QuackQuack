@@ -36,7 +36,7 @@ As recomendações desta primeira tabela são histórico, não o plano vigente. 
 
 | Tema | Complemento proposto | Consequência/alternativa para comparação |
 |---|---|---|
-| XP | Cada derrota elegível gera XP, sem sorteio nem descarte por saturação; manter concessão única por lease. Expiração/despawn não é derrota. Para chefe final, conceder seu XP antes do encerramento, sem deixar recompensa pendente numa tela terminal; quantidade vem dos dados aprovados e não é inventada aqui. | Requer rever supressão atual no pool; não significa adicionar chance de XP nem duplicar recompensa. |
+| XP | Cada derrota elegível gera XP, sem sorteio nem descarte por saturação; manter concessão única por lease. Expiração/despawn não é derrota. Chefe final não concede XP nem cura (revisão T030 aprovada). | Requer rever supressão atual no pool; não significa adicionar chance de XP nem duplicar recompensa. |
 | Cura | Sorteio independente de 10% por derrota comum, sem cooldown adicional e sem teto de gameplay que reduza essa chance. XP e cura podem cair juntos. Miniboss gera exatamente uma cura de 50%, sem sorteio extra de comum; chefe não gera cura automática. | Cooldown/teto reduziriam chance efetiva; se desejados precisam de decisão posterior. Capacidade técnica dos pools deve preservar recompensas, com fallback agrupado/pendente testável e medido. |
 | Raio | Um Pato significa um diâmetro físico de espaço livre entre sua borda e o centro do pickup. Com raio atual do Pato 0,42, isso dá espaço de 0,84 e distância de captura centro-centro de 1,26 unidades. Recalcular por escala/collider, não pelo desenho da animação. | Alternativa mais curta: 0,84 centro-centro, equivalente a meio diâmetro de espaço livre. Nenhuma das duas inicia atração de longe. |
 | Velocidade | 1,25 × velocidade efetiva do Pato na água, incluindo bônus relevantes; com base atual 6, atração base 7,5 unidades/s. Reavaliar referência ao mudar atributos. | 1,10 × seria mais suave, mas demoraria mais para alcançar o Pato em fuga. Sem teleporte e sem duração máxima de atração enquanto jogador vive/partida simula. |
@@ -77,3 +77,8 @@ Durante a comparação, o usuário também relatou ausência de feedback visíve
 ## Revisão D3 — 05/11/2026, implementação T029
 
 O usuário corrigiu explicitamente a proposta de cura acompanhando o Pato com vida cheia: “caso a cura seja capturada e o pato estiver com a vida cheia, a cura capturada deve ser descarta”. A partir desta revisão, cura já capturada é descartada ao encontrar vida cheia durante simulação, sem aplicar cura, sem claim positivo e sem reenfileirar o pickup. Cura ainda no chão não inicia captura com vida cheia e permanece disponível. Pausa/seleção suspendem o processamento; o descarte ocorre na retomada. Os trechos anteriores de D3 que propunham acompanhar até haver falta são históricos e foram substituídos.
+
+
+## Revisão T030 — chefe final sem XP (05/11/2026)
+
+Decisão explícita do usuário: “Remover o XP do chefe (recomendado)”. O chefe final não gera XP nem cura, pois encerra a partida. Mantêm-se moedas, bônus de vitória e registros uma única vez. As instruções anteriores sobre XP positivo/editável/liquidado do chefe são históricas e estão substituídas por esta revisão. BossExperience foi removido dos dados e geradores. Pickups pendentes no encerramento são cancelados, sem coleta automática. Capacidade vigente: 3.323 derrotas elegíveis e 6.646 registros pré-alocados; relatórios anteriores preservam os números daquela versão.

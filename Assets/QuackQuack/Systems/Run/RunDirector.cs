@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using QuackQuack.Content.Catalogs;
 using QuackQuack.Content.Encounters;
+using QuackQuack.Content.Enemies;
 using QuackQuack.Core.Combat;
 using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
@@ -74,6 +75,8 @@ namespace QuackQuack.Systems.Run
         private string healingKey;
         public PickupAttractionSystem Attraction { get; private set; }
         private readonly Dictionary<string, int> rewardSources = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<string, EnemyDefinition> rewardCatalog = new Dictionary<string, EnemyDefinition>(StringComparer.Ordinal);
+        private bool bossDefeatRecorded;
         private readonly HashSet<string> miniRewardSources = new HashSet<string>(StringComparer.Ordinal);
         private Func<int, bool> collectExperience;
         private static long nextRewardRun;
@@ -144,7 +147,8 @@ namespace QuackQuack.Systems.Run
             miniIds = new[] { minis[0].EnemyIds[0], minis[1].EnemyIds[0] };
             foreach (string id in miniIds) miniRewardSources.Add(id);
             var rewardDefinitions = settings.Catalog.GetAllEnemies();
-            for (int i = 0; i < rewardDefinitions.Length; i++) rewardSources.Add(rewardDefinitions[i].Id, i + 1);
+            for (int i = 0; i < rewardDefinitions.Length; i++)
+            { rewardSources.Add(rewardDefinitions[i].Id, i + 1); rewardCatalog.Add(rewardDefinitions[i].Id, rewardDefinitions[i]); }
             var dropRandom = new System.Random(unchecked(run.Seed ^ 0x52dce729));
             Rewards = settings.PickupPolicy.CreateLedger(Interlocked.Increment(ref nextRewardRun), dropRandom.NextDouble,
                 settings.CalculateRewardDefeatCapacity());
@@ -227,7 +231,7 @@ namespace QuackQuack.Systems.Run
                 }
             }
             if (run.IsSimulating) { Physics2D.SyncTransforms(); weapons.Advance(seconds); }
-            if (run.IsSimulating && Boss != null) Boss.Advance(seconds);
+            if (run.IsSimulating && Boss != null) { Boss.Advance(seconds); Boss.TryFinalizeDefeat(); }
             if (run.IsSimulating) MaterializeRewards();
             if (run.IsSimulating) Attraction.Advance(seconds, pickups, healingPickups);
             if (run.IsSimulating && player.State.Health <= 0) run.TryTransition(RunPhase.Lost);
@@ -255,8 +259,9 @@ namespace QuackQuack.Systems.Run
             if (run.Outcome.HasValue || disposed) return;
             if (!rewardSources.TryGetValue(reward.DefinitionId, out int source)) return;
             var origin = miniRewardSources.Contains(reward.DefinitionId) ? RewardOrigin.MiniBoss : RewardOrigin.Common;
-            if (!Rewards.ProcessDefeat(source, reward.LeaseId, origin, reward.Experience, reward.Position.x, reward.Position.y, true)) return;
-            results.RecordIssuedDefeat(reward.DefinitionId, reward.Coins);
+            var definition = rewardCatalog[reward.DefinitionId];
+            if (!Rewards.ProcessDefeat(source, reward.LeaseId, origin, definition.ExperienceReward, reward.Position.x, reward.Position.y, true)) return;
+            results.RecordIssuedDefeat(reward.DefinitionId, definition.CoinReward);
             MaterializeRewards();
         }
         private bool MaterializeHealingView(RewardEntry entry)
@@ -290,7 +295,7 @@ namespace QuackQuack.Systems.Run
         }
         private void MaterializeRewards()
         {
-            if (!run.IsSimulating || disposed || pools.IsDisposed) return;
+            if (!run.IsSimulating || disposed || pools.IsDisposed || Rewards.IsClosed) return;
             // Mini healing has first access to the future shared healing pool; XP is independent.
             if (MaterializeHealing(RewardKind.HealMiniBoss)) MaterializeHealing(RewardKind.HealCommon);
             int free = 0;
@@ -313,14 +318,18 @@ namespace QuackQuack.Systems.Run
         }
         private void OnCombat(CombatEvent value)
         {
-            if (!Ready || !run.IsSimulating) return;
-            if (value.Type == CombatEventType.DamageApplied)
+            if (!Ready || run.Outcome.HasValue) return;
+            if (value.Type == CombatEventType.DamageApplied && run.IsSimulating)
             {
                 if (value.Target == player.GetInstanceID()) results.BreakStreak();
                 else if (sources.TryGetValue(value.Source, out string id)) results.RecordWeaponDamage(id, value.Amount);
             }
-            if (value.Type == CombatEventType.EntityDefeated && Boss != null && value.Target == Boss.GetInstanceID())
-            { results.RecordDefeat(LakeEncounterCatalog.FinalBossId); results.AddCoins(settings.BossCoins); }
+            if (value.Type == CombatEventType.EntityDefeated && Boss != null && value.Target == Boss.GetInstanceID() &&
+                Boss.Health <= 0 && Boss.Phase == FrogKingPhase.Defeated && !bossDefeatRecorded)
+            {
+                bossDefeatRecorded = true;
+                results.RecordIssuedDefeat(LakeEncounterCatalog.FinalBossId, settings.BossCoins);
+            }
         }
         private void UpdateFacts()
         {
@@ -347,7 +356,7 @@ namespace QuackQuack.Systems.Run
         }
         private void OnEnded(RunPhase phase)
         {
-            ending = true; Result = results.FinalizeResult(); dirty = true;
+            ending = true; Rewards.Close(); Result = results.FinalizeResult(); dirty = true;
             Spawns.Dispose(); Scheduler.enabled = false; weapons.enabled = false;
             if (Boss != null) Boss.enabled = false;
             foreach (var pickup in pickups) pools.Release(pickup);

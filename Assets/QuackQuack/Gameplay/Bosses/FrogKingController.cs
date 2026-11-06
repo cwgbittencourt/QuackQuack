@@ -170,8 +170,14 @@ namespace QuackQuack.Gameplay.Bosses
                 events.Publish(new CombatEvent(eventTick, id, source, GetInstanceID(), transform.position, applied, CombatEventType.DamageApplied));
                 if (defeated) events.Publish(new CombatEvent(eventTick, id, source, GetInstanceID(), transform.position, 0, CombatEventType.EntityDefeated));
             }
-            finally { if (defeated) run.TryTransition(RunPhase.Won); }
+            finally { if (defeated) TryFinalizeDefeat(); }
             return true;
+        }
+        public bool TryFinalizeDefeat()
+        {
+            if (!configured || run == null || run.Outcome.HasValue || run.Phase != RunPhase.Boss || Health > 0 || Phase != FrogKingPhase.Defeated)
+                return false;
+            return run.TryTransition(RunPhase.Won);
         }
         private void Commit(string id, Vector2 target, FrogKingSafeArea area, long attackCorrelation)
         {

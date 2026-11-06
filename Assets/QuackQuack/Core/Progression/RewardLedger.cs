@@ -6,7 +6,19 @@ namespace QuackQuack.Core.Progression
 {
     public enum RewardOrigin { Common, MiniBoss, FinalBoss }
     public enum RewardKind { Experience, HealCommon, HealMiniBoss }
-    public enum RewardState { Due, WaitingForView, Grounded, Claimed, Attracted, Released, Discarded }
+    public enum RewardState { Due, WaitingForView, Grounded, Claimed, Attracted, Released, Discarded, Cancelled }
+
+    public readonly struct RewardClosureSummary
+    {
+        public int Registered { get; }
+        public int Claimed { get; }
+        public int Discarded { get; }
+        public int Cancelled { get; }
+        public int InFlight { get; }
+        public long CancelledExperience { get; }
+        public RewardClosureSummary(int registered, int claimed, int discarded, int cancelled, int inFlight, long cancelledExperience)
+        { Registered = registered; Claimed = claimed; Discarded = discarded; Cancelled = cancelled; InFlight = inFlight; CancelledExperience = cancelledExperience; }
+    }
 
     public readonly struct RewardId : IEquatable<RewardId>
     {
@@ -60,6 +72,37 @@ namespace QuackQuack.Core.Progression
         private readonly Dictionary<RewardId, RewardEntry> byId;
         private readonly int[] heads = { -1, -1, -1 }, tails = { -1, -1, -1 };
         public IReadOnlyList<RewardEntry> Entries { get; }
+        public long RunId => runId;
+        public bool IsClosed { get; private set; }
+        public RewardClosureSummary Closure
+        {
+            get
+            {
+                int claimed = 0, discarded = 0, cancelled = 0, inFlight = 0; long xp = 0;
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    var entry = entries[i];
+                    if (entry.Collecting) { inFlight++; continue; }
+                    if (entry.State == RewardState.Claimed) claimed++;
+                    else if (entry.State == RewardState.Discarded) discarded++;
+                    else if (entry.State == RewardState.Cancelled) { cancelled++; xp += entry.Experience; }
+                }
+                return new RewardClosureSummary(entries.Count, claimed, discarded, cancelled, inFlight, xp);
+            }
+        }
+        public bool Close()
+        {
+            if (IsClosed) return false;
+            IsClosed = true;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i]; entry.Next = entry.Previous = -1;
+                if (!entry.Collecting && entry.State != RewardState.Claimed && entry.State != RewardState.Discarded)
+                    entry.State = RewardState.Cancelled;
+            }
+            for (int i = 0; i < heads.Length; i++) heads[i] = tails[i] = -1;
+            PendingCount = 0; return true;
+        }
         public int DefeatCapacity => defeatCapacity;
         public int DefeatCount => defeats;
         public int PendingCount { get; private set; }
@@ -89,7 +132,7 @@ namespace QuackQuack.Core.Progression
         public bool ProcessDefeat(int sourceId, long lease, RewardOrigin origin, int experience,
             float x, float y, bool isDefeat)
         {
-            if (!isDefeat || sourceId == 0 || lease <= 0 || experience <= 0 || !Finite(x) || !Finite(y) ||
+            if (IsClosed || origin == RewardOrigin.FinalBoss || !isDefeat || sourceId == 0 || lease <= 0 || experience <= 0 || !Finite(x) || !Finite(y) ||
                 origin < RewardOrigin.Common || origin > RewardOrigin.FinalBoss) return false;
             var xpId = new RewardId(runId, sourceId, lease, RewardKind.Experience);
             if (byId.ContainsKey(xpId)) return false;
@@ -145,23 +188,23 @@ namespace QuackQuack.Core.Progression
         }
         public bool ReturnToPending(RewardId id)
         {
-            if (!byId.TryGetValue(id, out var entry) || !Collectable(entry)) return false;
+            if (IsClosed || !byId.TryGetValue(id, out var entry) || !Collectable(entry)) return false;
             if (entry.Collecting) { entry.ReleasedDuringClaim = true; return false; }
             entry.State = RewardState.WaitingForView; Enqueue(entry); return true;
         }
         public bool TryGetEntry(RewardId id, out RewardEntry entry) => byId.TryGetValue(id, out entry);
         public bool TryMarkAttracted(RewardId id)
         {
-            if (!byId.TryGetValue(id, out var entry) || entry.State != RewardState.Grounded) return false;
+            if (IsClosed || !byId.TryGetValue(id, out var entry) || entry.State != RewardState.Grounded) return false;
             entry.State = RewardState.Attracted; return true;
         }
         public void CancelAttraction(RewardId id)
         {
-            if (byId.TryGetValue(id, out var entry) && entry.State == RewardState.Attracted) entry.State = RewardState.Grounded;
+            if (!IsClosed && byId.TryGetValue(id, out var entry) && entry.State == RewardState.Attracted) entry.State = RewardState.Grounded;
         }
         public bool TryDiscardCapturedHealing(RewardId id)
         {
-            if (!byId.TryGetValue(id, out var entry) || entry.State != RewardState.Attracted ||
+            if (IsClosed || !byId.TryGetValue(id, out var entry) || entry.State != RewardState.Attracted ||
                 (entry.Kind != RewardKind.HealCommon && entry.Kind != RewardKind.HealMiniBoss)) return false;
             entry.State = RewardState.Discarded; return true;
         }
@@ -171,7 +214,7 @@ namespace QuackQuack.Core.Progression
         // binding and retry scheduling with real pools belong to T027/T028.
         public bool TryMaterialize(RewardId id, bool hasViewSlot)
         {
-            if (!byId.TryGetValue(id, out var entry) ||
+            if (IsClosed || !byId.TryGetValue(id, out var entry) ||
                 (entry.State != RewardState.Due && entry.State != RewardState.WaitingForView)) return false;
             entry.State = hasViewSlot ? RewardState.Grounded : RewardState.WaitingForView;
             if (hasViewSlot) RemovePending(entry);
@@ -181,7 +224,7 @@ namespace QuackQuack.Core.Progression
         // Uses the real UpgradeSystem consumer so level offers remain in its existing flow.
         public bool TryClaimExperience(RewardId id, Func<int, bool> collect)
         {
-            if (collect == null || !byId.TryGetValue(id, out var entry) || entry.Kind != RewardKind.Experience ||
+            if (IsClosed || collect == null || !byId.TryGetValue(id, out var entry) || entry.Kind != RewardKind.Experience ||
                 !Collectable(entry) || entry.Collecting) return false;
             entry.Collecting = true;
             try
@@ -192,13 +235,14 @@ namespace QuackQuack.Core.Progression
             finally
             {
                 entry.Collecting = false;
+                if (IsClosed && entry.State != RewardState.Claimed) entry.State = RewardState.Cancelled;
                 if (entry.ReleasedDuringClaim) { entry.ReleasedDuringClaim = false; ReturnToPending(id); }
             }
         }
 
         public float TryCollectHeal(RewardId id, PlayerState player)
         {
-            if (player == null || !byId.TryGetValue(id, out var entry) || !Collectable(entry) ||
+            if (IsClosed || player == null || !byId.TryGetValue(id, out var entry) || !Collectable(entry) ||
                 (entry.Kind != RewardKind.HealCommon && entry.Kind != RewardKind.HealMiniBoss)) return 0;
             float applied = player.Heal(entry.Fraction);
             if (applied > 0) entry.State = RewardState.Claimed;
@@ -207,7 +251,7 @@ namespace QuackQuack.Core.Progression
 
         public bool TryCollectExperience(RewardId id, ExperienceState experience)
         {
-            if (experience == null || !byId.TryGetValue(id, out var entry) || entry.Kind != RewardKind.Experience ||
+            if (IsClosed || experience == null || !byId.TryGetValue(id, out var entry) || entry.Kind != RewardKind.Experience ||
                 !Collectable(entry) || entry.Collecting || !experience.TryAdd(entry.Experience, out _)) return false;
             entry.State = RewardState.Claimed;
             return true;

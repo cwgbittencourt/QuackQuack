@@ -20,7 +20,6 @@ MonoBehaviour:
   HealingCapacity: 16
   MiniBossReservedHealingSlots: 2
   PickupPolicy: {fileID: 11400000, guid: 23c7b707115bb6b41b8e18dcc6978d87, type: 2}
-  BossExperience: 50
   SpawnRegion:
     serializedVersion: 2
     x: -11.5

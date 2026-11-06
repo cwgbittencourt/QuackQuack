@@ -80,7 +80,7 @@ namespace QuackQuack.Tests.EditMode
         {
             var ledger = RewardContract.Create(1, () => { Assert.Fail("Special origins must not roll common healing."); return 0; });
             RewardContract.Defeat(ledger, 8, 1, origin);
-            Assert.That(RewardContract.OfKind(ledger, "Experience").Length, Is.EqualTo(1));
+            Assert.That(RewardContract.OfKind(ledger, "Experience").Length, Is.EqualTo(origin == "FinalBoss" ? 0 : 1));
             Assert.That(RewardContract.OfKind(ledger, "HealCommon"), Is.Empty);
             var healing = RewardContract.OfKind(ledger, kind);
             Assert.That(healing.Length, Is.EqualTo(fraction > 0 ? 1 : 0));

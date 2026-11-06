@@ -12,8 +12,6 @@ namespace QuackQuack.Editor
         public const string PolicyPath = "Assets/QuackQuack/Content/Pickups/LakePickupPolicy.asset";
         public const string HealingPath = "Assets/QuackQuack/Prefabs/Prototype/HealingPickup.prefab";
         public const string ExperiencePath = "Assets/QuackQuack/Prefabs/Prototype/ExperiencePickup.prefab";
-        // Authoring choice for T026: reuse the existing special-enemy reward tier.
-        public const int PrototypeBossExperience = 50;
 
         [MenuItem("QuackQuack/Build pickup policy (002 T026)")]
         public static void Build()
@@ -25,7 +23,7 @@ namespace QuackQuack.Editor
             Configure(settings);
             if (!settings.IsValid) throw new InvalidOperationException("Invalid lake settings after pickup policy generation.");
             AssetDatabase.SaveAssets();
-            Debug.Log("T026_PICKUP_POLICY_OK chance=0.10 fractions=0.15/0.50 capture=3 speed=1.25 bossXP=" + settings.BossExperience);
+            Debug.Log("T026_PICKUP_POLICY_OK chance=0.10 fractions=0.15/0.50 capture=3 speed=1.25 finalBossXP=none");
         }
 
         public static void Configure(LakeRunSettings settings)
@@ -33,7 +31,6 @@ namespace QuackQuack.Editor
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             settings.PickupPolicy = EnsurePolicy();
             settings.HealingPrefab = EnsureHealingPrefab();
-            if (settings.BossExperience <= 0) settings.BossExperience = PrototypeBossExperience;
             EditorUtility.SetDirty(settings);
         }
 
@@ -84,6 +81,15 @@ namespace QuackQuack.Editor
             finally { UnityEngine.Object.DestroyImmediate(root); }
         }
 
+        [MenuItem("QuackQuack/Refresh reward settings (002 T030)")]
+        public static void RefreshRewardSettings()
+        {
+            var settings = AssetDatabase.LoadAssetAtPath<LakeRunSettings>(LakeRunSetup.SettingsPath);
+            Configure(settings); AssetDatabase.SaveAssets();
+            AssetDatabase.ForceReserializeAssets(new[] { LakeRunSetup.SettingsPath });
+            if (!settings.IsValid) throw new InvalidOperationException("Invalid run settings.");
+            Debug.Log("T030_REWARD_SETTINGS_OK finalBossXP=none");
+        }
         private static PickupPolicyDefinition EnsurePolicy()
         {
             const string folder = "Assets/QuackQuack/Content/Pickups";

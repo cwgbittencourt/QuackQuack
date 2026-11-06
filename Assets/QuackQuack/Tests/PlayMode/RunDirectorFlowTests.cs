@@ -269,6 +269,76 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(root.GetComponentsInChildren<HealingPickup>(true).Length, Is.EqualTo(settings.HealingCapacity));
         }
 
+        [Test]
+        public void BossDefeatEndsWithoutXpOrUpgradeAndCountsCoinsOnce()
+        {
+            BossPhase(); bool observed = false;
+            run.Ended += _ =>
+            {
+                observed = true; Assert.That(upgrades.Experience, Is.Zero);
+                Assert.That(upgrades.CurrentOffer, Is.Null); Assert.That(upgrades.PendingLevels, Is.Zero);
+            };
+            var boss = director.Boss; boss.TakeDamage(boss.MaxHealth, player.GetInstanceID(), 1);
+            Assert.That(observed, Is.True); Assert.That(run.Outcome, Is.EqualTo(RunPhase.Won));
+            Assert.That(director.Rewards.IsClosed, Is.True);
+            Assert.That(director.Rewards.Entries.Any(e => e.Origin == RewardOrigin.FinalBoss), Is.False);
+            Assert.That(boss.TryFinalizeDefeat(), Is.False); Assert.That(boss.TakeDamage(1, 1, 2), Is.False);
+            Assert.That(upgrades.Experience, Is.Zero); Assert.That(director.Result.EnemiesDefeated, Is.EqualTo(1));
+            Assert.That(director.Result.EarnedCoins, Is.EqualTo(settings.BossCoins));
+            Assert.That(director.Result.Coins, Is.EqualTo(settings.BossCoins + settings.VictoryBonus));
+        }
+
+        [Test] public void PausedBossDefeatRetriesVictoryWithoutRepublishingDefeat()
+        {
+            BossPhase(); int defeats = 0;
+            events.Combat += value => { if (value.Type == CombatEventType.EntityDefeated) { defeats++; director.TogglePause(); } };
+            director.Boss.TakeDamage(director.Boss.MaxHealth, player.GetInstanceID(), 1);
+            Assert.That(run.Outcome.HasValue, Is.False); Assert.That(upgrades.Experience, Is.Zero);
+            director.TogglePause(); director.Advance(0, bounds);
+            Assert.That(run.Outcome, Is.EqualTo(RunPhase.Won)); Assert.That(defeats, Is.EqualTo(1));
+            Assert.That(upgrades.Experience, Is.Zero);
+        }
+
+        [Test] public void FakeBossDefeatEventCannotGrantRewardWhileBossLives()
+        {
+            BossPhase();
+            events.Publish(new CombatEvent(1, 1, player.GetInstanceID(), director.Boss.GetInstanceID(), Vector2.zero, 0, CombatEventType.EntityDefeated));
+            Assert.That(director.Boss.TryFinalizeDefeat(), Is.False); Assert.That(upgrades.Experience, Is.Zero);
+            Assert.That(director.Rewards.Entries.Any(e => e.Origin == RewardOrigin.FinalBoss), Is.False);
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void LossAndAbandonmentCancelFloorRewardsWithoutGrant(bool lost)
+        {
+            StaticTimeline(); DeliverReward(1000001); int entries = director.Rewards.Entries.Count;
+            if (lost) { player.State.TakeDamage(player.State.MaxHealth, 1, 0); director.Advance(0, bounds); }
+            else director.TryAbandon();
+            Assert.That(upgrades.Experience, Is.Zero); Assert.That(director.Rewards.IsClosed, Is.True);
+            Assert.That(director.Rewards.Closure.Cancelled, Is.EqualTo(entries)); Assert.That(director.Rewards.Closure.InFlight, Is.Zero);
+            Assert.That(director.Rewards.PendingCount, Is.Zero); Assert.That(pools.ActiveCount, Is.Zero);
+            DeliverReward(1000002); Assert.That(director.Rewards.Entries.Count, Is.EqualTo(entries));
+        }
+
+        [Test] public void VictoryDoesNotSweepSaturatedFloorRewardsOrGrantBossXp()
+        {
+            StaticTimeline(); int deaths = settings.PickupCapacity + 3;
+            for (int i = 0; i < deaths; i++) DeliverReward(1100000 + i);
+            BossPhase(); Assert.That(upgrades.Experience, Is.Zero);
+            director.Boss.TakeDamage(director.Boss.MaxHealth, player.GetInstanceID(), 1);
+            Assert.That(upgrades.Experience, Is.Zero);
+            director.Advance(0, bounds);
+            Assert.That(director.Rewards.Closure.Claimed, Is.Zero);
+            Assert.That(director.Rewards.Closure.CancelledExperience, Is.EqualTo(deaths * 2));
+            Assert.That(director.Rewards.PendingCount, Is.Zero); Assert.That(pools.ActiveCount, Is.Zero);
+        }
+
+        [Test] public void RewardAmountsAreResolvedFromCatalogInsteadOfNotificationPayload()
+        {
+            StaticTimeline(); DeliverReward(1200001, "formiga", 999, 999);
+            Assert.That(director.Rewards.Entries.Single(e => e.Kind == RewardKind.Experience).Experience, Is.EqualTo(2));
+            director.TryAbandon(); Assert.That(director.Result.EarnedCoins, Is.EqualTo(1));
+        }
+
         [Test] public void TimelineRequestsBothMinibossesBeforeSingleBossAndStopsCommonWaves()
         {
             StaticTimeline(); var seen = new List<string>(); director.EncounterStarted += seen.Add;

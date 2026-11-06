@@ -75,7 +75,7 @@ Assets/QuackQuack/
 **Structure Decision**: estender camadas atuais, sem reescrita geral. Core para regras, Content para dados, Gameplay para física e Presentation para visual. Arquivos novos propostos, não ainda existentes:
 
 - Core/Combat/EffectiveAttributes.cs, Core/Progression/RewardLedger.cs, Core/Progression/AttractionState.cs, Core/Shared/ProgressSnapshot.cs.
-- Content/Pickups/PickupPolicyDefinition.cs; Content/Encounters/LakeRunSettings.cs integra política e XP do chefe.
+- Content/Pickups/PickupPolicyDefinition.cs; Content/Encounters/LakeRunSettings.cs integra a política de pickups.
 - Gameplay/Player/ArenaConfinement.cs somente se diagnóstico sustentar proteção geométrica; Gameplay/Pickups/HealingPickup.cs; Systems/Pickups/PickupAttractionSystem.cs.
 - Platform/Input/ControlProfile.cs, ControlProfileStore.cs; Presentation/UI/ControlBindingsView.cs, SpecialEnemyBarsView.cs, ContextualHintsView.cs e UpgradeAreaPreview.cs.
 - Presentation/Weapons/WeaponVisuals.cs e Presentation/Terrain/LakeWaterAnimation.cs; Editor/PolishUiSetup.cs e PolishArtSetup.cs.
@@ -86,7 +86,7 @@ Os caminhos acima são relativos a Assets/QuackQuack exceto os iniciados por spe
 ## Fronteiras do design
 
 - RewardLedger é a verdade de recompensas; views são pooled e podem aguardar slot sem perda de valor/posição/ID. RNG de cura ocorre uma vez por derrota, separado da geração de ofertas. Dimensionamento completo e stress de saturação são obrigatórios; SuppressedPickups não atende o novo contrato.
-- XP de chefe é liquidado uma vez antes do resultado terminal; quantidade é campo editável positivo em LakeRunSettings, revisada na task de dados. Despawn não gera drop; fim não coleta automaticamente o chão.
+- Chefe final sem XP nem cura; mantém moedas, vitória e registros uma vez. Despawn não gera drop; fim cancela pickups pendentes sem coleta automática.
 - EffectiveAttributes resolve base/passivas/relíquias/terreno sem mutar definições e preserva ordem de relíquias. Player, arma e visual consomem a mesma resolução; só Bolhas recebe Sabão nesta entrega.
 - Bumerangue usa fases/leases, aura ignora oclusão somente para seu dano, UI lê snapshots, hotplug preserva contexto/pausa e perfis ficam separados do save de progressão.
 - Correção de arena só é selecionada após T003/T004: método físico exato é resultado do diagnóstico técnico, não decisão de produto aberta. T005 registra alternativas/evidência antes de integrar proteção.
@@ -133,3 +133,6 @@ Sem violações propostas e sem novo framework/serviço. Nenhuma alteração de 
 ## Entrega e próximo passo
 
 Planejamento apto a execução incremental; nenhuma implementação iniciada. Primeiro incremento sugerido: T001 de tasks.md desta feature, seguido do diagnóstico US1. IDs T001–T053 pertencem à feature 002 e não alteram as tasks da 001. Cada task valida, atualiza checkbox e recebe commit lógico antes de parar para revisão/publicação. Aceite físico/artístico/performance incompleto deve permanecer pendente, sem marcar a história inteira pronta.
+
+
+**Revisão T030 (05/11/2026):** chefe final sem XP nem cura; moedas, vitória e registros preservados uma vez. Pickups pendentes são cancelados no término, sem coleta automática. Esta decisão substitui referências anteriores a XP do chefe; ver [decisions.md](decisions.md) e o relatório T030.

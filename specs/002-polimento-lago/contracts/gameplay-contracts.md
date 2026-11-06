@@ -28,7 +28,7 @@ Bumerangue: cada lease de alvo recebe no máximo um acerto por passagem Outbound
 
 ## C4 — Derrota, cura, XP e saturação (FR-010–012)
 
-ProcessDefeat(origem, lease, dados, posição): valida uma vez por derrota real. Common → XP garantido + um sorteio independente r <0,10 para cura de 0,15 × MaxHealth; miniboss → XP + uma cura 0,50 garantidos, sem sorteio comum extra; chefe → XP editável positivo liquidado antes do resultado final, sem cura herdada. Despawn não é derrota. Um em dez significa probabilidade, não quota. RNG é dedicado e reproduzível; repetir notificação/materialização não sorteia novamente.
+ProcessDefeat(origem, lease, dados, posição): valida uma vez por derrota real. Common → XP garantido + um sorteio independente r <0,10 para cura de 0,15 × MaxHealth; miniboss → XP + uma cura 0,50 garantidos, sem sorteio comum extra; chefe → sem XP nem cura; moedas, vitória e registros uma vez. Despawn não é derrota. Um em dez significa probabilidade, não quota. RNG é dedicado e reproduzível; repetir notificação/materialização não sorteia novamente.
 
 Ledger registra obrigação antes de alugar view. Sem slot: manter posição/ID/valor e tentar materializar, sem descartar nem conceder à distância. Reservar/priorizar miniboss e medir capacidade. Teto técnico nunca reduz chance; incapacidade de suportar carga autoral bloqueia aceite. No teardown registrar destino de pendências; não carregar drops para nova partida.
 
@@ -49,3 +49,6 @@ Dicas ocupam apenas primeiros 10 segundos de simulação; pausa suspende, famíl
 Identidade reconhecível do elenco aprovado, contornos cartoon, distinção decoração/colisão. Manifesto de assets e cena-amostra aprovada antes de lote; referências duráveis não são assets finais. Animação de água não encobre água/terra/limites/perigos. Seis armas e três evoluções têm forma/animação/trajetória distintas além da cor, correspondentes ao alcance real.
 
 Aceite separado: testes de regras, integração Unity, entrada física, revisão artística, gameplay e profiling. Quatro proporções, recortes dos dois lados; Windows/Android com teclado/controle/toque; alvos 200/400 inimigos e 60/30 FPS constitucionais. Nenhum teste sintético, screenshot ou S23 isolado aprova todos os dispositivos.
+
+
+**Revisão T030 (05/11/2026):** chefe final sem XP nem cura; moedas, vitória e registros preservados uma vez. Pickups pendentes são cancelados no término, sem coleta automática. Esta decisão substitui referências anteriores a XP do chefe; ver [decisions.md](../decisions.md) e o relatório T030.

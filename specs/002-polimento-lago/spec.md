@@ -46,10 +46,10 @@ Como jogador, quero oportunidades de cura e coleta de XP próximo com fluidez.
 **Independent Test**: derrotar comuns/minibosses, coletar em vida cheia/parcial e atrair XP junto a obstáculos.
 **Acceptance Scenarios**:
 
-1. **Given** inimigo derrotado, **When** processar recompensa, **Then** sempre deixa XP; morte comum também tem chance independente de 1 em 10 de deixar cura de 15% da vida máxima, limitada à falta.
-2. **Given** miniboss derrotado, **When** recompensa é emitida, **Then** sempre deixa uma cura de 50% da vida máxima limitada à falta; chefe não herda esse drop automaticamente.
+1. **Given** inimigo comum ou miniboss derrotado, **When** processar recompensa, **Then** sempre deixa XP; morte comum também tem chance independente de 1 em 10 de deixar cura de 15% da vida máxima, limitada à falta.
+2. **Given** miniboss derrotado, **When** recompensa é emitida, **Then** sempre deixa uma cura de 50% da vida máxima limitada à falta; chefe final não deixa XP nem cura.
 3. **Given** XP ou cura dentro do raio de captura, **When** inicia atração, **Then** segue até o Pato independentemente da distância posterior, a 1,25 vez sua velocidade efetiva na água, sem ficar preso em obstáculos e concede uma vez. O raio é um diâmetro de espaço livre além da borda física do Pato (hoje 1,26 unidades centro-centro).
-4. **Given** cura e vida cheia, **When** há proximidade, **Then** cura não é consumida nem inicia atração; se vida encher depois de capturada, acompanha sem consumir até poder curar.
+4. **Given** cura e vida cheia, **When** há proximidade, **Then** cura não é consumida nem inicia atração; se vida encher depois de capturada, é descartada sem cura nem retorno ao chão (revisão T029).
 5. **Given** saturação de apresentação de pickups, **When** ocorre derrota, **Then** XP e curas devidas são preservados sem reduzir chance, apagar recompensa ou conceder duas vezes.
 
 ### User Story 5 — Ler progressão e ameaças (Priority: P2)
@@ -98,7 +98,7 @@ Como jogador, quero reconhecer personagens, armas, recompensas e bloqueios na di
 | FR-008 | MEL-008 | Aplicar e comunicar as seis passivas. Sabão somente em Bolhas: +16% no raio por nível, até +80%; raio real de acerto e tamanho visual crescem juntos, com prévia antes/depois; não aumenta dano, velocidade ou alcance de aquisição. |
 | FR-009 | MEL-009 | Permitir um acerto por alvo por trecho de ida/volta do mesmo bumerangue. |
 | FR-010 | MEL-010 + resposta | Cada derrota comum tem chance independente de 10% de deixar cura de 15% da vida máxima, limitada à falta, sem cooldown ou teto de gameplay que reduza a chance. Não são 100% das mortes nem garantia de um drop a cada dez. Cura pode cair junto do XP. |
-| FR-011 | MEL-011 + resposta | Toda derrota de inimigo deixa XP sem sorteio, sem supressão por pool cheio. XP e cura capturam a um diâmetro de espaço livre além da borda física do Pato (raio centro-centro de 3 vezes seu raio físico; hoje 1,26 unidades), movem a 1,25 vezes sua velocidade efetiva na água, continuam após afastamento, ignoram obstáculos na atração e concedem uma vez. Cura ainda não capturada é preservada com vida cheia; cura já capturada é descartada se a vida ficar cheia (revisão T029, 05/11/2026); pausa suspende e morte/fim cancelam atração. XP do chefe final é liquidado antes do encerramento. |
+| FR-011 | MEL-011 + resposta | Toda derrota de inimigo comum ou miniboss deixa XP sem sorteio, sem supressão por pool cheio. XP e cura capturam a um diâmetro de espaço livre além da borda física do Pato (raio centro-centro de 3 vezes seu raio físico; hoje 1,26 unidades), movem a 1,25 vezes sua velocidade efetiva na água, continuam após afastamento, ignoram obstáculos na atração e concedem uma vez. Cura ainda não capturada é preservada com vida cheia; cura já capturada é descartada se a vida ficar cheia (revisão T029, 05/11/2026); pausa suspende e morte/fim cancelam atração. O chefe final não concede XP nem cura; mantém moedas, vitória e registros uma vez. |
 | FR-012 | MEL-012 + resposta | Barra individual acima de cada miniboss/chefe; cada miniboss sempre deixa cura de 50% da vida máxima limitada à falta, sem extensão automática ao chefe. |
 | FR-013 | MEL-013 | Alternar touch pela disponibilidade do controle sem reiniciar/perder ações. |
 | FR-014 | MEL-014 | Navegar armas/relíquias por controle com foco, confirmação, retorno e fechamento válidos. |
@@ -146,3 +146,6 @@ Respostas e aprovações recebidas em 03/11/2026: XP garantido, cura comum proba
 Decisões D1–D8 resolvidas em [decisions.md](decisions.md), com alternativas rejeitadas claramente separadas. Cura nunca ressuscita morto. Relíquias preservam dono da pausa; Cancel na melhoria fecha detalhe/retorna foco, sem escolher/pular implicitamente; encerrar oferta exige escolha ou PULAR válido.
 
 Ordem de arte aprovada: personagens/ameaças/obstáculos → armas/efeitos/recompensas → HUD/menus/controles → cenário/água; aprovar cena-amostra antes de lote. Revisões e tarefas de diagnóstico/tuning técnico continuam necessárias, sem novas decisões de balanceamento implícitas.
+
+
+**Revisão T030 (05/11/2026):** chefe final sem XP nem cura; moedas, vitória e registros preservados uma vez. Pickups pendentes são cancelados no término, sem coleta automática. Esta decisão substitui referências anteriores a XP do chefe; ver [decisions.md](decisions.md) e o relatório T030.

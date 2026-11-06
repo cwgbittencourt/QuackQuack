@@ -10,6 +10,57 @@ namespace QuackQuack.Tests.EditMode
 {
     public class RewardLedgerTests
     {
+        [Test]
+        public void ClosingCancelsUncollectedRecordsWithoutGrantAndKeepsClaimedAndDiscardedReceipts()
+        {
+            int rolls = 0;
+            var ledger = new RewardLedger(1, () => { rolls++; return 0; }, 1, 0.15f, 0.5f, 4);
+            ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 5, 0, 0, true);
+            ledger.ProcessDefeat(8, 2, RewardOrigin.MiniBoss, 50, 1, 2, true);
+            ledger.ProcessDefeat(7, 3, RewardOrigin.Common, 9, 3, 4, true);
+            var xp = new ExperienceState(new[] { 1000 });
+            ledger.TryMaterialize(ledger.Entries[0].Id, true); ledger.TryCollectExperience(ledger.Entries[0].Id, xp);
+            ledger.TryMaterialize(ledger.Entries[1].Id, true); ledger.TryMarkAttracted(ledger.Entries[1].Id);
+            ledger.TryDiscardCapturedHealing(ledger.Entries[1].Id);
+            ledger.TryMaterialize(ledger.Entries[2].Id, false);
+            ledger.TryMaterialize(ledger.Entries[3].Id, true); ledger.TryMarkAttracted(ledger.Entries[3].Id);
+            ledger.TryMaterialize(ledger.Entries[4].Id, true);
+            Assert.That(ledger.Close(), Is.True); Assert.That(ledger.Close(), Is.False);
+            var summary = ledger.Closure;
+            Assert.That(summary.Registered, Is.EqualTo(6)); Assert.That(summary.Claimed, Is.EqualTo(1));
+            Assert.That(summary.Discarded, Is.EqualTo(1)); Assert.That(summary.Cancelled, Is.EqualTo(4));
+            Assert.That(summary.CancelledExperience, Is.EqualTo(59)); Assert.That(summary.InFlight, Is.Zero);
+            Assert.That(ledger.PendingCount, Is.Zero); Assert.That(xp.Experience, Is.EqualTo(5));
+            Assert.That(ledger.ProcessDefeat(7, 4, RewardOrigin.Common, 9, 0, 0, true), Is.False);
+            Assert.That(ledger.TryMaterialize(ledger.Entries[2].Id, true), Is.False);
+            Assert.That(ledger.ReturnToPending(ledger.Entries[4].Id), Is.False);
+            Assert.That(ledger.TryCollectExperience(ledger.Entries[4].Id, xp), Is.False); Assert.That(rolls, Is.EqualTo(2));
+        }
+
+        [TestCase(0)] [TestCase(50)]
+        public void FinalBossProducesNoPickupsOrRandom(int xp)
+        {
+            int rolls = 0;
+            var ledger = new RewardLedger(1, () => { rolls++; return 0; }, 0.1, 0.15f, 0.5f, 1);
+            for (int i = 0; i < 2; i++)
+                Assert.That(ledger.ProcessDefeat(7, 1, RewardOrigin.FinalBoss, xp, 0, 0, true), Is.False);
+            Assert.That(ledger.Entries.Count, Is.Zero); Assert.That(rolls, Is.Zero);
+            ledger.Close();
+            Assert.That(ledger.ProcessDefeat(7, 1, RewardOrigin.FinalBoss, xp, 0, 0, true), Is.False);
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void ClosingInsideConsumerAccountsFinalClaimWithoutRequeue(bool accepted)
+        {
+            var ledger = new RewardLedger(1, () => 0.9, 0.1, 0.15f, 0.5f, 1);
+            ledger.ProcessDefeat(7, 1, RewardOrigin.Common, 9, 0, 0, true);
+            var id = ledger.Entries[0].Id; ledger.TryMaterialize(id, true);
+            ledger.TryClaimExperience(id, _ => { ledger.Close(); Assert.That(ledger.Closure.InFlight, Is.EqualTo(1)); return accepted; });
+            Assert.That(ledger.Closure.InFlight, Is.Zero);
+            Assert.That(ledger.Closure.Claimed, Is.EqualTo(accepted ? 1 : 0));
+            Assert.That(ledger.Closure.Cancelled, Is.EqualTo(accepted ? 0 : 1)); Assert.That(ledger.PendingCount, Is.Zero);
+        }
+
         [TestCase(false)] [TestCase(true)]
         public void ViewReleasedInsideExperienceConsumerDoesNotLoseOrReemitClaim(bool accepted)
         {
@@ -135,7 +186,7 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(rolls, Is.EqualTo(1));
         }
 
-        [TestCase("Common", 2)] [TestCase("MiniBoss", 2)] [TestCase("FinalBoss", 1)]
+        [TestCase("Common", 2)] [TestCase("MiniBoss", 2)]
         public void DuplicateDefeatKeepsOneObligationPerKindAndDoesNotReroll(string origin, int count)
         {
             int rolls = 0;
@@ -162,7 +213,7 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(ids.Distinct().Count(), Is.EqualTo(ids.Length));
         }
 
-        [TestCase("Common")] [TestCase("MiniBoss")] [TestCase("FinalBoss")]
+        [TestCase("Common")] [TestCase("MiniBoss")]
         public void DespawnIsNotDefeatAndCannotConsumeRandomOrReward(string origin)
         {
             int rolls = 0;

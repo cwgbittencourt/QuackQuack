@@ -81,7 +81,6 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(policy.AttractionWaterSpeedMultiplier, Is.EqualTo(1.25f));
             var settings = AssetDatabase.LoadAssetAtPath<LakeRunSettings>(LakeRunSetup.SettingsPath);
             Assert.That(settings.IsValid, Is.True); Assert.That(settings.PickupPolicy, Is.SameAs(policy));
-            Assert.That(settings.BossExperience, Is.EqualTo(50));
             Assert.That(settings.HealingPrefab, Is.Not.Null);
             Assert.That(settings.HealingPrefab.GetComponent<CircleCollider2D>().isTrigger, Is.True);
             Assert.That(settings.HealingPrefab.GetComponentsInChildren<SpriteRenderer>().Length, Is.EqualTo(3));
@@ -97,14 +96,6 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(settings.IsValid, Is.False);
         }
 
-        [TestCase(0)] [TestCase(-1)]
-        public void BossExperienceMustBePositive(int xp)
-        {
-            var settings = Clone(AssetDatabase.LoadAssetAtPath<LakeRunSettings>(LakeRunSetup.SettingsPath));
-            settings.BossExperience = xp;
-            Assert.That(settings.IsValid, Is.False);
-            Assert.That(ContentValidationWindow.Validate(new[] { settings }).Issues.Any(i => i.Code == "NonPositiveBossExperience"), Is.True);
-        }
 
         [TestCase(0)] [TestCase(-1)]
         public void EveryEnemyRequiresPositiveExperience(int xp)

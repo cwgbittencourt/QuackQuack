@@ -41,7 +41,7 @@ Inspeção estática somente; nenhum teste, gameplay ou profiling executado nest
 **Decisão**: cura pura limitada à falta, sem reanimar morto; drop por origem/lease e RNG determinístico independente de ofertas. Atração centralizada, pausada e limpa no reuso. Reservar capacidade para cura garantida de miniboss, sem perda silenciosa por pool cheio. D1–D3 condicionam comportamento/dados finais.
 **Alternativas**: Instantiate por morte, sorteio global compartilhado e cooldown oculto prejudicam desempenho/reprodutibilidade. Testar vida cheia/morta, maxHealth modificado, duplicações, saturação, atração dentro/fora do raio, obstáculo, pausa e afastamento.
 
-**Garantia nova de XP**: usuário exige XP em toda derrota. RunDirector.Reward atualmente retorna se Experience<=0 e incrementa SuppressedPickups quando pool cheio. OnCombat trata morte de chefe com moedas/estatística separadas, sem XP. Planejar validação de XP positivo por inimigo elegível e garantir recompensa sob saturação, incluindo política de concessão final do chefe, antes de declarar atendimento; despawn não é derrota. Quantidades não informadas não devem ser inventadas.
+**Garantia nova de XP**: usuário exige XP em toda derrota. RunDirector.Reward atualmente retorna se Experience<=0 e incrementa SuppressedPickups quando pool cheio. OnCombat trata morte de chefe com moedas/estatística separadas, sem XP. Planejar validação de XP positivo por inimigo elegível e garantir recompensa sob saturação, excluindo o chefe final por decisão T030, antes de declarar atendimento; despawn não é derrota. Quantidades não informadas não devem ser inventadas.
 
 ## HUD
 
@@ -72,7 +72,7 @@ Inspeção estática somente; nenhum teste, gameplay ou profiling executado nest
 - D7: somente Bolhas, +8%/nível até +40% no raio efetivo e visual, prévia antes/depois. Não aplicar AreaRadius sobre zero; definir raio efetivo a partir do HitRadius de Bolhas e não alterar aquisição/dano/velocidade.
 - D8: cartoon confirmado; ordem de assets em decisions.md. Assets precisam de autoria/licença/importação e aceite de amostra antes do lote.
 
-**Arquitetura de saturação escolhida**: separar RewardLedger lógico das views pooled; registrar cada derrota uma vez antes de tentar apresentação. Pool cheio nunca descarta XP/cura ou dispara novo sorteio. Preservar posição, quantidade/fração e identidade em pendências até obter view. Capacidade e drenagem devem ser demonstradas para uma partida completa com maior taxa autoral de mortes e benchmark; falha de capacidade impede aceite, não aplica teto de chance. Não conceder à distância para contornar falta de view. Miniboss tem prioridade de materialização; XP do chefe é liquidado antes de selar resultado. Quantidade de XP do chefe fica nos dados: na ausência de valor positivo existente, usar recompensa padrão editável de chefe e documentar valor de autoria durante task de dados, sem inventá-lo no controlador.
+**Arquitetura de saturação escolhida**: separar RewardLedger lógico das views pooled; registrar cada derrota uma vez antes de tentar apresentação. Pool cheio nunca descarta XP/cura ou dispara novo sorteio. Preservar posição, quantidade/fração e identidade em pendências até obter view. Capacidade e drenagem devem ser demonstradas para uma partida completa com maior taxa autoral de mortes e benchmark; falha de capacidade impede aceite, não aplica teto de chance. Não conceder à distância para contornar falta de view. Miniboss tem prioridade de materialização; Chefe final não concede XP nem cura (revisão T030 aprovada).
 
 **Alternativa de saturação rejeitada**: manter SuppressedPickups ou conceder XP imediatamente na morte mudaria as garantias de drop/proximidade. Pending ledger deve ser observável em testes e no diagnóstico de desempenho. Dimensionamento numérico dos pools é resultado de profiling/catálogo, não nova decisão de chance.
 
@@ -81,3 +81,6 @@ Inspeção estática somente; nenhum teste, gameplay ou profiling executado nest
 Manifest local: Input System 1.19.0, URP 17.4.0, uGUI 2.0.0, Test Framework 1.6.0; Unity 6000.4.3f1. Nenhuma atualização proposta. Pesquisa local fundamenta estes achados, sem novas alegações sobre APIs externas. Resultados anteriores 465 EditMode/258 PlayMode/34 por player são históricos, não execução desta rodada nem contagem fixa futura.
 
 **Revisão explícita D3 na T029 (05/11/2026):** cura já capturada que encontra vida cheia é descartada, sem cura nem retorno ao chão. Substitui a recomendação anterior de aguardar falta de vida acompanhando. Cura ainda não capturada continua no chão com vida cheia; ver decisions.md.
+
+
+**Revisão T030 (05/11/2026):** chefe final sem XP nem cura; moedas, vitória e registros preservados uma vez. Pickups pendentes são cancelados no término, sem coleta automática. Esta decisão substitui referências anteriores a XP do chefe; ver [decisions.md](decisions.md) e o relatório T030.
