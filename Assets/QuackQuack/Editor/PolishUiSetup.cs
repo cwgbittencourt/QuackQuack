@@ -10,6 +10,14 @@ namespace QuackQuack.Editor
     public static class PolishUiSetup
     {
         public const string ProfilePath = "Assets/QuackQuack/Prefabs/Prototype/ControlSettings.prefab";
+        [MenuItem("QuackQuack/Build 002 gameplay UI composition")]
+        public static void BuildGameplayComposition()
+        {
+            UpgradeSelectionSetup.UpdateAreaPreview();
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(ProfilePath) == null) BuildProfile();
+            IntegratedUiSetup.Build();
+            Debug.Log("T038_GAMEPLAY_COMPOSITION_SAVED");
+        }
         [MenuItem("QuackQuack/Build 002 control menus")]
         public static void Build()
         {
@@ -20,6 +28,7 @@ namespace QuackQuack.Editor
                     PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(ProfilePath));
                 EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
             }
+            IntegratedUiSetup.Build();
             AssetDatabase.SaveAssets(); Debug.Log("T013_CONTROL_MENUS_SAVED");
         }
         private static void BuildProfile()

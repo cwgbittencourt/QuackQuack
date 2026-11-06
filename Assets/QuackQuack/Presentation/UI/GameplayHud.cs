@@ -54,7 +54,7 @@ namespace QuackQuack.Presentation.UI
             if (healthLabel != null) healthLabel.text = "";
             if (breathLabel != null) breathLabel.text = "";
             if (terrainLabel != null) terrainLabel.text = "";
-            // Compatibility with the existing authored footer until its generator is updated in T038.
+            // Compatibility only for older scenes/fixtures; current scenes have no static footer.
             var controls = statusLabel != null ? statusLabel.transform.parent.Find("Controls") : null;
             if (controls != null && controls.TryGetComponent<Text>(out var text)) text.text = "";
         }
@@ -78,7 +78,7 @@ namespace QuackQuack.Presentation.UI
             return icon;
         }
         // One-time compatibility composition for existing scenes; serialized bindings take precedence.
-        // T038 authors the permanent composition. Never creates UI in the steady-state render loop.
+        // Current authored scenes bind these fields; standalone fixtures retain this fallback.
         private void CreateProgressView()
         {
             var safe = healthFill != null ? healthFill.GetComponentInParent<SafeAreaController>() : null;

@@ -20,6 +20,19 @@ namespace QuackQuack.Gameplay.Player
         // Keep the serialized name; this list now accepts both land and water volumes.
         [SerializeField] private TerrainZone[] water;
         private IPlayerInput input;
+        private InputSource lastInputSource;
+        public InputSource HintInputSource
+        {
+            get
+            {
+                if (input is UnifiedPlayerInput unified)
+                {
+                    if (Application.isMobilePlatform) return unified.ControllerAvailable ? InputSource.Gamepad : InputSource.Touch;
+                    return unified.Source == InputSource.Gamepad && !unified.ControllerAvailable ? InputSource.Keyboard : unified.Source;
+                }
+                return lastInputSource;
+            }
+        }
         private UnifiedPlayerInput ownedInput;
         private RunState run;
         private GameplayEventBus events;
@@ -98,6 +111,7 @@ namespace QuackQuack.Gameplay.Player
 
         public void ApplyCommand(PlayerCommand command)
         {
+            lastInputSource = command.Source;
             if (State == null || !isActiveAndEnabled) return;
             if (menuInputBlocked) { ClearCommands(); return; }
             if (command.RelicsPressed && !command.PausePressed) { RelicsRequested?.Invoke(); ClearCommands(); return; }

@@ -19,13 +19,19 @@ namespace QuackQuack.Editor
                 try { Configure(root); PrefabUtility.SaveAsPrefabAsset(root,path); }
                 finally { PrefabUtility.UnloadPrefabContents(root); }
             }
-            var scene = EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/LakeRun.unity");
-            var controls = GameObject.Find("Run controls");
-            if (controls == null) throw new InvalidOperationException("LakeRun is missing its authored run controls.");
-            ConfigureRunControls(controls);
-            EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+            foreach (string name in new[] { "Lake", "LakeRun" })
+            {
+                var scene = EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/" + name + ".unity");
+                var hud = Object.FindAnyObjectByType<GameplayHud>();
+                if (hud == null) throw new InvalidOperationException(name + " is missing its authored HUD.");
+                GameplayHudSetup.Configure(hud);
+                var controls = GameObject.Find("Run controls");
+                if (controls != null) ConfigureRunControls(controls);
+                else if (name == "LakeRun") throw new InvalidOperationException("LakeRun is missing its authored run controls.");
+                EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+            }
             AssetDatabase.SaveAssets();
-            Debug.Log("T075_INTEGRATED_UI_SAVED");
+            Debug.Log("T038_INTEGRATED_UI_SAVED");
         }
 
         public static void Configure(GameObject root)

@@ -103,7 +103,7 @@ namespace QuackQuack.Tests.PlayMode
                 var hud = Object.FindAnyObjectByType<GameplayHud>();
                 var rects = new List<RectTransform> {
                     Field<Text>(hud,"timeLabel").transform.parent as RectTransform,
-                    Field<Text>(hud,"healthLabel").transform.parent as RectTransform,
+                    Field<ResourceIconGraphic>(hud,"healthIcon").transform.parent as RectTransform,
                     Field<Text>(hud,"statusLabel").transform.parent as RectTransform,
                     open.GetComponent<RectTransform>(),
                     Field<Button>(director,"pauseButton").GetComponent<RectTransform>(),
