@@ -40,7 +40,7 @@ Distância de captura centro-centro <=3 × raio físico escalado do Pato (base 1
 
 ## C6 — HUD e dicas (FR-003–005/012/017)
 
-Snapshots são projeções de regras, sem recalcular curva/área na view. Vida/Fôlego: duas barras com ícones e estados além da cor; remover números, textos de terreno e instruções permanentes dos produtores, geradores e view. XP/nível inferior central; último limiar mostra barra cheia no nível atual.
+Snapshots são projeções de regras, sem recalcular curva/área na view. Vida/Fôlego: duas barras com ícones e estados além da cor; remover números, textos de terreno e instruções permanentes dos produtores, geradores e view. XP/nível inferior central; último limiar mostra barra cheia no nível atual. Revisão explícita T040: remover a tarja inferior e seus textos de status, inclusive em pausa; XP/nível desce para esse espaço. Sinais do Quack ficam na região dos recursos, pausa nos controles e fim no modal de resultados.
 
 Dicas ocupam apenas primeiros 10 segundos de simulação; pausa suspende, família muda símbolos sem reset, sem reapresentação posterior. Barra de especial individual acima da âncora de cada entidade, posição filtrada para não ocultar barra de outra, sem painel agregado. Registro por lease; fora da tela não deslocar barra sobre alvo diferente. Compatibilidade com UI Safe Area, modais de bloqueio inteiro e ambos os lados da paisagem.
 

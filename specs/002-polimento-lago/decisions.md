@@ -82,3 +82,7 @@ O usuário corrigiu explicitamente a proposta de cura acompanhando o Pato com vi
 ## Revisão T030 — chefe final sem XP (05/11/2026)
 
 Decisão explícita do usuário: “Remover o XP do chefe (recomendado)”. O chefe final não gera XP nem cura, pois encerra a partida. Mantêm-se moedas, bônus de vitória e registros uma única vez. As instruções anteriores sobre XP positivo/editável/liquidado do chefe são históricas e estão substituídas por esta revisão. BossExperience foi removido dos dados e geradores. Pickups pendentes no encerramento são cancelados, sem coleta automática. Capacidade vigente: 3.323 derrotas elegíveis e 6.646 registros pré-alocados; relatórios anteriores preservam os números daquela versão.
+
+## Revisão T040 — rodapé e posição de XP (06/11/2026)
+
+Durante o aceite Windows, o usuário confirmou funcionamento normal e pediu remover a tarja abaixo de XP/nível e os textos de status nela, inclusive durante pausa. Em seguida solicitou que XP/nível ocupasse esse espaço. Aplicar nas duas cenas: remover Messages e o binding statusLabel, manter os sinais de Quack junto às barras superiores e indicar pausa pelos controles; tela de resultados continua responsável pelo fim. XP/nível permanece centralizado e passa da margem inferior 108 para 12 unidades de referência, sem alterar progressão ou proporção. Esta decisão substitui a composição de mensagens descrita historicamente em T035/T038. Não autoriza mudar chance de cura, Sabão ou outro balanceamento.

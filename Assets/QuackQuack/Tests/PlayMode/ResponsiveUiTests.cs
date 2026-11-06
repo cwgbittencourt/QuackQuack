@@ -272,7 +272,7 @@ namespace QuackQuack.Tests.PlayMode
 
         private IEnumerable<RectTransform> Essentials()
         {
-            foreach (var name in new[] { "healthIcon", "breathIcon", "quackLabel", "statusLabel", "timeLabel", "healthFill", "breathFill", "experienceFill", "levelLabel" })
+            foreach (var name in new[] { "healthIcon", "breathIcon", "quackLabel", "timeLabel", "healthFill", "breathFill", "experienceFill", "levelLabel" })
             {
                 var field = typeof(GameplayHud).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
                 Assert.That(field, Is.Not.Null, "Missing HUD binding: " + name);

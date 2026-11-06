@@ -52,7 +52,8 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(safe, Is.Not.Null, "Production LakeRun must retain the responsive HUD from Lake.");
             Assert.That(safe.transform.Find("Player vitals"), Is.Not.Null);
             Assert.That(safe.transform.Find("Clock"), Is.Not.Null);
-            Assert.That(safe.transform.Find("Messages"), Is.Not.Null);
+            Assert.That(safe.transform.Find("Messages"), Is.Null, "T040: removed redundant status footer.");
+            Assert.That(safe.transform.Find("Experience progress").GetComponent<RectTransform>().anchoredPosition.y, Is.EqualTo(12));
             var telemetry = director.GetComponent<QuackQuack.Systems.Diagnostics.PerformanceTelemetry>();
             Assert.That(telemetry, Is.Not.Null);
             Assert.That(telemetry.Capture(0), Is.True, "LakeRun must bind its live pools and scheduler.");

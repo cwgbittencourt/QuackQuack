@@ -125,14 +125,13 @@ namespace QuackQuack.Tests.PlayMode
                 var rects = new List<RectTransform> {
                     Field<Text>(hud,"timeLabel").transform.parent as RectTransform,
                     Field<ResourceIconGraphic>(hud,"healthIcon").transform.parent as RectTransform,
-                    Field<Text>(hud,"statusLabel").transform.parent as RectTransform,
                     open.GetComponent<RectTransform>(),
                     Field<Button>(director,"pauseButton").GetComponent<RectTransform>(),
                     Field<Button>(director,"abandonButton").GetComponent<RectTransform>()
                 };
                 foreach (string name in new[] { "Joystick","QUACK" })
                     foreach (var rect in mobile.GetComponentsInChildren<RectTransform>()) if (rect.name == name) rects.Add(rect);
-                Assert.That(rects.Count, Is.EqualTo(8));
+                Assert.That(rects.Count, Is.EqualTo(7));
                 foreach (var rect in rects) AssertInside(rect);
                 for (int i=0;i<rects.Count;i++) for (int j=i+1;j<rects.Count;j++)
                     Assert.That(ScreenRect(rects[i]).Overlaps(ScreenRect(rects[j])), Is.False, rects[i].name + " overlaps " + rects[j].name);
@@ -204,7 +203,9 @@ namespace QuackQuack.Tests.PlayMode
                     Assert.That(progressBounds.yMax, Is.LessThan(safe.center.y));
                     Assert.That(hints.IsVisible, Is.True);
                     var panels = FixedPanels(hud, mobile, true); AssertSeparated(panels);
-                    foreach (var text in new[] { Field<Text>(hud,"levelLabel"), Field<Text>(hud,"quackLabel"), Field<Text>(hud,"statusLabel"), Field<Text>(hints,"label") }) AssertTextFits(text);
+                    Assert.That(Field<Text>(hud,"statusLabel"), Is.Null);
+                    Assert.That(Field<Text>(hud,"levelLabel").transform.parent.GetComponent<RectTransform>().anchoredPosition.y, Is.EqualTo(12));
+                    foreach (var text in new[] { Field<Text>(hud,"levelLabel"), Field<Text>(hud,"quackLabel"), Field<Text>(hints,"label") }) AssertTextFits(text);
                     Capture(size,"resources-"+state+"-"+right);
                 }
             }
@@ -299,7 +300,6 @@ namespace QuackQuack.Tests.PlayMode
             var result = new List<RectTransform> {
                 Field<ResourceIconGraphic>(hud,"healthIcon").transform.parent as RectTransform,
                 Field<Text>(hud,"timeLabel").transform.parent as RectTransform,
-                Field<Text>(hud,"statusLabel").transform.parent as RectTransform,
                 Field<Text>(hud,"levelLabel").transform.parent as RectTransform,
                 Object.FindAnyObjectByType<RelicLoadoutView>().OpenButton.GetComponent<RectTransform>(),
                 Field<Button>(director,"pauseButton").GetComponent<RectTransform>(),

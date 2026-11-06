@@ -58,7 +58,7 @@ Campos: projectile lease, fase Outbound/Inbound, alvos atingidos por identidade 
 ## 6. UI snapshots
 
 - ProgressSnapshot: Level >=1, XP acumulado, limite anterior/próximo e fração normalizada [0,1] produzidos por ExperienceState. Múltiplos níveis processados antes da leitura. Após último limiar, mostrar nível atual e barra cheia, sem dividir por zero ou criar nova curva.
-- ResourceSnapshot: Health01, Breath01, Ready, Empowered/cooldown e ícones/estados. Vida/Fôlego sem números/textos de terreno; progresso/nível e avisos de pausa/fim continuam em áreas próprias.
+- ResourceSnapshot: Health01, Breath01, Ready, Empowered/cooldown e ícones/estados. Vida/Fôlego sem números/textos de terreno; progresso/nível no centro inferior, sinais do Quack junto aos recursos. Revisão T040: sem tarja de status inferior; pausa indicada pelos controles e fim pelo modal de resultados. Metadados de status podem permanecer no snapshot sem binding de rodapé nas cenas.
 - SpecialEnemySnapshot: encounter/lease, posição âncora, Health01 e categoria. Registro aceita ciclo EnemyState e FrogKingController; remove ao morrer/desativar/reusar. View segue acima do alvo e não representa alvo fora da tela em outra posição.
 - HintWindow: elapsedSimulationSeconds em [0,10], família/bindings; inicia a cada partida, pausa suspende, troca entrada não reseta, após 10 não reaparece.
 - UpgradePreview: raio atual/previsto de Bolhas, nível de Sabão e grandeza descrita como raio, sem exagerar 16% de raio como 16% de área.

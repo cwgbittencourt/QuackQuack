@@ -42,7 +42,7 @@ namespace QuackQuack.Editor
             safe.anchorMin = Vector2.zero;
             safe.anchorMax = Vector2.one;
             safe.offsetMin = safe.offsetMax = Vector2.zero;
-            foreach (var name in new[] { "Player vitals", "Clock", "Messages" })
+            foreach (var name in new[] { "Player vitals", "Clock" })
             {
                 var panel = canvas.transform.Find(name) ?? safe.Find(name);
                 if (panel == null) throw new System.InvalidOperationException("Missing HUD panel: " + name);

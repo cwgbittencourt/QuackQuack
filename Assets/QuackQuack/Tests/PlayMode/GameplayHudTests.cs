@@ -122,22 +122,22 @@ namespace QuackQuack.Tests.PlayMode
             yield return LoadArena();
             var hud = Object.FindAnyObjectByType<GameplayHud>(); var player = Object.FindAnyObjectByType<PlayerController>();
             var snapshot = player.Snapshot(); Assert.That(snapshot.Terrain, Is.Empty); Assert.That(snapshot.Status, Is.Empty);
-            var controls = Field<Text>(hud, "statusLabel").transform.parent.Find("Controls");
-            if (controls != null) Assert.That(controls.GetComponent<Text>().text, Is.Empty);
+            Assert.That(Field<Text>(hud, "statusLabel"), Is.Null);
+            Assert.That(hud.transform.Find("HUD Safe Area/Messages"), Is.Null);
             Assert.That(Field<Image>(hud, "experienceFill").fillAmount, Is.EqualTo(snapshot.Progress.Fraction));
         }
 
         private static readonly RunPhase[] OtherOutcomes = { RunPhase.Won, RunPhase.Abandoned };
         [UnityTest]
-        public IEnumerator TerminalMessagesStaySeparateFromProgress([ValueSource(nameof(OtherOutcomes))] RunPhase outcome)
+        public IEnumerator TerminalOutcomeDoesNotRestoreRemovedStatusFooter([ValueSource(nameof(OtherOutcomes))] RunPhase outcome)
         {
             yield return LoadArena();
             var hud = Object.FindAnyObjectByType<GameplayHud>(); var player = Object.FindAnyObjectByType<PlayerController>();
             var run = GameBootstrap.Instance.Run;
             if (outcome == RunPhase.Won) Assert.That(run.TryTransition(RunPhase.Boss), Is.True);
             Assert.That(run.TryTransition(outcome), Is.True); yield return null;
-            Assert.That(Field<Text>(hud, "statusLabel").text, Does.Contain(outcome == RunPhase.Won ? "VITÓRIA" : "ABANDONADA"));
-            Assert.That(Field<Text>(hud, "levelLabel"), Is.Not.SameAs(Field<Text>(hud, "statusLabel")));
+            Assert.That(player.Snapshot().Status, Does.Contain(outcome == RunPhase.Won ? "VITÓRIA" : "ABANDONADA"));
+            Assert.That(Field<Text>(hud, "statusLabel"), Is.Null);
         }
 
         [Test]
@@ -401,7 +401,7 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator RejectionsPauseAndDeathReachVisibleStatus()
+        public IEnumerator QuackStateRemainsAboveResourcesWithoutRedundantFooterOnPauseOrDeath()
         {
             yield return LoadArena();
             var hud = Object.FindAnyObjectByType<GameplayHud>();
@@ -410,20 +410,22 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(player.ActivateQuack(), Is.True);
             Assert.That(player.ActivateQuack(), Is.False);
             yield return null; yield return null;
-            Assert.That(Field<Text>(hud, "statusLabel").text, Does.Contain("recarregando"));
+            Assert.That(Field<Text>(hud, "quackLabel").text, Does.Contain("RECARREGANDO"));
             yield return new WaitForSeconds(0.4f);
             player.State.Breath.TryConsume(player.State.Breath.Capacity, out _);
             Assert.That(player.ActivateQuack(), Is.False);
-            yield return null; yield return null;
-            Assert.That(Field<Text>(hud, "statusLabel").text, Does.Contain("Sem Fôlego"));
+            hud.Render(player.Snapshot());
+            Assert.That(Field<Text>(hud, "quackLabel").text, Does.Contain("SEM FÔLEGO"));
             var run = GameBootstrap.Instance.Run;
             run.TryTransition(RunPhase.Paused);
             yield return null; yield return null;
-            Assert.That(Field<Text>(hud, "statusLabel").text, Does.Contain("PAUSADO"));
+            Assert.That(Field<Text>(hud, "statusLabel"), Is.Null);
+            Assert.That(Field<Text>(hud, "quackLabel").text, Does.Contain("INDISPONÍVEL"));
             run.TryTransition(RunPhase.Playing);
             run.TryTransition(RunPhase.Lost);
             yield return null; yield return null;
-            Assert.That(Field<Text>(hud, "statusLabel").text, Does.Contain("DERROTA"));
+            Assert.That(player.Snapshot().Status, Does.Contain("DERROTA"));
+            Assert.That(Field<Text>(hud, "statusLabel"), Is.Null);
         }
 
         private IEnumerator LoadArena()

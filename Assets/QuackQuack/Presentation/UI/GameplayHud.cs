@@ -83,7 +83,7 @@ namespace QuackQuack.Presentation.UI
         {
             var safe = healthFill != null ? healthFill.GetComponentInParent<SafeAreaController>() : null;
             var parent = safe != null ? safe.transform : transform;
-            var panel = UiRect("Experience progress", parent, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 108), new Vector2(420, 56));
+            var panel = UiRect("Experience progress", parent, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(420, 56));
             var background = panel.gameObject.AddComponent<Image>(); background.color = new Color(0.04f, 0.09f, 0.12f, 0.94f); background.raycastTarget = false;
             if (experienceFill == null)
             {

@@ -43,13 +43,10 @@ namespace QuackQuack.Editor
             var clock = Panel("Clock", root.transform, Vector2.one, Vector2.one, new Vector2(-16, -16), new Vector2(112, 52));
             var time = Label("Time", clock, new Vector2(12, -10), new Vector2(88, 32), 24, "00:00");
             time.alignment = TextAnchor.MiddleCenter;
-            var footer = Panel("Messages", root.transform, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(850, 76));
-            var status = Label("Status", footer, new Vector2(16, -8), new Vector2(818, 30), 18, "");
-            status.alignment = TextAnchor.MiddleCenter;
             var data = new SerializedObject(hud);
             Assign(data, "healthFill", healthBar); Assign(data, "breathFill", breathBar);
             Assign(data, "quackLabel", ready);
-            Assign(data, "timeLabel", time); Assign(data, "statusLabel", status);
+            Assign(data, "timeLabel", time);
             data.ApplyModifiedPropertiesWithoutUndo();
             Configure(hud);
             var arena = Object.FindAnyObjectByType<LakeArenaController>();
@@ -69,19 +66,17 @@ namespace QuackQuack.Editor
             var safe = hud.transform.Find("HUD Safe Area");
             var vitals = (RectTransform)safe.Find("Player vitals"); vitals.sizeDelta = new Vector2(348, 122);
             var data = new SerializedObject(hud);
-            foreach (string field in new[] { "healthLabel", "breathLabel", "terrainLabel" }) Assign(data, field, null);
+            foreach (string field in new[] { "healthLabel", "breathLabel", "terrainLabel", "statusLabel" }) Assign(data, field, null);
             foreach (string name in new[] { "Health", "Breath", "Terrain" })
             { var legacy = vitals.Find(name); if (legacy != null) Object.DestroyImmediate(legacy.gameObject); }
-            var footer = (RectTransform)safe.Find("Messages"); footer.sizeDelta = new Vector2(850, 44);
-            var controls = footer.Find("Controls"); if (controls != null) Object.DestroyImmediate(controls.gameObject);
+            var footer = safe.Find("Messages"); if (footer != null) Object.DestroyImmediate(footer.gameObject);
             Assign(data, "healthIcon", Icon("Health icon", vitals, new Vector2(14, -14), ResourceIconKind.Health, new Color(.91f,.37f,.4f)));
             Assign(data, "breathIcon", Icon("Breath icon", vitals, new Vector2(14, -54), ResourceIconKind.Breath, new Color(.98f,.84f,.32f)));
             ConfigureResourceBar((Image)data.FindProperty("healthFill").objectReferenceValue, new Vector2(50, -20));
             ConfigureResourceBar((Image)data.FindProperty("breathFill").objectReferenceValue, new Vector2(50, -60));
             var quack = (Text)data.FindProperty("quackLabel").objectReferenceValue;
             quack.rectTransform.anchoredPosition = new Vector2(14, -92); quack.text = "PRONTO • APRIMORADO";
-            ((Text)data.FindProperty("statusLabel").objectReferenceValue).text = "";
-            var progress = Panel("Experience progress", safe, new Vector2(.5f,0), new Vector2(.5f,0), new Vector2(0,108), new Vector2(420,56));
+            var progress = Panel("Experience progress", safe, new Vector2(.5f,0), new Vector2(.5f,0), new Vector2(0,12), new Vector2(420,56));
             var fill = Bar("Experience track", progress, new Vector2(16,-36), new Color(.98f,.84f,.32f));
             fill.rectTransform.sizeDelta = new Vector2(388,10); ((RectTransform)fill.transform.parent).sizeDelta = new Vector2(388,10); fill.fillAmount = 0;
             var level = Label("Level", progress, new Vector2(16,-4), new Vector2(388,24), 19, "NÍVEL 1"); level.alignment = TextAnchor.MiddleCenter;

@@ -91,7 +91,7 @@ Como jogador, quero reconhecer personagens, armas, recompensas e bloqueios na di
 | FR-001 | MEL-001 | Substituir representações provisórias por assets reconhecíveis no elenco e direção visual aprovados. |
 | FR-002 | MEL-002 | Diferenciar decoração/bloqueios e animar água sem ocultar terreno/perigos/limites. |
 | FR-003 | MEL-003 | Exibir XP até próximo nível e nível atual na região inferior central, inclusive múltiplas subidas. |
-| FR-004 | MEL-004 | Usar somente duas barras de recursos sem números/textos de terreno, com identificação visual e sinais de prontidão/aprimoramento do Quack. |
+| FR-004 | MEL-004 | Usar somente duas barras de recursos sem números/textos de terreno, com identificação visual e sinais de prontidão/aprimoramento do Quack junto às barras superiores; sem tarja inferior de status. XP/nível ocupa o centro inferior liberado (revisão T040). |
 | FR-005 | MEL-005 | Mostrar instruções nos primeiros 10 segundos de simulação; pausa suspende contador, troca de entrada atualiza símbolos sem reiniciar, sem repetição automática após a janela. |
 | FR-006 | MEL-006 | Distinguir armas/projéteis por forma, animação ou trajetória além da cor. |
 | FR-007 | MEL-007 | Animar aura translúcida no alcance real; dano ignora obstáculos nesse alcance e preserva sua colisão de movimento. |

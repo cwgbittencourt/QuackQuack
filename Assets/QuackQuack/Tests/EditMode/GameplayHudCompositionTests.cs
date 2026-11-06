@@ -32,17 +32,18 @@ namespace QuackQuack.Tests.EditMode
             foreach (string field in new[] { "hud", "hints", "specials", "specialArea", "player", "worldCamera" })
                 Assert.That(Reference(composition, field), Is.Not.Null, field);
             Assert.That(Reference(composition, "director") != null, Is.EqualTo(name == "LakeRun"));
-            foreach (string field in new[] { "healthLabel", "breathLabel", "terrainLabel" }) Assert.That(Reference(hud,field), Is.Null);
+            foreach (string field in new[] { "healthLabel", "breathLabel", "terrainLabel", "statusLabel" }) Assert.That(Reference(hud,field), Is.Null);
             var safe = hud.GetComponentInChildren<SafeAreaController>().transform;
-            foreach (string field in new[] { "healthIcon", "breathIcon", "healthFill", "breathFill", "experienceFill", "levelLabel", "timeLabel", "statusLabel", "quackLabel" })
+            foreach (string field in new[] { "healthIcon", "breathIcon", "healthFill", "breathFill", "experienceFill", "levelLabel", "timeLabel", "quackLabel" })
             {
                 var graphic = Reference(hud,field) as Graphic; Assert.That(graphic, Is.Not.Null,field);
                 Assert.That(graphic.transform.IsChildOf(safe), Is.True,field); Assert.That(graphic.raycastTarget, Is.False,field);
             }
             var progress = (Image)Reference(hud,"experienceFill"); Assert.That(progress.type, Is.EqualTo(Image.Type.Filled)); Assert.That(progress.sprite, Is.Not.Null);
             Assert.That(progress.transform.parent.parent.GetComponent<RectTransform>().anchorMin, Is.EqualTo(new Vector2(.5f,0)));
+            Assert.That(progress.transform.parent.parent.GetComponent<RectTransform>().anchoredPosition.y, Is.EqualTo(12));
             Assert.That(safe.Find("Player vitals/Health"), Is.Null); Assert.That(safe.Find("Player vitals/Breath"), Is.Null);
-            Assert.That(safe.Find("Player vitals/Terrain"), Is.Null); Assert.That(safe.Find("Messages/Controls"), Is.Null);
+            Assert.That(safe.Find("Player vitals/Terrain"), Is.Null); Assert.That(safe.Find("Messages"), Is.Null);
             Assert.That(safe.GetComponentsInChildren<ContextualHintsView>(true).Length, Is.EqualTo(1));
             Assert.That(safe.GetComponentsInChildren<SpecialEnemyBarsView>(true).Length, Is.EqualTo(1));
             Assert.That(Reference((ContextualHintsView)Reference(composition,"hints"),"label"), Is.Not.Null);

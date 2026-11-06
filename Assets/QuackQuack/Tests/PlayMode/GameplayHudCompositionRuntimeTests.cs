@@ -53,7 +53,7 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(hud.GetComponentsInChildren<RectTransform>(true).Length, Is.EqualTo(count));
             Assert.That(run.TryTransition(RunPhase.Paused), Is.True); double before = run.ElapsedSeconds;
             run.Advance(100); yield return null; Assert.That(hints.IsVisible, Is.False); Assert.That(run.ElapsedSeconds, Is.EqualTo(before));
-            Assert.That(Field<Text>(hud,"statusLabel").text, Does.Contain("PAUSADO"));
+            Assert.That(Field<Text>(hud,"statusLabel"), Is.Null, "T040: no redundant status footer, including while paused.");
             Assert.That(run.TryResume(), Is.True); run.Advance(Math.Max(0,10-run.ElapsedSeconds)); yield return null;
             Assert.That(hints.IsVisible, Is.False); composition.enabled = false; composition.enabled = true; yield return null;
             Assert.That(hints.IsVisible, Is.False); Assert.That(hud.GetComponentsInChildren<RectTransform>(true).Length, Is.EqualTo(count));
