@@ -228,9 +228,11 @@ namespace QuackQuack.Tests.PlayMode
             run.Advance(9.5); run.TryTransition(RunPhase.Paused); run.Advance(100);
             yield return new WaitForSecondsRealtime(0.03f);
             Assert.That(run.ElapsedSeconds, Is.EqualTo(9.5));
+            AssertHint(hints.view, hints.label, false);
             run.TryResume(); yield return null; AssertHint(hints.view, hints.label, true);
             run.TryTransition(RunPhase.ChoosingUpgrade); run.Advance(100); yield return null;
             Assert.That(run.ElapsedSeconds, Is.EqualTo(9.5));
+            AssertHint(hints.view, hints.label, false);
             run.TryResume(); yield return null; AssertHint(hints.view, hints.label, true);
             run.Advance(0.5); yield return null; AssertHint(hints.view, hints.label, false);
         }
@@ -288,6 +290,77 @@ namespace QuackQuack.Tests.PlayMode
                 yield return null; AssertHint(hints.view, hints.label, false);
                 run.TryTransition(RunPhase.Results); yield return null; AssertHint(hints.view, hints.label, false);
             }
+        }
+
+        [UnityTest]
+        public IEnumerator AutomaticHintFamilyFollowsCurrentDeviceWithoutRestartingClock()
+        {
+            var run = new RunState(36); run.TryTransition(RunPhase.Playing); run.Advance(9);
+            var profile = new ControlProfile();
+            var hints = Hints(run, () => InputSource.Gamepad, () => profile);
+            UnityEngine.InputSystem.Gamepad generic = null, playstation = null;
+            try
+            {
+                generic = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Gamepad>();
+                generic.MakeCurrent(); yield return null;
+                string previous = hints.label.text;
+                Assert.That(previous, Does.Contain(profile.Label(ProfileAction.Quack, generic)));
+                playstation = (UnityEngine.InputSystem.Gamepad)UnityEngine.InputSystem.InputSystem.AddDevice("DualShockGamepad");
+                playstation.MakeCurrent(); yield return null;
+                Assert.That(hints.label.text, Does.Contain("Cross").And.Contain("Options"));
+                Assert.That(hints.label.text, Is.Not.EqualTo(previous));
+                Assert.That(run.ElapsedSeconds, Is.EqualTo(9));
+                run.Advance(1); yield return null; AssertHint(hints.view, hints.label, false);
+            }
+            finally
+            {
+                if (playstation != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(playstation);
+                if (generic != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(generic);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator DisabledAndUnboundHintsClearTextWithoutOwningTheLabelActivation()
+        {
+            var run = new RunState(36); run.TryTransition(RunPhase.Playing); run.Advance(7);
+            var hints = Hints(run, () => InputSource.Touch, () => new ControlProfile());
+            hints.view.enabled = false; AssertHint(hints.view, hints.label, false);
+            Assert.That(hints.label.gameObject.activeSelf, Is.True);
+            run.Advance(1); hints.view.enabled = true; yield return null; AssertHint(hints.view, hints.label, true);
+            Assert.That(run.ElapsedSeconds, Is.EqualTo(8));
+            ((ContextualHintsView)hints.view).Unbind(); yield return null; AssertHint(hints.view, hints.label, false);
+            run.Advance(2); BindHints(hints.view, run, () => InputSource.Keyboard, () => new ControlProfile());
+            yield return null; AssertHint(hints.view, hints.label, false);
+        }
+
+        [UnityTest]
+        public IEnumerator LateBindingAndClockJumpDoNotCreateAWindowRelativeToTheView()
+        {
+            var run = new RunState(36); run.TryTransition(RunPhase.Playing); run.Advance(9.9);
+            int reads = 0; var profile = new ControlProfile();
+            var hints = Hints(run, () => { reads++; return InputSource.Gamepad; }, () => profile);
+            yield return null; AssertHint(hints.view, hints.label, true);
+            run.Advance(100); yield return null; AssertHint(hints.view, hints.label, false);
+            int expiredReads = reads; yield return null; yield return null;
+            Assert.That(reads, Is.EqualTo(expiredReads), "Expired hints must stop polling presentation providers.");
+        }
+
+        [Test]
+        public void SharedProfileBindingDoesNotCopyProfileOrRebuildTextOnSteadyRefresh()
+        {
+            var run = new RunState(36); run.TryTransition(RunPhase.Playing);
+            var hints = Hints(run, () => InputSource.Gamepad, () => new ControlProfile());
+            var view = (ContextualHintsView)hints.view; view.Bind(run, () => InputSource.Gamepad);
+            var refresh = (Action)Delegate.CreateDelegate(typeof(Action), view,
+                typeof(ContextualHintsView).GetMethod("Refresh", BindingFlags.Instance | BindingFlags.NonPublic));
+            for (int i = 0; i < 10; i++) refresh();
+            string text = hints.label.text;
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (int i = 0; i < 1000; i++) refresh();
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            Assert.That(allocated, Is.Zero); Assert.That(hints.label.text, Is.SameAs(text));
+            Assert.That(hints.label.raycastTarget, Is.False);
+            view.Unbind(); AssertHint(view, hints.label, false);
         }
 
         private T Own<T>(T value) where T : Object { owned.Add(value); return value; }
