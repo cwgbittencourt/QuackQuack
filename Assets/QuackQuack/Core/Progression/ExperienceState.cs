@@ -1,4 +1,5 @@
 using System;
+using QuackQuack.Core.Shared;
 
 namespace QuackQuack.Core.Progression
 {
@@ -7,6 +8,18 @@ namespace QuackQuack.Core.Progression
         private readonly int[] thresholds;
         public int Experience { get; private set; }
         public int Level { get; private set; } = 1;
+        public ProgressSnapshot Progress
+        {
+            get
+            {
+                int previous = Level == 1 ? 0 : thresholds[Level - 2];
+                if (Level > thresholds.Length)
+                    return new ProgressSnapshot(Level, Experience, previous, previous, 1);
+                int next = thresholds[Level - 1];
+                return new ProgressSnapshot(Level, Experience, previous, next,
+                    (float)((double)(Experience - previous) / (next - previous)));
+            }
+        }
 
         public ExperienceState(int[] cumulativeThresholds)
         {

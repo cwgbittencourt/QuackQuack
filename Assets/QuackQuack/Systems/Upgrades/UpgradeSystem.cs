@@ -6,6 +6,7 @@ using QuackQuack.Core.Combat;
 using QuackQuack.Content.Weapons;
 using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
+using QuackQuack.Core.Shared;
 
 namespace QuackQuack.Systems.Upgrades
 {
@@ -42,6 +43,7 @@ namespace QuackQuack.Systems.Upgrades
         private int attributeHistory = -1;
         public int Experience => experience == null ? 0 : experience.Experience;
         public int Level => experience == null ? 1 : experience.Level;
+        public ProgressSnapshot Progress => experience == null ? default : experience.Progress;
         public int PendingLevels => pendingLevels;
         public bool CanCollectExperience => !disposed && experience != null && run != null && run.IsSimulating;
         public BuildState Build => build;

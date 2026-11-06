@@ -63,6 +63,8 @@ Campos: projectile lease, fase Outbound/Inbound, alvos atingidos por identidade 
 - HintWindow: elapsedSimulationSeconds em [0,10], família/bindings; inicia a cada partida, pausa suspende, troca entrada não reseta, após 10 não reaparece.
 - UpgradePreview: raio atual/previsto de Bolhas, nível de Sabão e grandeza descrita como raio, sem exagerar 16% de raio como 16% de área.
 
+**Implementação T034 (06/11/2026):** `ExperienceState.Progress` é a origem de `ProgressSnapshot` readonly, repassado por `UpgradeSystem.Progress` e transportável em `HudSnapshot.Progress`. Leitura O(1) da curva existente; no teto, anterior/próximo iguais ao último limiar e fração 1. Default sem progressão inicializada: nível 1, demais valores zero; curva conhecida vazia: fração 1. `HudSnapshot.Health01/Breath01` normalizam pelos máximos efetivos em [0,1], retornando zero em leituras não finitas ou máximo não positivo, sem alterar dados brutos. Ligação do produtor PlayerController e renderização permanecem T035. Ver `test-report-t034.md`.
+
 ## 7. InputAvailability e ControlProfile
 
 Campos: dispositivos conectados/habilitados, controle disponível, última fonte ativa, família e bindings, foco anterior, contexto Gameplay/Paused/Relics/ChoosingUpgrade/Results. Disponibilidade e última atividade são conceitos distintos. Smartphone com controle disponível oculta touch; perda/desabilitação restaura touch, limpa comandos presos e preserva contexto.
