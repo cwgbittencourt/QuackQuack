@@ -9,6 +9,7 @@ using QuackQuack.Content.Enemies;
 using QuackQuack.Core.Combat;
 using QuackQuack.Core.Progression;
 using QuackQuack.Core.Run;
+using QuackQuack.Core.Shared;
 using QuackQuack.Gameplay.Bosses;
 using QuackQuack.Gameplay.Enemies;
 using QuackQuack.Gameplay.Pickups;
@@ -38,6 +39,7 @@ namespace QuackQuack.Systems.Run
         public SpawnDirector Spawns { get; private set; }
         public EnemyUpdateScheduler Scheduler { get; private set; }
         public FrogKingController Boss { get; private set; }
+        public SpecialEnemyRegistry SpecialEnemies { get; private set; }
         public RunResult Result { get; private set; }
         public string RunId { get; } = Guid.NewGuid().ToString("N");
         public PrototypeBuildCatalog BuildCatalog => buildCatalog;
@@ -158,6 +160,9 @@ namespace QuackQuack.Systems.Run
             timeline = settings.Catalog.CreateSchedule(run);
             settings.Catalog.RegisterPools(pools, transform);
             Spawns = settings.Catalog.CreateDirector(run, pools, events, player.transform, run.Seed, Reward);
+            int specialCapacity = 1;
+            foreach (var id in miniIds) specialCapacity += rewardCatalog[id].PoolMaxSize;
+            SpecialEnemies = new SpecialEnemyRegistry(specialCapacity);
             Scheduler = gameObject.AddComponent<EnemyUpdateScheduler>(); Scheduler.AutomaticTick = false;
             Scheduler.Initialize(run, Spawns, pools, events, player, settings.Catalog.BehaviorSettings, settings.Catalog.GetAllEnemies());
             xpKey = "run-xp/" + GetInstanceID(); bossKey = "run-boss/" + GetInstanceID();
@@ -189,6 +194,28 @@ namespace QuackQuack.Systems.Run
             if (!Ready || !AutomaticTick) return;
             Advance(Time.deltaTime, VisibleArea());
         }
+        // Also refreshes while paused: disabled/despawned actors must never leave stale bars.
+        public void RefreshSpecialEnemies()
+        {
+            if (SpecialEnemies == null) return;
+            SpecialEnemies.Clear();
+            if (!Ready || !isActiveAndEnabled || disposed || pools.IsDisposed || run.Outcome.HasValue) return;
+            for (int i = 0; i < Spawns.Capacity; i++)
+            {
+                if (!Spawns.TryGetActive(i, out var enemy, out long lease) || !enemy.isActiveAndEnabled) continue;
+                for (int j = 0; j < miniIds.Length; j++)
+                {
+                    if (enemy.Definition.Id != miniIds[j]) continue;
+                    var bounds = enemy.Shape.bounds;
+                    if (enemy.State.TryGetSpecialSnapshot(lease, enemy.GetInstanceID(), minis[j].Id, enemy.Definition.DisplayName,
+                        new Vector3(bounds.center.x, bounds.max.y, enemy.transform.position.z), out var snapshot) && !SpecialEnemies.TryAdd(snapshot))
+                        throw new InvalidOperationException("Special enemy registry capacity or identity conflict.");
+                }
+            }
+            if (Boss != null && pools.IsActive(Boss, PoolFamily.Enemy) && Boss.TryGetSpecialSnapshot(settings.Catalog.FinalBossEncounter.Id, out var bossSnapshot) &&
+                !SpecialEnemies.TryAdd(bossSnapshot)) throw new InvalidOperationException("Special boss registry capacity or identity conflict.");
+        }
+        private void OnDisable() => SpecialEnemies?.Clear();
         public void Advance(float seconds, Rect visibleArea)
         {
             if (float.IsNaN(seconds) || float.IsInfinity(seconds) || seconds < 0 || !SpawnRequest.ValidRegion(visibleArea)) throw new ArgumentException("Valid timestep and camera bounds required.");
@@ -356,6 +383,7 @@ namespace QuackQuack.Systems.Run
         }
         private void OnEnded(RunPhase phase)
         {
+            SpecialEnemies?.Clear();
             ending = true; Rewards.Close(); Result = results.FinalizeResult(); dirty = true;
             Spawns.Dispose(); Scheduler.enabled = false; weapons.enabled = false;
             if (Boss != null) Boss.enabled = false;
@@ -388,6 +416,7 @@ namespace QuackQuack.Systems.Run
         private void LateUpdate()
         {
             if (!Ready || disposed) return;
+            RefreshSpecialEnemies();
             if (view != null && player != null)
             {
                 float halfHeight = view.orthographicSize, halfWidth = halfHeight * view.aspect; var area = settings.CameraBounds;

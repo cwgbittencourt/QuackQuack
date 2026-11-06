@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using QuackQuack.Core.Shared;
 
 namespace QuackQuack.Core.Combat
 {
@@ -38,6 +39,15 @@ namespace QuackQuack.Core.Combat
         public Vector2 Knockback { get; private set; }
         public float InterruptionRemaining { get; private set; }
         public int TargetId { get; private set; }
+
+        public bool TryGetSpecialSnapshot(long expectedLease, int instanceId, string encounterId, string displayName,
+            Vector3 anchor, out SpecialEnemySnapshot snapshot)
+        {
+            snapshot = default;
+            if (!Alive(expectedLease)) return false;
+            snapshot = new SpecialEnemySnapshot(instanceId, LeaseId, encounterId, displayName,
+                SpecialEnemyCategory.MiniBoss, anchor, Health, MaxHealth); return true;
+        }
 
         public bool TryActivate(long leaseId, string definitionId, float health, int experience, int coins, Vector2 position, int targetId)
         {

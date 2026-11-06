@@ -3,6 +3,7 @@ using System.Threading;
 using QuackQuack.Content.Enemies;
 using QuackQuack.Core.Combat;
 using QuackQuack.Core.Run;
+using QuackQuack.Core.Shared;
 using QuackQuack.Gameplay.Player;
 using QuackQuack.Systems.Combat;
 using QuackQuack.Systems.Pooling;
@@ -19,6 +20,17 @@ namespace QuackQuack.Gameplay.Bosses
         public FrogKingPhase Phase { get; private set; }
         public float Health { get; private set; }
         public float MaxHealth { get; private set; }
+        private static long nextLease;
+        public long LeaseId { get; private set; }
+        public bool TryGetSpecialSnapshot(string encounterId, out SpecialEnemySnapshot snapshot)
+        {
+            snapshot = default;
+            if (!configured || !isActiveAndEnabled || LeaseId <= 0 || Health <= 0 || run == null || run.Outcome.HasValue) return false;
+            var shape = GetComponent<Collider2D>();
+            Vector3 anchor = shape != null ? new Vector3(shape.bounds.center.x, shape.bounds.max.y, transform.position.z) : transform.position;
+            snapshot = new SpecialEnemySnapshot(GetInstanceID(), LeaseId, encounterId, "Sapo-Rei",
+                SpecialEnemyCategory.Boss, anchor, Health, MaxHealth); return true;
+        }
         private float damageMultiplier = 1;
         public int ActiveHazards { get; private set; }
         public int SuppressedHazards { get; private set; }
@@ -85,6 +97,7 @@ namespace QuackQuack.Gameplay.Bosses
             visual.sharedMaterial = definition.MarkerMaterial;
             Initialize(state, eventBus, visual, source, definition.WarningAudio, definition.TelegraphSeconds);
             Health = MaxHealth = definition.Health * healthMultiplier; this.damageMultiplier = damageMultiplier;
+            if (LeaseId <= 0) LeaseId = Interlocked.Increment(ref nextLease);
             Phase = FrogKingPhase.Opening; configured = true;
             if (state.Phase == RunPhase.Boss) events.Publish(new PresentationEvent(0, Interlocked.Increment(ref correlations),
                 PresentationEventType.BossPresented, EventPriority.Essential, 3, transform.position));
@@ -268,14 +281,14 @@ namespace QuackQuack.Gameplay.Bosses
         }
         private void OnDisable() { Cancel(); }
         private void OnDestroy() { if (run != null) run.Changed -= PhaseChanged; Cancel(); }
-        public void OnAcquire() { enabled = true; }
-        public void OnRelease() { Cancel(); }
+        public void OnAcquire() { LeaseId = Interlocked.Increment(ref nextLease); enabled = true; }
+        public void OnRelease() { LeaseId = 0; Cancel(); }
         public void ResetState()
         {
             if (run != null) run.Changed -= PhaseChanged;
             Cancel(); run = null; events = null; marker = null; audioSource = null; clip = null;
             settings = null; pools = null; player = null; safeAreas = null; hazards = null; waveKey = tadpoleKey = null;
-            configured = false; AutomaticTick = true; AutomaticPatterns = false; Health = MaxHealth = 0; damageMultiplier = 1; Phase = FrogKingPhase.Opening;
+            configured = false; LeaseId = 0; AutomaticTick = true; AutomaticPatterns = false; Health = MaxHealth = 0; damageMultiplier = 1; Phase = FrogKingPhase.Opening;
             remaining = recovery = lead = 0; tick = correlation = 0; pattern = SuppressedHazards = 0;
             AttackCommitted = null; transform.localPosition = Vector3.zero;
         }
