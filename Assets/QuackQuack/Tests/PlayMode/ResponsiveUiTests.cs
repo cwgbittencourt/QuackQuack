@@ -5,6 +5,7 @@ using System.Reflection;
 using NUnit.Framework;
 using QuackQuack.Core.Run;
 using QuackQuack.Core.Shared;
+using QuackQuack.Core.Progression;
 using QuackQuack.Presentation.UI;
 using QuackQuack.Systems.Run;
 using UnityEngine;
@@ -39,8 +40,9 @@ namespace QuackQuack.Tests.PlayMode
             hud = Object.FindAnyObjectByType<GameplayHud>();
             Assert.That(hud, Is.Not.Null, "Lake must contain the authored HUD.");
             hud.Unbind();
-            hud.Render(new HudSnapshot(75, 100, 65, 100, "ÁGUA • mais velocidade e recuperação",
-                "Sem Fôlego para usar o Quack.", 920, false, "QUACK INDISPONÍVEL"));
+            var experience = new ExperienceState(new[] { 10, 30, 60 }); experience.TryAdd(35, out _);
+            hud.Render(new HudSnapshot(75, 100, 65, 100, "",
+                "Sem Fôlego para usar o Quack.", 920, false, "QUACK INDISPONÍVEL", experience.Progress));
             canvas = hud.GetComponentInParent<Canvas>();
             Assert.That(canvas, Is.Not.Null);
             cameraObject = new GameObject("T063 viewport camera");
@@ -270,7 +272,7 @@ namespace QuackQuack.Tests.PlayMode
 
         private IEnumerable<RectTransform> Essentials()
         {
-            foreach (var name in new[] { "healthLabel", "breathLabel", "terrainLabel", "quackLabel", "statusLabel", "timeLabel", "healthFill", "breathFill" })
+            foreach (var name in new[] { "healthIcon", "breathIcon", "quackLabel", "statusLabel", "timeLabel", "healthFill", "breathFill", "experienceFill", "levelLabel" })
             {
                 var field = typeof(GameplayHud).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
                 Assert.That(field, Is.Not.Null, "Missing HUD binding: " + name);

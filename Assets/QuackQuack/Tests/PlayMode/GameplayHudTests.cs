@@ -96,6 +96,76 @@ namespace QuackQuack.Tests.PlayMode
         }
 
         private sealed class NoInput : IPlayerInput { public PlayerCommand Read() => default; }
+
+        [UnityTest]
+        public IEnumerator ResourceShapesAndQuackWordsDistinguishStatesWithoutColor()
+        {
+            yield return LoadArena();
+            var hud = Object.FindAnyObjectByType<GameplayHud>(); var player = Object.FindAnyObjectByType<PlayerController>();
+            var health = Field<ResourceIconGraphic>(hud, "healthIcon"); var breath = Field<ResourceIconGraphic>(hud, "breathIcon");
+            Assert.That(health.Kind, Is.EqualTo(ResourceIconKind.Health)); Assert.That(breath.Kind, Is.EqualTo(ResourceIconKind.Breath));
+            Assert.That(health.canvasRenderer, Is.Not.Null); Assert.That(breath.canvasRenderer, Is.Not.Null);
+            health.color = breath.color = Color.gray;
+            Assert.That(IconVertexCount(health), Is.Not.EqualTo(IconVertexCount(breath)), "The silhouettes must differ even with the same tint.");
+            Assert.That(health.raycastTarget || breath.raycastTarget, Is.False);
+            hud.Unbind(); hud.Render(player.Snapshot());
+            Assert.That(Field<Text>(hud, "quackLabel").text, Does.Contain("APRIMORADO"));
+            player.State.Breath.TryConsume(1, out _); hud.Render(player.Snapshot());
+            Assert.That(Field<Text>(hud, "quackLabel").text, Does.Contain("PRONTO").And.Not.Contain("APRIMORADO"));
+            Assert.That(player.ActivateQuack(), Is.True); hud.Render(player.Snapshot());
+            Assert.That(Field<Text>(hud, "quackLabel").text, Does.Contain("RECARREGANDO"));
+        }
+
+        [UnityTest]
+        public IEnumerator ProducerAndExistingFooterDoNotPublishPermanentInstructionsOrTerrain()
+        {
+            yield return LoadArena();
+            var hud = Object.FindAnyObjectByType<GameplayHud>(); var player = Object.FindAnyObjectByType<PlayerController>();
+            var snapshot = player.Snapshot(); Assert.That(snapshot.Terrain, Is.Empty); Assert.That(snapshot.Status, Is.Empty);
+            var controls = Field<Text>(hud, "statusLabel").transform.parent.Find("Controls");
+            if (controls != null) Assert.That(controls.GetComponent<Text>().text, Is.Empty);
+            Assert.That(Field<Image>(hud, "experienceFill").fillAmount, Is.EqualTo(snapshot.Progress.Fraction));
+        }
+
+        private static readonly RunPhase[] OtherOutcomes = { RunPhase.Won, RunPhase.Abandoned };
+        [UnityTest]
+        public IEnumerator TerminalMessagesStaySeparateFromProgress([ValueSource(nameof(OtherOutcomes))] RunPhase outcome)
+        {
+            yield return LoadArena();
+            var hud = Object.FindAnyObjectByType<GameplayHud>(); var player = Object.FindAnyObjectByType<PlayerController>();
+            var run = GameBootstrap.Instance.Run;
+            if (outcome == RunPhase.Won) Assert.That(run.TryTransition(RunPhase.Boss), Is.True);
+            Assert.That(run.TryTransition(outcome), Is.True); yield return null;
+            Assert.That(Field<Text>(hud, "statusLabel").text, Does.Contain(outcome == RunPhase.Won ? "VITÓRIA" : "ABANDONADA"));
+            Assert.That(Field<Text>(hud, "levelLabel"), Is.Not.SameAs(Field<Text>(hud, "statusLabel")));
+        }
+
+        [Test]
+        public void CompatibilityCompositionIsCreatedOnceAndAnchorsProgressAtBottomCenter()
+        {
+            var hud = ResourceHud(); var snapshot = new HudSnapshot(100, 100, 100, 100, "ignored terrain", "warning", 0);
+            hud.Render(snapshot); var fill = Field<Image>(hud, "experienceFill"); var level = Field<Text>(hud, "levelLabel");
+            int count = hud.GetComponentsInChildren<RectTransform>(true).Length;
+            for (int i = 0; i < 100; i++) hud.Render(snapshot);
+            Assert.That(hud.GetComponentsInChildren<RectTransform>(true).Length, Is.EqualTo(count));
+            Assert.That(Field<Image>(hud, "experienceFill"), Is.SameAs(fill)); Assert.That(Field<Text>(hud, "levelLabel"), Is.SameAs(level));
+            var panel = level.transform.parent as RectTransform;
+            Assert.That(panel.anchorMin, Is.EqualTo(new Vector2(0.5f, 0))); Assert.That(panel.anchorMax, Is.EqualTo(panel.anchorMin));
+            Assert.That(fill.raycastTarget || level.raycastTarget, Is.False);
+            Assert.That(Field<Text>(hud, "statusLabel").text, Is.EqualTo("warning"));
+            Assert.That(VisibleText(hud, "terrainLabel"), Is.Empty);
+        }
+
+        private int IconVertexCount(ResourceIconGraphic icon)
+        {
+            using (var vertices = new VertexHelper())
+            {
+                typeof(ResourceIconGraphic).GetMethod("OnPopulateMesh", BindingFlags.Instance | BindingFlags.NonPublic,
+                    null, new[] { typeof(VertexHelper) }, null).Invoke(icon, new object[] { vertices });
+                var mesh = Own(new Mesh()); vertices.FillMesh(mesh); return mesh.vertexCount;
+            }
+        }
+
         [Test]
         public void PlayerHudSnapshotCarriesSameProgressAsUpgradeRulesDuringMultipleLevelChoice()
         {

@@ -47,7 +47,7 @@ namespace QuackQuack.Gameplay.Player
             if(float.IsNaN(multiplier)||float.IsInfinity(multiplier)||multiplier<=0||multiplier>1)throw new System.ArgumentOutOfRangeException(nameof(multiplier));
             EnemySlowMultiplier=multiplier;
         }
-        public string Status { get; private set; } = "Explore o lago e experimente o Quack.";
+        public string Status { get; private set; } = string.Empty;
         public CharacterDefinition Definition => definition;
         public void SetExternalPauseButton(bool available)
         { if (input is UnifiedPlayerInput unified) unified.SetExternalPauseButton(available); }
@@ -233,13 +233,12 @@ namespace QuackQuack.Gameplay.Player
         public void SetStatus(string value) { Status = value; statusUntil = Time.time + 2; }
         public HudSnapshot Snapshot()
         {
-            string status = run.Phase == RunPhase.Paused ? "PAUSADO • Esc para continuar" : run.Outcome.HasValue ?
-                (run.Outcome == RunPhase.Won ? "VITÓRIA • Sapo-Rei derrotado" : run.Outcome == RunPhase.Lost ? "DERROTA • Vida esgotada" : "PARTIDA ABANDONADA") : Time.time < statusUntil ? Status : "Use a água para recuperar Fôlego mais rápido.";
+            string status = run.Phase == RunPhase.Paused ? "PAUSADO" : run.Outcome.HasValue ?
+                (run.Outcome == RunPhase.Won ? "VITÓRIA • Sapo-Rei derrotado" : run.Outcome == RunPhase.Lost ? "DERROTA • Vida esgotada" : "PARTIDA ABANDONADA") : Time.time < statusUntil ? Status : string.Empty;
             string quackState = !CanSimulate ? "QUACK INDISPONÍVEL" : simulationSeconds < nextQuack ? "RECARREGANDO" :
                 State.Breath.Current <= 0 ? "SEM FÔLEGO" : State.Breath.IsFull ? "PRONTO • APRIMORADO" : "PRONTO • QUACK";
             return new HudSnapshot(State.Health, State.MaxHealth, State.Breath.Current, State.Breath.Capacity,
-                State.Terrain == TerrainType.Water ? "ÁGUA • mais velocidade e recuperação" : "TERRA • use as margens para se posicionar", status, run.ElapsedSeconds,
-                QuackReady, quackState);
+                string.Empty, status, run.ElapsedSeconds, QuackReady, quackState, Upgrades?.Progress ?? default);
         }
         private bool CanSimulate => State != null && isActiveAndEnabled && run.IsSimulating && State.Health > 0;
         private void ForwardCombat(CombatEvent value) => events.Publish(value);
