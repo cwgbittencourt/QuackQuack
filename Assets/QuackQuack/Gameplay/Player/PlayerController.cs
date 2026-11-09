@@ -62,6 +62,7 @@ namespace QuackQuack.Gameplay.Player
         }
         public string Status { get; private set; } = string.Empty;
         public CharacterDefinition Definition => definition;
+        public bool VisualSimulationActive => CanSimulate;
         public void SetExternalPauseButton(bool available)
         { if (input is UnifiedPlayerInput unified) unified.SetExternalPauseButton(available); }
         public bool QuackReady => CanSimulate && simulationSeconds >= nextQuack && State.Breath.Current > 0;

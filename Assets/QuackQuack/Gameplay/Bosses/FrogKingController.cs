@@ -20,6 +20,7 @@ namespace QuackQuack.Gameplay.Bosses
         public FrogKingPhase Phase { get; private set; }
         public float Health { get; private set; }
         public float MaxHealth { get; private set; }
+        public bool VisualSimulationActive => run != null && run.IsSimulating && Health > 0;
         private static long nextLease;
         public long LeaseId { get; private set; }
         public bool TryGetSpecialSnapshot(string encounterId, out SpecialEnemySnapshot snapshot)

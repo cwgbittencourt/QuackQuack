@@ -214,3 +214,51 @@ Em 09/11/2026: “provisoriamente utilize o c2 para cura e o x3 para o xp, se po
 Novo atlas `Assets/QuackQuack/Art/LakeCartoon/Sources/pickups-c2-x3.png`, PNG RGBA 1774×887, dois quadros 887×887 com pivô central, slices `heal` e `xp`. SHA-256 `63910AA78A852BBBB3070FDEC6FF7310FE1268B735B6FB4BA82A11AFACA1CC8E`. Origem/prompts em [art-source-prompts.md](art-source-prompts.md). Alpha da geração preservado; contorno e reflexos brancos mantidos, amarelo removido da esfera. Importação segue os parâmetros da amostra (Multiple, PPU 128, Bilinear, Clamp, sem mipmaps/ReadWrite/compressão). Tamanhos mundiais da exposição continuam 0,6 para cura e 0,48 para XP, incluindo margem do quadro; nenhuma mudança na regra ou raio de coleta.
 
 O gerador agora usa esses dois slices no lugar dos pickups do atlas R1; este permanece como fonte histórica compartilhada dos demais elementos, sem substituir seus bytes. Metas e cena regeneradas no Unity, log `Logs/Polimento002/T042/review-r3.log`: código 0, `T042_ART_SAMPLE_OK sprites=6 range=4`, sem erros C#/exceções. Quatro capturas regeneradas, 16:9 inspecionada com poção e esfera sem estrela. Sem alteração dos prefabs da partida ou aceite de gameplay/desempenho. T042 permanece em revisão artística.
+
+### Aceite da T042 e autorização do lote
+
+Em 09/11/2026, ao confirmar o gate antes da T043, o usuário respondeu **“Aprovar e iniciar T043”** à aprovação da direção atual: Quack circular, arcos para o frontal e C2/X3 sem estrela provisórios. T042 concluída; estados anteriores de revisão acima são históricos. Essa aprovação permite o lote de personagens/ameaças/obstáculos da T043, sem tornar definitivas as escolhas de pickups nem aprovar por inferência gameplay, plataformas, animações finais ou desempenho.
+
+## Lote T043 — personagens, ameaças e obstáculos
+
+09/11/2026, base `e5c5baf` + revisão `d8003bf` já incorporada; direção T042 aprovada explicitamente antes do lote. Gerador parcial `Editor/PolishArtCharacters.cs`, integrado a `PolishArtSetup`, menu **QuackQuack → Art → Integrate T043 characters and obstacles**. Salvar cenas abertas antes de usar: o comando abre/salva Lake, LakeRun e FrogKingPractice, terminando na galeria `Art/LakeCartoon/Sample/LakeCartoonCast.unity`. Não adiciona cenas ao pipeline de produto.
+
+### Fontes, dimensões e importação efetivas
+
+Pato e formiga reutilizam `Art/LakeCartoon/Sources/sample-atlas.png`, quadros 512×512, origem/prompts T042. Demais sete ameaças e duas rochas: `Art/LakeCartoon/Characters/lake-threats-atlas.png`, PNG RGBA 1254×1254, grade 3×3, quadros 418×418. SHA-256 `CD3AE886C99B4AE68356E1AC088008D452AA87F910A9560369E668862A499BF7`. Arte assistida por IA via image_gen integrado, referência da amostra aceita; sem pacote de arte externo e sem licença pública/CC0 atribuída. Fonte disponível achatada, sem camadas. [Prompts, revisões e proveniência](art-t043-prompts.md). Rascunhos com anatomia/halos/contaminação entre células foram descartados.
+
+Sprite Multiple, PPU 128, pivô central, Bilinear/Clamp, alpha transparency, sem mipmaps/ReadWrite/compressão, máximo 2048. Recortes e `.meta` pelo Unity 6000.4.3f1. Materiais Sprite-Unlit separados por atlas (`Characters/sample-atlas.mat` e `Characters/lake-threats-atlas.mat`) impedem associação de uma textura a recortes de outra. Não sobrescrever Circle/Square compartilhados. Overrides Android/atlas packing continuam para revisão medida, não foram aplicados.
+
+| ID | Slice / vínculo autorado | Altura de quadro na integração / ordem | Identidade |
+|---|---|---|---|
+| pato | pato; filho Cartoon actor nas cenas Lake/LakeRun/FrogKingPractice | 1,5 / 5 | Pato creme, bico e pés laranja, asa/olhos expressivos |
+| formiga | formiga; prefab de mesmo ID em Prefabs/Prototype/Enemies | 1,15 / 10 | Segmentos e antenas; sprite espelhado para alinhar à direção +X usada pelo scheduler |
+| aranha | aranha; mesmo padrão de prefab | 1,15 / 10 | Oito pernas, dois volumes corporais, sem antenas |
+| vespa | vespa | 1,15 / 10 | Listras, asas e ferrão |
+| besouro | besouro | 1,15 / 10 | Carapaça/frente protegida, indicador frontal original preservado |
+| caramujo-aquatico | caramujo-aquatico | 1,15 / 10 | Concha espiral e corpo deslizante |
+| libelula-alfa | libelula-alfa | 1,7 / 10 | Quatro asas e abdome comprido, maior que os comuns |
+| sapo-cururu | sapo-cururu | 1,7 / 10 | Pele verrugosa e bochechas infladas, sem coroa |
+| sapo-rei | sapo-rei; prefab existente do chefe | 2,5 / 10 | Sapo régio com coroa, distinto do Cururu |
+| art.obstacle.rocks | rock-wide; Objects/rock-wide.prefab | Encaixe na dimensão do collider existente / 1 | Rocha baixa/larga; treino e pedra sul |
+| art.obstacle.banks | rock-tall; Objects/rock-tall.prefab | Encaixe no collider existente / 1 | Acento rochoso nos bloqueios de margem/corredor |
+
+Altura inclui a margem transparente do quadro, não significa novo diâmetro físico. `Objects/` contém os dois prefabs visuais sem collider próprio; os slices estão no atlas compartilhado de Characters. O gerador aplica os visuais nos bloqueios existentes sem substituir seus BoxCollider2D; mantém uma base cinza cobrindo toda a pegada física para não criar colisão invisível nas margens transparentes da rocha. Margens orgânicas/vegetação/água continuam T046.
+
+### Estados e animações entregues
+
+`Gameplay/Player/CartoonActorVisual.cs` fica somente no filho visual, sem Rigidbody/Collider. Pose raster única por personagem, com animação procedural suave de escala: respiração idle, movimento terrestre e variante de nado do Pato; inversão horizontal do Pato pelo deslocamento. As ameaças acompanham a rotação real da raiz produzida pelo scheduler; preserva o sentido +X e o escudo frontal do Besouro. Dano usa a queda da vida real para tint temporário de 0,14 s. Não há novas regras de dano.
+
+O relógio visual só avança quando o ator informa simulação ativa, por propriedades readonly que leem os RunState atuais. Pausa/escolha/fim congelam escala/tint. Desativação/reuso limpa fase, flash, direção e escala; leases novos de inimigo também reiniciam a amostragem. Sem criação/destruição de objetos, consultas de cena, arrays ou LINQ no loop visual. Há um LateUpdate por ator: seu custo em 200/400 e Android ainda precisa de medição T049, sem promessa de FPS nesta task.
+
+Preparação/ataque/fases do chefe mantêm os telegráficos e linhas originais; o sprite usa a mesma pose com movimento/reação. Derrota de comum/miniboss segue a remoção pelo pool, sem clipe de morte novo; chefe segue o resultado original. Nenhum sheet de caminhada/ataque foi produzido, nem é declarado como entregue. Rochas são estáticas. Armas, pickups C2/X3 e HUD de produção não são alterados neste lote.
+
+### Integração e validação
+
+Prefabs existentes dos oito inimigos atualizados em lugar, preservando GUIDs, componentes de combate e os LineRenderer de direção/telegráfico. Renderers geométricos dos corpos antigos ficam desabilitados; filho Cartoon actor recebe a arte. Player integrado às três cenas reais, incluindo FrogKingPractice (o nome anterior BossArena no inventário era descritivo, não um arquivo existente). O gerador compara assinaturas de transforms físicos, Collider2D e Rigidbody2D antes/depois de cada mudança e falha se houver diferença. Conteúdo/balanceamento/cronograma permanecem nos assets anteriores.
+
+Validação em cópia completa isolada `Temp/T043Validation`, sem copiar Library: 714/714 EditMode e 596/596 PlayMode, zero falhas/ignorados, incluindo três casos novos de animação sem deslocar física, pausa/retomada, flash de dano e reset/desativação/reuso. XMLs locais em `TestResults/Polimento002/T043`, logs em `Logs/Polimento002/T043`. As suítes precedem somente a limpeza final de pixels/recortes e a manutenção da base visual dos obstáculos; esses ajustes não alteraram o código runtime testado. A primeira geração interrompeu por caminho de cena incorreto; corrigido para FrogKingPractice antes da entrega. Erros transitórios de assemblies dos pacotes na importação inicial não se repetiram nas suítes.
+
+Galeria e captura editor da LakeRun são evidências estáticas, não playtest nativo. Identidade artística e leitura de alcance em combate serão revisadas em T047; builds, aparelhos, profiling e rodada de participantes seguem T048–T051. Não extrapolar os testes para aceite físico/Android ou desempenho. Nenhuma task T044+ executada.
+
+Geração final aprovada com código 0: `T043_CHARACTERS_OK actors=9 threats=8 geometry=unchanged` e `T073_CONTENT_VALIDATION_OK assets=66 warnings=2`, log `Logs/Polimento002/T043/final-generate.log`. Galeria final `sample-cast.png` e render editor `sample-lake-scene.png` nesse diretório inspecionados: sprites corretos por atlas, sem halos/quadrados contaminados ou invasão entre células; Pato visível na composição real. O render da LakeRun não inclui HUD ScreenSpaceOverlay e não representa uma partida em execução. T043 concluída como entrega de lote/integracão; o aceite global continua separado.

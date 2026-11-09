@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace QuackQuack.Editor
 {
     // An isolated art-direction exhibit. Does not replace production prefabs or build scenes.
-    public static class PolishArtSetup
+    public static partial class PolishArtSetup
     {
         public const string Root = "Assets/QuackQuack/Art/LakeCartoon";
         private static readonly Color Ink = new Color(.20f, .105f, .055f);
@@ -157,9 +157,9 @@ namespace QuackQuack.Editor
             Box("Fill",xp,Vector2.zero,new Vector2(144,18),new Vector2(290,18),new Color(.12f,.85f,.85f));
             Label(safe.transform,"AMOSTRA ARTÍSTICA • NÃO É PARTIDA",new Vector2(.5f,0),new Vector2(0,82),new Vector2(650,34),19,Cream);
         }
-        private static void Capture(Camera camera,string name,int width,int height)
+        private static void Capture(Camera camera,string name,int width,int height,string output="Logs/Polimento002/T042")
         {
-            string output="Logs/Polimento002/T042";Directory.CreateDirectory(output);
+            Directory.CreateDirectory(output);
             var target=new RenderTexture(width,height,24);target.Create(); camera.targetTexture=target;
             camera.aspect=(float)width/height; Canvas.ForceUpdateCanvases(); camera.Render();
             var old=RenderTexture.active;RenderTexture.active=target;

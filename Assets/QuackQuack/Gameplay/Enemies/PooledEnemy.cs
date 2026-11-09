@@ -38,6 +38,7 @@ namespace QuackQuack.Gameplay.Enemies
             DamageMultiplier = damageMultiplier; return true;
         }
         public bool IsReady => acquired && owner != null && !owner.IsDisposed && State.IsActive;
+        public bool VisualSimulationActive => IsReady && run != null && run.IsSimulating;
 
         // Enemy/enemy and enemy/XP pairs do not drive gameplay. Keep physical player
         // and terrain contacts, and keep this collider visible to combat queries.
