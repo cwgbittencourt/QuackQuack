@@ -63,6 +63,9 @@ namespace QuackQuack.Tests.PlayMode
             do { director = Object.FindAnyObjectByType<RunDirector>(); if (director != null && director.Ready) break; yield return null; }
             while (Time.realtimeSinceStartupAsDouble < deadline);
             Assert.That(director != null && director.Ready, Is.True);
+            var water = Object.FindAnyObjectByType<QuackQuack.Presentation.Terrain.LakeWaterAnimation>();
+            Assert.That(water, Is.Not.Null, "The production scene needs its surface presentation.");
+            Assert.That(water.IsBound, Is.True, "Bootstrap must bind the shared simulation clock.");
             var composition = Object.FindAnyObjectByType<GameplayHudComposition>();
             for (int i = 0; i < 60 && !composition.Ready; i++) yield return null;
             Assert.That(composition.Ready, Is.True);

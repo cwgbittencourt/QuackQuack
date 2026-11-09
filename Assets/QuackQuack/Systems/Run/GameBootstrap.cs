@@ -4,6 +4,7 @@ using QuackQuack.Systems.Combat;
 using QuackQuack.Systems.Pooling;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using QuackQuack.Presentation.Terrain;
 
 namespace QuackQuack.Systems.Run
 {
@@ -30,6 +31,7 @@ namespace QuackQuack.Systems.Run
             Pools = new PoolService();
             Run = new RunState(seed);
             Random = new System.Random(seed);
+            SceneManager.sceneLoaded += BindWater;
         }
 
         private void Start()
@@ -37,6 +39,13 @@ namespace QuackQuack.Systems.Run
             if (Instance != this) return;
             if (loadLake && SceneManager.GetActiveScene().name != lakeScene) SceneManager.LoadScene(lakeScene);
             if (lakeScene != "LakeRun") Run.TryTransition(RunPhase.Playing);
+            BindWater(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+        }
+
+        private void BindWater(Scene scene, LoadSceneMode mode)
+        {
+            foreach (var root in scene.GetRootGameObjects())
+                foreach (var water in root.GetComponentsInChildren<LakeWaterAnimation>(true)) water.Bind(Run);
         }
 
         private void Update() { if (Instance == this && !ExternalClock) Run.Advance(Time.deltaTime); }
@@ -44,6 +53,7 @@ namespace QuackQuack.Systems.Run
         private void OnDestroy()
         {
             if (Instance != this) return;
+            SceneManager.sceneLoaded -= BindWater;
             Pools.Dispose();
             Events.Clear();
             Instance = null;
