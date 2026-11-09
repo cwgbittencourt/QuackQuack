@@ -278,6 +278,15 @@ namespace QuackQuack.Tests.PlayMode
                 Assert.That(field, Is.Not.Null, "Missing HUD binding: " + name);
                 var graphic = field.GetValue(hud) as Graphic;
                 Assert.That(graphic, Is.Not.Null, "Missing essential graphic: " + name);
+                if (graphic is ResourceIconGraphic && !graphic.enabled)
+                {
+                    // The illustrated skin replaces the legacy mesh with a real sprite child.
+                    var illustrated = graphic.GetComponentInChildren<Image>(true);
+                    Assert.That(illustrated, Is.Not.Null, name + " needs its illustrated replacement.");
+                    Assert.That(illustrated.sprite, Is.Not.Null);
+                    Assert.That(illustrated.color.a, Is.GreaterThan(0));
+                    graphic = illustrated;
+                }
                 Assert.That(graphic.isActiveAndEnabled, Is.True, name + " must remain visible.");
                 yield return graphic.rectTransform;
             }

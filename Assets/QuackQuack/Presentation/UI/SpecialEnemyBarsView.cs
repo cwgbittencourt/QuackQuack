@@ -126,6 +126,8 @@ namespace QuackQuack.Presentation.UI
             var tether = Rect("Anchor tether", area, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1), Vector2.zero, new Vector2(2, gap));
             Graphic(tether, new Color(1, 1, 1, 0.5f));
             tether.SetAsFirstSibling(); root.gameObject.SetActive(false); tether.gameObject.SetActive(false);
+            var skin=GetComponentInParent<CartoonUiSkin>();
+            if(skin!=null&&skin.Theme!=null){skin.Theme.Apply(root.gameObject);skin.Theme.Apply(tether.gameObject);}
             return new Bar { Root = root, Fill = fill, Label = text, Tether = tether };
         }
         private static void Graphic(RectTransform rect, Color color)

@@ -40,6 +40,8 @@ namespace QuackQuack.Presentation.UI
             closing = false; panel.SetActive(true);
             title.text = result.IsVictory ? "VITÓRIA" : result.Outcome == RunPhase.Abandoned ? "PARTIDA ABANDONADA" : "DERROTA";
             title.color = result.IsVictory ? new Color(1, 0.85f, 0.35f) : result.Outcome == RunPhase.Abandoned ? new Color(0.68f, 0.85f, 0.9f) : new Color(1, 0.5f, 0.48f);
+            bool themed=GetComponentInParent<CartoonUiSkin>()!=null;
+            if(themed)title.color=result.IsVictory?CartoonUiTheme.Green:result.Outcome==RunPhase.Abandoned?CartoonUiTheme.Teal:CartoonUiTheme.Warning;
             summary.text = "TEMPO  " + Time(result.DurationSeconds) + "     •     CHEFE  " + (result.BossReached ? (string.IsNullOrEmpty(result.BossId) ? "Alcançado" : Name(result.BossId)) : "Não alcançado") + "     •     SEED  " + result.Seed;
             var text = new StringBuilder();
             text.Append("<b>COMBATE</b>\n\nInimigos derrotados  ").Append(result.EnemiesDefeated).Append("\nMaior sequência  ").Append(result.LongestStreak);
@@ -83,9 +85,10 @@ namespace QuackQuack.Presentation.UI
                 text.Append(Name(pair.Key)).Append("\n").Append(pair.Value.Previous).Append(" → ").Append(pair.Value.Current).Append(" / ").Append(pair.Value.Target)
                     .Append(pair.Value.IsCompleted ? "  <color=#8ED4A5>COMPLETO</color>\n" : "\n");
             text.Append("\nPartidas  ").Append(progress.Profile.Runs).Append("  •  Vitórias  ").Append(progress.Profile.Victories);
-            rewards.text = text.ToString();
+            rewards.text = themed?text.ToString().Replace("#F5D477","#7C4A08").Replace("#8ED4A5","#245C3F"):text.ToString();
             saveStatus.text = saved ? "Progresso salvo" : "Progresso não salvo. Tente novamente antes de sair.";
             saveStatus.color = saved ? new Color(0.56f, 0.83f, 0.65f) : new Color(1, 0.7f, 0.45f);
+            if(themed)saveStatus.color=saved?CartoonUiTheme.Green:CartoonUiTheme.Warning;
             retry.interactable = !saved; restart.interactable = true;
             Canvas.ForceUpdateCanvases(); if (scrolls != null) foreach (var scroll in scrolls) scroll.verticalNormalizedPosition = 1;
             RefreshNavigation(true);

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2001983575072850959}
   - component: {fileID: 8092637044343678677}
   - component: {fileID: 4332006479512996160}
+  - component: {fileID: 8547903435996832944}
   m_Layer: 0
   m_Name: PAUSAR
   m_TagString: Untagged
@@ -60,15 +61,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.96, g: 0.79, b: 0.3, a: 0.95}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: -322521593692891950, guid: 1e80763eb1af434449eae52513f3b13e, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -76,7 +77,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2
 --- !u!114 &4332006479512996160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91,6 +92,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: QuackQuack.Platform::QuackQuack.Platform.Input.MobileActionButton
   input: {fileID: 7251136516256104884}
   action: 1
+--- !u!114 &8547903435996832944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 838418024567491027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824821dcbff37bf46964c32df01e71c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Presentation::QuackQuack.Presentation.UI.CartoonTouchFeedback
 --- !u!1 &1914131821999630910
 GameObject:
   m_ObjectHideFlags: 0
@@ -103,6 +116,7 @@ GameObject:
   - component: {fileID: 7452110553392819993}
   - component: {fileID: 7207390336887595997}
   - component: {fileID: 984530209734304841}
+  - component: {fileID: 8335120860455745200}
   m_Layer: 0
   m_Name: Joystick
   m_TagString: Untagged
@@ -152,14 +166,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.06, g: 0.14, b: 0.18, a: 0.8}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -3742778668923139756, guid: 1e80763eb1af434449eae52513f3b13e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -183,6 +197,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: QuackQuack.Platform::QuackQuack.Platform.Input.MobileJoystick
   input: {fileID: 7251136516256104884}
   handle: {fileID: 8277975031743601815}
+--- !u!114 &8335120860455745200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1914131821999630910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824821dcbff37bf46964c32df01e71c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Presentation::QuackQuack.Presentation.UI.CartoonTouchFeedback
 --- !u!1 &2832665152418160781
 GameObject:
   m_ObjectHideFlags: 0
@@ -241,14 +267,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.38, g: 0.8, b: 0.84, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 4432993238990679582, guid: 1e80763eb1af434449eae52513f3b13e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -271,6 +297,7 @@ GameObject:
   - component: {fileID: 6212833009677433970}
   - component: {fileID: 3867559094933626731}
   - component: {fileID: 7251136516256104884}
+  - component: {fileID: 3239490765904293040}
   m_Layer: 0
   m_Name: MobileControls
   m_TagString: Untagged
@@ -374,6 +401,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bc1fad083ce8744a8ce081831d5cbc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: QuackQuack.Platform::QuackQuack.Platform.Input.MobileInputAdapter
+--- !u!114 &3239490765904293040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3151943213161377492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34e237e7ca9ad28498141fc59f3fb2cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Presentation::QuackQuack.Presentation.UI.CartoonUiSkin
+  theme: {fileID: 11400000, guid: d38087a2edef14c40aea718dea02cbe6, type: 2}
 --- !u!1 &5208479815229518541
 GameObject:
   m_ObjectHideFlags: 0
@@ -385,6 +425,7 @@ GameObject:
   - component: {fileID: 7446434039020372783}
   - component: {fileID: 3605147878515103795}
   - component: {fileID: 6543468253211826040}
+  - component: {fileID: 8202763453250562233}
   m_Layer: 0
   m_Name: MOVER label
   m_TagString: Untagged
@@ -432,7 +473,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
-  m_Color: {r: 0.75, g: 0.94, b: 0.96, a: 1}
+  m_Color: {r: 1, g: 0.95, b: 0.79, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -452,7 +493,22 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: MOVER
+  m_Text: 
+--- !u!114 &8202763453250562233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5208479815229518541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
+  m_EffectColor: {r: 0.22, g: 0.12, b: 0.065, a: 1}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
 --- !u!1 &7703387476987952203
 GameObject:
   m_ObjectHideFlags: 0
@@ -485,11 +541,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 6925013790306524022}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 240, y: 180}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 38}
+  m_SizeDelta: {x: 220, y: 52}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &7311631655615702976
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -511,7 +567,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
-  m_Color: {r: 0.04, g: 0.09, b: 0.12, a: 1}
+  m_Color: {r: 0.22, g: 0.12, b: 0.065, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -519,8 +575,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 30
+    m_Font: {fileID: 12800000, guid: 8250e66bac2708f4686594f65384256f, type: 3}
+    m_FontSize: 34
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -544,6 +600,7 @@ GameObject:
   - component: {fileID: 8709450317996312405}
   - component: {fileID: 6737857190189723847}
   - component: {fileID: 8768826543567666884}
+  - component: {fileID: 6074229546041724419}
   m_Layer: 0
   m_Name: QUACK
   m_TagString: Untagged
@@ -569,7 +626,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: -180, y: 210}
-  m_SizeDelta: {x: 240, y: 180}
+  m_SizeDelta: {x: 240, y: 240}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8709450317996312405
 CanvasRenderer:
@@ -592,14 +649,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.96, g: 0.79, b: 0.3, a: 0.95}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -5271145560675006428, guid: 1e80763eb1af434449eae52513f3b13e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -623,6 +680,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: QuackQuack.Platform::QuackQuack.Platform.Input.MobileActionButton
   input: {fileID: 7251136516256104884}
   action: 0
+--- !u!114 &6074229546041724419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7868295753556980761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824821dcbff37bf46964c32df01e71c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: QuackQuack.Presentation::QuackQuack.Presentation.UI.CartoonTouchFeedback
 --- !u!1 &8560224736615228425
 GameObject:
   m_ObjectHideFlags: 0
@@ -681,7 +750,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
-  m_Color: {r: 0.04, g: 0.09, b: 0.12, a: 1}
+  m_Color: {r: 0.22, g: 0.12, b: 0.065, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

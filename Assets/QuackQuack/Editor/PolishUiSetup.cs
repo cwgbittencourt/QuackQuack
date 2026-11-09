@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace QuackQuack.Editor
 {
-    public static class PolishUiSetup
+    public static partial class PolishUiSetup
     {
         public const string ProfilePath = "Assets/QuackQuack/Prefabs/Prototype/ControlSettings.prefab";
         [MenuItem("QuackQuack/Build 002 gameplay UI composition")]

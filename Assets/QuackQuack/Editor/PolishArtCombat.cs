@@ -87,7 +87,7 @@ namespace QuackQuack.Editor
             if(material==null){material=new Material(Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default"));AssetDatabase.CreateAsset(material,path);}
             material.mainTexture=AssetDatabase.LoadAssetAtPath<Texture2D>(atlas);EditorUtility.SetDirty(material);return material;
         }
-        private static void ImportTrimmed(string path,string[] names,int columns,int rows)
+        internal static void ImportTrimmed(string path,string[] names,int columns,int rows,Func<string,Rect,Vector4> border=null)
         {
             var texture=new Texture2D(2,2,TextureFormat.RGBA32,false);texture.LoadImage(File.ReadAllBytes(path));
             try
@@ -106,7 +106,7 @@ namespace QuackQuack.Editor
                     var rect=new Rect(ox+minX,oy+minY,maxX-minX+1,maxY-minY+1);
                     if(names[i]=="bolhas"||names[i]=="aura-energia")
                     {float side=Mathf.Max(rect.width,rect.height);rect=new Rect(Mathf.Clamp(rect.center.x-side/2,ox,ox+width-side),Mathf.Clamp(rect.center.y-side/2,oy,oy+height-side),side,side);}
-                    slices[i]=new SpriteMetaData{name=names[i],rect=rect,alignment=(int)SpriteAlignment.Center,pivot=new Vector2(.5f,.5f)};
+                    slices[i]=new SpriteMetaData{name=names[i],rect=rect,alignment=(int)SpriteAlignment.Center,pivot=new Vector2(.5f,.5f),border=border==null?Vector4.zero:border(names[i],rect)};
                 }
                 var importer=(TextureImporter)AssetImporter.GetAtPath(path);
                 importer.textureType=TextureImporterType.Sprite;importer.spriteImportMode=SpriteImportMode.Multiple;

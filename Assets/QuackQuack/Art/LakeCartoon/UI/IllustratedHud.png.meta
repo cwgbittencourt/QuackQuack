@@ -1,0 +1,657 @@
+fileFormatVersion: 2
+guid: 1e80763eb1af434449eae52513f3b13e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8116227232017024190
+    second: IllustratedHud_0
+  - first:
+      213: 3957516519055057360
+    second: IllustratedHud_1
+  - first:
+      213: 7746512990776735327
+    second: IllustratedHud_2
+  - first:
+      213: -8466740991940065857
+    second: IllustratedHud_3
+  - first:
+      213: 7126893667999461578
+    second: IllustratedHud_4
+  - first:
+      213: -1265098510777860460
+    second: IllustratedHud_5
+  - first:
+      213: -4129850859079406587
+    second: IllustratedHud_6
+  - first:
+      213: -3665868663781121983
+    second: IllustratedHud_7
+  - first:
+      213: 1170734972914647206
+    second: IllustratedHud_8
+  - first:
+      213: 3316307369676286589
+    second: IllustratedHud_9
+  - first:
+      213: -8158100727712536735
+    second: IllustratedHud_10
+  - first:
+      213: 5005943563565715606
+    second: IllustratedHud_11
+  - first:
+      213: 5100391392855977240
+    second: IllustratedHud_12
+  - first:
+      213: 4070591175060258835
+    second: IllustratedHud_13
+  - first:
+      213: -5981497596204157162
+    second: IllustratedHud_14
+  - first:
+      213: 3590480533783344385
+    second: IllustratedHud_15
+  - first:
+      213: 3620252794166184143
+    second: IllustratedHud_16
+  - first:
+      213: -4187207723514204880
+    second: IllustratedHud_17
+  - first:
+      213: 8845738596930095594
+    second: IllustratedHud_18
+  - first:
+      213: -5099183149893761803
+    second: IllustratedHud_19
+  - first:
+      213: 1838715107166589848
+    second: IllustratedHud_20
+  - first:
+      213: 8536688782700110693
+    second: IllustratedHud_21
+  - first:
+      213: 3799292363574395472
+    second: IllustratedHud_22
+  - first:
+      213: 5199080943865918033
+    second: IllustratedHud_23
+  - first:
+      213: -607469106465787991
+    second: IllustratedHud_24
+  - first:
+      213: -3565893607639661174
+    second: IllustratedHud_25
+  - first:
+      213: 4137285392966714745
+    second: IllustratedHud_26
+  - first:
+      213: 1307932219710291063
+    second: IllustratedHud_27
+  - first:
+      213: -7674749799562760318
+    second: IllustratedHud_28
+  - first:
+      213: -3168300430902195600
+    second: IllustratedHud_29
+  - first:
+      213: -7354826847960093371
+    second: IllustratedHud_30
+  - first:
+      213: -5539064761842176978
+    second: IllustratedHud_31
+  - first:
+      213: -3156739730025024866
+    second: IllustratedHud_32
+  - first:
+      213: 4893636258204729296
+    second: IllustratedHud_33
+  - first:
+      213: 4027750781557846278
+    second: IllustratedHud_34
+  - first:
+      213: 68449520714386718
+    second: IllustratedHud_35
+  - first:
+      213: 5913972618116862392
+    second: IllustratedHud_36
+  - first:
+      213: 4452424745913776572
+    second: IllustratedHud_37
+  - first:
+      213: 5971510433754041324
+    second: IllustratedHud_38
+  - first:
+      213: 1719127327077508557
+    second: IllustratedHud_39
+  - first:
+      213: 2226502726345475850
+    second: IllustratedHud_40
+  - first:
+      213: -9127898872470264003
+    second: IllustratedHud_41
+  - first:
+      213: -1660843474435545659
+    second: IllustratedHud_42
+  - first:
+      213: 6256666626073839226
+    second: IllustratedHud_43
+  - first:
+      213: -6519309083709802334
+    second: IllustratedHud_44
+  - first:
+      213: -278111744796275168
+    second: IllustratedHud_45
+  - first:
+      213: -2844212656981791317
+    second: IllustratedHud_46
+  - first:
+      213: -1212662448559963062
+    second: IllustratedHud_47
+  - first:
+      213: 5394620985104922943
+    second: IllustratedHud_48
+  - first:
+      213: 8526579292789750160
+    second: IllustratedHud_49
+  - first:
+      213: -3405794931078079169
+    second: IllustratedHud_50
+  - first:
+      213: 5366069800499530309
+    second: IllustratedHud_51
+  - first:
+      213: 3752015728269072117
+    second: IllustratedHud_52
+  - first:
+      213: 4096527321991198307
+    second: IllustratedHud_53
+  - first:
+      213: 1032143403461214982
+    second: IllustratedHud_54
+  - first:
+      213: -8881233827057743410
+    second: IllustratedHud_55
+  - first:
+      213: -3439269233289256531
+    second: IllustratedHud_56
+  - first:
+      213: -7901661647262325983
+    second: IllustratedHud_57
+  - first:
+      213: 4801079823494463985
+    second: IllustratedHud_58
+  - first:
+      213: -5218915246290855400
+    second: IllustratedHud_59
+  - first:
+      213: -3089391770610611837
+    second: IllustratedHud_60
+  - first:
+      213: 3956057636928998325
+    second: IllustratedHud_61
+  - first:
+      213: -6289714661842425655
+    second: IllustratedHud_62
+  - first:
+      213: -1779985083830937474
+    second: IllustratedHud_63
+  - first:
+      213: 9012864564383961249
+    second: IllustratedHud_64
+  - first:
+      213: -6972917596611846089
+    second: IllustratedHud_65
+  - first:
+      213: -980082945037087408
+    second: IllustratedHud_66
+  - first:
+      213: 1786036946325327704
+    second: IllustratedHud_67
+  - first:
+      213: -5204619577282258122
+    second: IllustratedHud_68
+  - first:
+      213: -9099361572464623495
+    second: IllustratedHud_69
+  - first:
+      213: 1788068148216652489
+    second: ui-relics
+  - first:
+      213: 8568010174621758358
+    second: ui-capsule
+  - first:
+      213: -5271145560675006428
+    second: ui-quack
+  - first:
+      213: -3742778668923139756
+    second: ui-joystick
+  - first:
+      213: 4432993238990679582
+    second: ui-knob
+  - first:
+      213: -5093033512166764478
+    second: ui-heart
+  - first:
+      213: -1179940527964459715
+    second: ui-feather
+  - first:
+      213: -6941983202837500434
+    second: ui-clock
+  - first:
+      213: -322521593692891950
+    second: ui-panel
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ui-relics
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 970
+        width: 381
+        height: 129
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 100, y: 38.7, z: 100, w: 38.7}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c2e4a8d18e70d810800000000000000
+      internalID: 1788068148216652489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui-capsule
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 966
+        width: 381
+        height: 120
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 72, y: 20, z: 72, w: 20}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 693334acbdfa7e670800000000000000
+      internalID: 8568010174621758358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui-quack
+      rect:
+        serializedVersion: 2
+        x: 859
+        y: 853
+        width: 350
+        height: 355
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 428c6905a0129d6b0800000000000000
+      internalID: -5271145560675006428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui-joystick
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 449
+        width: 361
+        height: 365
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4594de571aafe0cc0800000000000000
+      internalID: -3742778668923139756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui-knob
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 504
+        width: 239
+        height: 251
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1e6fb52dd7258d30800000000000000
+      internalID: 4432993238990679582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui-heart
+      rect:
+        serializedVersion: 2
+        x: 861
+        y: 513
+        width: 334
+        height: 245
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 240d3263109e159b0800000000000000
+      internalID: -5093033512166764478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui-feather
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 60
+        width: 264
+        height: 306
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3d6796675200afe0800000000000000
+      internalID: -1179940527964459715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui-clock
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 44
+        width: 286
+        height: 338
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eed6426ae0f19af90800000000000000
+      internalID: -6941983202837500434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui-panel
+      rect:
+        serializedVersion: 2
+        x: 838
+        y: 48
+        width: 385
+        height: 365
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 64, y: 64, z: 64, w: 64}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d4da8fb15c268bf0800000000000000
+      internalID: -322521593692891950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      IllustratedHud_0: -8116227232017024190
+      IllustratedHud_1: 3957516519055057360
+      IllustratedHud_10: -8158100727712536735
+      IllustratedHud_11: 5005943563565715606
+      IllustratedHud_12: 5100391392855977240
+      IllustratedHud_13: 4070591175060258835
+      IllustratedHud_14: -5981497596204157162
+      IllustratedHud_15: 3590480533783344385
+      IllustratedHud_16: 3620252794166184143
+      IllustratedHud_17: -4187207723514204880
+      IllustratedHud_18: 8845738596930095594
+      IllustratedHud_19: -5099183149893761803
+      IllustratedHud_2: 7746512990776735327
+      IllustratedHud_20: 1838715107166589848
+      IllustratedHud_21: 8536688782700110693
+      IllustratedHud_22: 3799292363574395472
+      IllustratedHud_23: 5199080943865918033
+      IllustratedHud_24: -607469106465787991
+      IllustratedHud_25: -3565893607639661174
+      IllustratedHud_26: 4137285392966714745
+      IllustratedHud_27: 1307932219710291063
+      IllustratedHud_28: -7674749799562760318
+      IllustratedHud_29: -3168300430902195600
+      IllustratedHud_3: -8466740991940065857
+      IllustratedHud_30: -7354826847960093371
+      IllustratedHud_31: -5539064761842176978
+      IllustratedHud_32: -3156739730025024866
+      IllustratedHud_33: 4893636258204729296
+      IllustratedHud_34: 4027750781557846278
+      IllustratedHud_35: 68449520714386718
+      IllustratedHud_36: 5913972618116862392
+      IllustratedHud_37: 4452424745913776572
+      IllustratedHud_38: 5971510433754041324
+      IllustratedHud_39: 1719127327077508557
+      IllustratedHud_4: 7126893667999461578
+      IllustratedHud_40: 2226502726345475850
+      IllustratedHud_41: -9127898872470264003
+      IllustratedHud_42: -1660843474435545659
+      IllustratedHud_43: 6256666626073839226
+      IllustratedHud_44: -6519309083709802334
+      IllustratedHud_45: -278111744796275168
+      IllustratedHud_46: -2844212656981791317
+      IllustratedHud_47: -1212662448559963062
+      IllustratedHud_48: 5394620985104922943
+      IllustratedHud_49: 8526579292789750160
+      IllustratedHud_5: -1265098510777860460
+      IllustratedHud_50: -3405794931078079169
+      IllustratedHud_51: 5366069800499530309
+      IllustratedHud_52: 3752015728269072117
+      IllustratedHud_53: 4096527321991198307
+      IllustratedHud_54: 1032143403461214982
+      IllustratedHud_55: -8881233827057743410
+      IllustratedHud_56: -3439269233289256531
+      IllustratedHud_57: -7901661647262325983
+      IllustratedHud_58: 4801079823494463985
+      IllustratedHud_59: -5218915246290855400
+      IllustratedHud_6: -4129850859079406587
+      IllustratedHud_60: -3089391770610611837
+      IllustratedHud_61: 3956057636928998325
+      IllustratedHud_62: -6289714661842425655
+      IllustratedHud_63: -1779985083830937474
+      IllustratedHud_64: 9012864564383961249
+      IllustratedHud_65: -6972917596611846089
+      IllustratedHud_66: -980082945037087408
+      IllustratedHud_67: 1786036946325327704
+      IllustratedHud_68: -5204619577282258122
+      IllustratedHud_69: -9099361572464623495
+      IllustratedHud_7: -3665868663781121983
+      IllustratedHud_8: 1170734972914647206
+      IllustratedHud_9: 3316307369676286589
+      ui-capsule: 8568010174621758358
+      ui-clock: -6941983202837500434
+      ui-feather: -1179940527964459715
+      ui-heart: -5093033512166764478
+      ui-joystick: -3742778668923139756
+      ui-knob: 4432993238990679582
+      ui-panel: -322521593692891950
+      ui-quack: -5271145560675006428
+      ui-relics: 1788068148216652489
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

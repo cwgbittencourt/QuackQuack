@@ -11,7 +11,7 @@ namespace QuackQuack.Presentation.UI
         {
             if (value.GetComponent<MenuCancelRelay>() == null) value.gameObject.AddComponent<MenuCancelRelay>();
             var outline = value.GetComponent<Outline>(); if (outline == null) outline = value.gameObject.AddComponent<Outline>();
-            outline.effectColor = new Color(1, .82f, .15f); outline.effectDistance = new Vector2(4, -4); outline.enabled = Selected == value;
+            outline.effectColor = CartoonUiTheme.Teal; outline.effectDistance = new Vector2(4, -4); outline.enabled = Selected == value;
             var colors = value.colors; colors.selectedColor = new Color(1, .82f, .32f); colors.highlightedColor = new Color(.75f, .9f, 1);
             value.colors = colors; value.transition = Selectable.Transition.ColorTint;
         }

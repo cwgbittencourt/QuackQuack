@@ -396,6 +396,8 @@ namespace QuackQuack.Tests.PlayMode
 #else
                 string folder=Path.Combine(Application.temporaryCachePath,"Polimento002/T039");
 #endif
+                string captureOverride=Environment.GetEnvironmentVariable("QUACKQUACK_UI_CAPTURE_DIR");
+                if(!string.IsNullOrWhiteSpace(captureOverride))folder=Path.GetFullPath(captureOverride);
                 Directory.CreateDirectory(folder); File.WriteAllBytes(Path.Combine(folder,$"{size.x}x{size.y}-{state}.png"),pixels.EncodeToPNG());
             }
             finally { RenderTexture.active=previous; Object.DestroyImmediate(pixels); }

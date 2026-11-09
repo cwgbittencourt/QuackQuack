@@ -16,7 +16,7 @@ namespace QuackQuack.Editor
             foreach (string path in new[] { MobileControlsSetup.PrefabPath, RelicSetup.PrefabPath, UpgradeSelectionSetup.PrefabPath, ResultsSetup.PrefabPath, PolishUiSetup.ProfilePath })
             {
                 var root = PrefabUtility.LoadPrefabContents(path);
-                try { Configure(root); PrefabUtility.SaveAsPrefabAsset(root,path); }
+                try { Configure(root);PolishUiSetup.RefreshExistingTheme(root); PrefabUtility.SaveAsPrefabAsset(root,path); }
                 finally { PrefabUtility.UnloadPrefabContents(root); }
             }
             foreach (string name in new[] { "Lake", "LakeRun" })
@@ -28,6 +28,7 @@ namespace QuackQuack.Editor
                 var controls = GameObject.Find("Run controls");
                 if (controls != null) ConfigureRunControls(controls);
                 else if (name == "LakeRun") throw new InvalidOperationException("LakeRun is missing its authored run controls.");
+                foreach(var skin in Object.FindObjectsByType<CartoonUiSkin>(FindObjectsInactive.Include,FindObjectsSortMode.None))PolishUiSetup.RefreshExistingTheme(skin.gameObject);
                 EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
             }
             AssetDatabase.SaveAssets();

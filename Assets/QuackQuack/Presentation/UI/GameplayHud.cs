@@ -15,7 +15,9 @@ namespace QuackQuack.Presentation.UI
         private Func<HudSnapshot> read;
         private int previousSecond = -1, previousLevel = -1;
         private bool visualsReady;
-        private void Awake() => HideLegacyText();
+        private bool themed;
+        private bool illustrated;
+        private void Awake() {var skin=GetComponent<CartoonUiSkin>();themed=skin!=null;illustrated=skin!=null&&skin.Theme!=null&&skin.Theme.Illustrated;HideLegacyText();}
         public void Bind(Func<HudSnapshot> source)
         { read = source; previousLevel = previousSecond = -1; InitializeVisuals(); }
         public void Unbind() { read = null; }
@@ -32,11 +34,13 @@ namespace QuackQuack.Presentation.UI
             breathFill.fillAmount = value.Breath01;
             bool full = value.Capacity > 0 && value.Breath01 >= 1;
             breathFill.color = full ? new Color(0.98f, 0.84f, 0.32f) : new Color(0.29f, 0.78f, 0.86f);
-            if (breathIcon != null) breathIcon.color = breathFill.color;
+            if (breathIcon != null) breathIcon.color = themed?(full?new Color(.57f,.31f,.045f):CartoonUiTheme.Teal):breathFill.color;
+            if (themed&&healthIcon!=null)healthIcon.color=new Color(.72f,.16f,.13f);
             if (quackLabel != null)
             {
                 quackLabel.text = value.QuackState;
-                quackLabel.color = value.QuackReady ? new Color(0.98f, 0.84f, 0.32f) : new Color(0.75f, 0.8f, 0.81f);
+                quackLabel.color = illustrated ? new Color(1,.95f,.79f) : themed ? (value.QuackReady?CartoonUiTheme.Teal:CartoonUiTheme.Muted) :
+                    value.QuackReady ? new Color(0.98f, 0.84f, 0.32f) : new Color(0.75f, 0.8f, 0.81f);
             }
             if (statusLabel != null) statusLabel.text = value.Status;
             if (experienceFill != null) experienceFill.fillAmount = value.Progress.Fraction;

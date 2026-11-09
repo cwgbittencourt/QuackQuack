@@ -11,6 +11,7 @@ using QuackQuack.Content.Relics;
 using QuackQuack.Content.Shared;
 using QuackQuack.Content.Weapons;
 using QuackQuack.Platform.Input;
+using QuackQuack.Presentation.UI;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
@@ -169,6 +170,7 @@ namespace QuackQuack.Editor
             switch (asset)
             {
                 case PickupPolicyDefinition p: valid = p.IsValid(out reason); break;
+                case CartoonUiTheme theme: valid = theme.IsValid; break;
                 case ContentDefinition d: valid = d.IsValid(out reason); break;
                 case LakeEncounterCatalog c: valid = c.IsValid(out reason); break;
                 case PrototypeRelicCatalog c: valid = c.IsValid(out reason); break;
