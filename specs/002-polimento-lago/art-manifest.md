@@ -166,3 +166,35 @@ Revisão final T047: reconhecer jogador, ameaça, cura, XP e bloqueio sem explic
 ## Verificação da T041
 
 Inspeção estática de Content, prefabs, cenas, geradores, importadores e referência R1; reconciliação dos IDs com os assets versionados: um Pato, cinco comuns, dois minibosses, um chefe, seis armas, três resultados/três receitas, seis passivas e dez relíquias. Conferir também fixtures, recursos compartilhados, HUD e ambiente acima. Checklist de requisitos 11/11, sem alterar seus marcadores. Nenhuma execução Unity/build/teste de gameplay é necessária para esta entrega documental; sem alegação de aceite visual final ou desempenho. T042–T047 permanecem pendentes.
+
+## Amostra T042 — 09/11/2026
+
+Estado: cena-amostra implementada, **aceite artístico do usuário pendente**. Base `2847642`; somente T042. Não inicia lotes T043–T046 nem substitui prefabs/cenas da partida. Cena estática de exposição, sem IA, colliders, coleta, animação ou botões funcionais; o HUD é uma composição representativa da linguagem visual, não uma instância do fluxo de gameplay. Valores das barras/nível/relógio são exemplos visuais.
+
+Cena: `Assets/QuackQuack/Art/LakeCartoon/Sample/LakeCartoonSample.unity`. Gerador: `Assets/QuackQuack/Editor/PolishArtSetup.cs`, menu **QuackQuack → Art → Build T042 cartoon sample**. Abrir a cena no Unity permite inspecionar os elementos; regeneração abre somente essa cena, portanto salvar qualquer outra cena aberta antes de usar o menu. Não é adicionada ao pipeline de build do produto.
+
+### Entrega e proveniência
+
+Fonte/exportação: `Assets/QuackQuack/Art/LakeCartoon/Sources/sample-atlas.png`, RGBA 1536×1024 com seis células 512×512, alpha preservado. SHA-256 `E19F869C43EEF25B359E1B96912A0F5EB29FE742741CE285D1CD7BD1CBB99F54`. Geração assistida por IA com ferramenta integrada image_gen em 09/11/2026, referência R1; prompts e restrições em [art-source-prompts.md](art-source-prompts.md). Fonte achatada disponível, sem arquivo em camadas. Não há licença pública/CC0 atribuída; nenhuma biblioteca externa de sprites integrada.
+
+Importação efetiva da amostra: Sprite Multiple, seis slices centrais, PPU 128, Bilinear, Clamp, mipmaps/ReadWrite off, alpha transparency, sem compressão, máximo 2048. `.meta`, recortes e cena produzidos pelo Unity 6000.4.3f1 na cópia completa isolada `Temp/T042Validation`, sem copiar Library. Esses parâmetros pertencem à amostra; Android ASTC e perfis finais continuam propostas da T041.
+
+| ID do manifesto | Slice / tamanho do quadro / pivô | Estado e tamanho autorados na amostra | Ordenação |
+|---|---|---|---|
+| pato | pato / 512×512 / 0,5;0,5 | Pose única vocalizando; quadro 1,5 unidades de altura (inclui margem transparente) | 5 |
+| formiga | formiga / 512×512 / 0,5;0,5 | Pose única; cabeça/tórax/abdome separados, seis pernas e antenas; quadro 1,25 | 10 |
+| art.obstacle.rocks | rock / 512×512 / 0,5;0,5 | Rocha única; quadro 2,1; exposição sem collider | 1 |
+| art.pickup.xp | xp / 512×512 / 0,5;0,5 | Gema ciana, quadro 0,48; sem coleta | 12 |
+| art.pickup.heal | heal / 512×512 / 0,5;0,5 | Folha verde com símbolo de cura, quadro 0,6; sem coleta | 12 |
+| fx.quack-active | quack / 512×512 / 0,5;0,5 | Arcos internos, quadro 2,4; anel separado de raio 4 obtido de PatoQuack.asset, indica alcance circular nominal | 14 / anel 13 |
+| ui.resources / ui.progress / ui.run-actions | uGUI + ResourceIconGraphic + LegacyRuntime.ttf | Duas barras sem números, coração/ondas distintos; XP/nível central a 12 unidades do rodapé, Relíquias/relógio/Pausar. Sem tarja de status; rótulo de exposição fora do HUD de produto | Canvas ScreenSpaceCamera |
+
+Solo/água são blocos de contexto com cores e linhas discretas, não cenário final da T046. A amostra mostra diferenças por silhueta: Pato creme/bico, formiga segmentada, rocha, gema e folha com símbolo. Os arcos são acento gráfico: **não transformam o Quack ativo circular em ataque frontal**. A integração animada, reset pooled, skin de todos os estados e validação de alcance no combate continuam nas tasks de lote.
+
+### Verificação executada e limites
+
+Checklist de requisitos 11/11. Compilação e geração pelo Unity concluídas com marcador `T042_ART_SAMPLE_OK sprites=6 range=4`. A importação inicial teve erros transitórios de assemblies de pacotes e falha Burst JIT ao carregar DLL (erro Windows 4551); o gerador ainda executou. Reexecução com `--burst-disable-compilation` apenas no processo de validação confirmou geração sem esses erros, sem alterar pacotes/PlayerSettings. Logs em `Logs/Polimento002/T042/`; não versionados.
+
+Quatro capturas de câmera, `sample-16x9.png` (1920×1080), `sample-18x9.png` (2160×1080), `sample-19_5x9.png` (2340×1080) e `sample-4x3.png` (1440×1080), inspecionadas. Correção R1 amplia somente o bloco de terra do contexto para não terminar na borda ultralarga. Isso é inspeção da amostra estática, sem aceite de Safe Area física, gameplay, animação, Android ou desempenho; suítes de gameplay não foram reexecutadas porque produção não foi alterada. Capturas regeneráveis permanecem locais no diretório de logs.
+
+Aceite solicitado: reconhecer Pato/formiga/rocha/XP/cura e aprovar traço, paleta, proporções e linguagem das barras para orientar os próximos lotes. Registrar aqui a resposta explícita antes de marcar T042 concluída. Não inferir aprovação pela solicitação de implementação.

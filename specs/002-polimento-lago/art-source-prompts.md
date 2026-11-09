@@ -1,0 +1,17 @@
+# T042 — origem da amostra
+
+09/11/2026. Atlas gerado com a ferramenta integrada image_gen (skill imagegen), a partir de `specs/002-polimento-lago/references/direcao-cartoon-candidata.png`. Autoria assistida por IA; nenhuma biblioteca de sprites de terceiros importada. Não há declaração de licença pública/CC0. Uso no projeto conforme condições aplicáveis à geração e à referência fornecida pelo usuário. Fonte disponível é o PNG achatado `sample-atlas.png`, não um original em camadas nem uma animação.
+
+O atlas contém seis células 512×512 em PNG RGBA 1536×1024. Nomes Unity: pato, formiga, rock, xp, heal, quack. Recorte feito pelo importador Unity; alpha da geração preservado. O primeiro rascunho foi descartado por inseto semelhante a besouro. Somente o atlas revisado integra esta entrega. Registro de aceite em `specs/002-polimento-lago/art-manifest.md`.
+
+## Prompt inicial (ferramenta integrada, transparência solicitada)
+
+Use case: stylized-concept. Create ONE production sprite atlas PNG with genuine transparent background for Unity cartoon 2D lake game, matching the attached reference's dark brown thick rounded outlines, warm simple shaded volumes and expressive faces. Exactly a 3-column by 2-row evenly spaced grid, six equally sized square cells, each subject centered with generous transparent margin, no overlapping cells. Row1: cell1 the single cream white duck hero facing right, orange beak and feet, confident expressive face, top-down three-quarter view like reference; cell2 a single red brown ANT enemy facing left, six legs antennae segmented body, unmistakably ant, same view; cell3 one solid gray rounded rock obstacle with dark outline. Row2: cell1 one cyan diamond XP gem with dark outline and small shine; cell2 one green healing leaf-shaped token bearing a cream plus symbol, unmistakable healing collectible; cell3 three cyan curved sound wave arcs facing right, Quack effect, translucent interiors and crisp edges. No text, no numbers, no UI, no scene, no water, no ground, no shadows outside each sprite, no turtles, no additional characters. All six cells have transparent background and no grid lines. This is a single sprite sheet asset, not a screenshot. Preserve coherent style throughout.
+
+## Prompt de revisão (referência: primeiro rascunho; transparência solicitada)
+
+Edit this six cell sprite atlas only as follows. Preserve exact 3x2 layout and all other sprites and style. Replace top middle insect with an unmistakable ANT: three clearly separated small head, narrow thorax, large rounded abdomen, very narrow pinched waist between them, exactly six thin jointed legs attached to thorax and two long elbowed antennae. Facing left, red brown friendly menacing cartoon like existing sprites, no beetle shell/wing covers. Remove every dark background and every colored glow surrounding every sprite; genuinely transparent alpha background including between cells, no ambient shadows or vignette. Keep opaque dark-brown outlines of the actual subjects. No new objects or text.
+
+## HUD e contexto
+
+HUD uGUI autorado pelo gerador PolishArtSetup, reaproveitando ResourceIconGraphic e fonte interna LegacyRuntime.ttf; sem fonte externa. Solo/água são amostras de cor e linhas existentes, não o lote de cenário T046. Cena estática de direção artística, sem colliders, IA, coleta ou botões funcionais. O anel indica o raio nominal circular do Quack ativo obtido de PatoQuack.asset; os arcos internos são acento visual, não delimitador de dano frontal.

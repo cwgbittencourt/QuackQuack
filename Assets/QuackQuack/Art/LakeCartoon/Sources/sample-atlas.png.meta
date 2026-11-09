@@ -1,0 +1,599 @@
+fileFormatVersion: 2
+guid: 708ee79478e221247a3b7ad3da1749fc
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8163972525651717818
+    second: sample-atlas_0
+  - first:
+      213: 4756345453249329454
+    second: sample-atlas_1
+  - first:
+      213: 5467491631216541643
+    second: sample-atlas_2
+  - first:
+      213: 8863746197904851830
+    second: sample-atlas_3
+  - first:
+      213: 3072293875100156362
+    second: sample-atlas_4
+  - first:
+      213: 4525395929506922400
+    second: sample-atlas_5
+  - first:
+      213: -736986156346359925
+    second: sample-atlas_6
+  - first:
+      213: -5639019379975402118
+    second: sample-atlas_7
+  - first:
+      213: 462414929035847385
+    second: sample-atlas_8
+  - first:
+      213: 2997550400169551357
+    second: sample-atlas_9
+  - first:
+      213: -1602443041741404108
+    second: sample-atlas_10
+  - first:
+      213: -1343314612738110069
+    second: sample-atlas_11
+  - first:
+      213: 5246985151195825291
+    second: sample-atlas_12
+  - first:
+      213: 7582064424215159069
+    second: sample-atlas_13
+  - first:
+      213: -8593794205449330058
+    second: sample-atlas_14
+  - first:
+      213: 6996694116092022861
+    second: sample-atlas_15
+  - first:
+      213: -5489483825141883057
+    second: sample-atlas_16
+  - first:
+      213: -1936069220385141385
+    second: sample-atlas_17
+  - first:
+      213: -8207791867607895467
+    second: sample-atlas_18
+  - first:
+      213: 1296242004202175646
+    second: sample-atlas_19
+  - first:
+      213: 2330352279758198890
+    second: sample-atlas_20
+  - first:
+      213: 288176217463960037
+    second: sample-atlas_21
+  - first:
+      213: 1634299988677975471
+    second: sample-atlas_22
+  - first:
+      213: 2415283776857042976
+    second: sample-atlas_23
+  - first:
+      213: 1031653713088606415
+    second: sample-atlas_24
+  - first:
+      213: 7559923549505793812
+    second: sample-atlas_25
+  - first:
+      213: -4860660411818338186
+    second: sample-atlas_26
+  - first:
+      213: -3210015929637076931
+    second: sample-atlas_27
+  - first:
+      213: 6617419166248697598
+    second: sample-atlas_28
+  - first:
+      213: -519403270934785819
+    second: sample-atlas_29
+  - first:
+      213: -6223894322931965712
+    second: sample-atlas_30
+  - first:
+      213: 1881451816076735226
+    second: sample-atlas_31
+  - first:
+      213: 388283278278547045
+    second: sample-atlas_32
+  - first:
+      213: -4575451284704958731
+    second: sample-atlas_33
+  - first:
+      213: -5337567737224451948
+    second: sample-atlas_34
+  - first:
+      213: -5165537711295020069
+    second: sample-atlas_35
+  - first:
+      213: -3968299881967728215
+    second: sample-atlas_36
+  - first:
+      213: -8586842309572224584
+    second: sample-atlas_37
+  - first:
+      213: 2468848717087705415
+    second: sample-atlas_38
+  - first:
+      213: 6645053081393713702
+    second: sample-atlas_39
+  - first:
+      213: 3766491456238036049
+    second: sample-atlas_40
+  - first:
+      213: 5642648085098749177
+    second: sample-atlas_41
+  - first:
+      213: 9002443756254103618
+    second: sample-atlas_42
+  - first:
+      213: -3217719093396680579
+    second: sample-atlas_43
+  - first:
+      213: -5801460475370089584
+    second: sample-atlas_44
+  - first:
+      213: -4089308237758514304
+    second: sample-atlas_45
+  - first:
+      213: 433340589180332691
+    second: sample-atlas_46
+  - first:
+      213: 2283403126346814885
+    second: sample-atlas_47
+  - first:
+      213: -1170051059885640735
+    second: sample-atlas_48
+  - first:
+      213: 4888781216184719174
+    second: sample-atlas_49
+  - first:
+      213: 4980832620713285024
+    second: sample-atlas_50
+  - first:
+      213: -1764630966939335895
+    second: sample-atlas_51
+  - first:
+      213: -871089250850481911
+    second: sample-atlas_52
+  - first:
+      213: 527626002796190753
+    second: sample-atlas_53
+  - first:
+      213: 2966978773809800082
+    second: sample-atlas_54
+  - first:
+      213: 4893196924603774484
+    second: sample-atlas_55
+  - first:
+      213: 1477912982468904609
+    second: sample-atlas_56
+  - first:
+      213: -7714873766562761712
+    second: sample-atlas_57
+  - first:
+      213: -1537034272225201729
+    second: sample-atlas_58
+  - first:
+      213: 8250957991463386683
+    second: sample-atlas_59
+  - first:
+      213: -5696577301218286167
+    second: sample-atlas_60
+  - first:
+      213: -1075613378146193560
+    second: sample-atlas_61
+  - first:
+      213: 9171086085995126702
+    second: sample-atlas_62
+  - first:
+      213: -5466877491241166169
+    second: sample-atlas_63
+  - first:
+      213: 5706654433357327105
+    second: sample-atlas_64
+  - first:
+      213: -4300245447384417163
+    second: sample-atlas_65
+  - first:
+      213: -8536787846676084871
+    second: sample-atlas_66
+  - first:
+      213: 4799478549615050785
+    second: sample-atlas_67
+  - first:
+      213: -6201737610796626589
+    second: sample-atlas_68
+  - first:
+      213: 4648192847896817879
+    second: sample-atlas_69
+  - first:
+      213: -8095907524117282934
+    second: sample-atlas_70
+  - first:
+      213: -1827037247257720276
+    second: sample-atlas_71
+  - first:
+      213: -6048057892666724656
+    second: sample-atlas_72
+  - first:
+      213: 8040276394687535913
+    second: sample-atlas_73
+  - first:
+      213: 4735700863181389805
+    second: sample-atlas_74
+  - first:
+      213: -1002487256758144420
+    second: pato
+  - first:
+      213: -5533379300132476371
+    second: formiga
+  - first:
+      213: 5401209469563074041
+    second: rock
+  - first:
+      213: 297337893524743424
+    second: xp
+  - first:
+      213: 3553399709606440032
+    second: heal
+  - first:
+      213: 8776494232438028763
+    second: quack
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: pato
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c523311c6237612f0800000000000000
+      internalID: -1002487256758144420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: formiga
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d2aaa18f7dc7533b0800000000000000
+      internalID: -5533379300132476371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rock
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 512
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f578ce4563f4fa40800000000000000
+      internalID: 5401209469563074041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: xp
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0052ec12d3b502400800000000000000
+      internalID: 297337893524743424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: heal
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06c611c8536305130800000000000000
+      internalID: 3553399709606440032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: quack
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 512
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd9bbb9210f5cc970800000000000000
+      internalID: 8776494232438028763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      formiga: -5533379300132476371
+      heal: 3553399709606440032
+      pato: -1002487256758144420
+      quack: 8776494232438028763
+      rock: 5401209469563074041
+      sample-atlas_0: -8163972525651717818
+      sample-atlas_1: 4756345453249329454
+      sample-atlas_10: -1602443041741404108
+      sample-atlas_11: -1343314612738110069
+      sample-atlas_12: 5246985151195825291
+      sample-atlas_13: 7582064424215159069
+      sample-atlas_14: -8593794205449330058
+      sample-atlas_15: 6996694116092022861
+      sample-atlas_16: -5489483825141883057
+      sample-atlas_17: -1936069220385141385
+      sample-atlas_18: -8207791867607895467
+      sample-atlas_19: 1296242004202175646
+      sample-atlas_2: 5467491631216541643
+      sample-atlas_20: 2330352279758198890
+      sample-atlas_21: 288176217463960037
+      sample-atlas_22: 1634299988677975471
+      sample-atlas_23: 2415283776857042976
+      sample-atlas_24: 1031653713088606415
+      sample-atlas_25: 7559923549505793812
+      sample-atlas_26: -4860660411818338186
+      sample-atlas_27: -3210015929637076931
+      sample-atlas_28: 6617419166248697598
+      sample-atlas_29: -519403270934785819
+      sample-atlas_3: 8863746197904851830
+      sample-atlas_30: -6223894322931965712
+      sample-atlas_31: 1881451816076735226
+      sample-atlas_32: 388283278278547045
+      sample-atlas_33: -4575451284704958731
+      sample-atlas_34: -5337567737224451948
+      sample-atlas_35: -5165537711295020069
+      sample-atlas_36: -3968299881967728215
+      sample-atlas_37: -8586842309572224584
+      sample-atlas_38: 2468848717087705415
+      sample-atlas_39: 6645053081393713702
+      sample-atlas_4: 3072293875100156362
+      sample-atlas_40: 3766491456238036049
+      sample-atlas_41: 5642648085098749177
+      sample-atlas_42: 9002443756254103618
+      sample-atlas_43: -3217719093396680579
+      sample-atlas_44: -5801460475370089584
+      sample-atlas_45: -4089308237758514304
+      sample-atlas_46: 433340589180332691
+      sample-atlas_47: 2283403126346814885
+      sample-atlas_48: -1170051059885640735
+      sample-atlas_49: 4888781216184719174
+      sample-atlas_5: 4525395929506922400
+      sample-atlas_50: 4980832620713285024
+      sample-atlas_51: -1764630966939335895
+      sample-atlas_52: -871089250850481911
+      sample-atlas_53: 527626002796190753
+      sample-atlas_54: 2966978773809800082
+      sample-atlas_55: 4893196924603774484
+      sample-atlas_56: 1477912982468904609
+      sample-atlas_57: -7714873766562761712
+      sample-atlas_58: -1537034272225201729
+      sample-atlas_59: 8250957991463386683
+      sample-atlas_6: -736986156346359925
+      sample-atlas_60: -5696577301218286167
+      sample-atlas_61: -1075613378146193560
+      sample-atlas_62: 9171086085995126702
+      sample-atlas_63: -5466877491241166169
+      sample-atlas_64: 5706654433357327105
+      sample-atlas_65: -4300245447384417163
+      sample-atlas_66: -8536787846676084871
+      sample-atlas_67: 4799478549615050785
+      sample-atlas_68: -6201737610796626589
+      sample-atlas_69: 4648192847896817879
+      sample-atlas_7: -5639019379975402118
+      sample-atlas_70: -8095907524117282934
+      sample-atlas_71: -1827037247257720276
+      sample-atlas_72: -6048057892666724656
+      sample-atlas_73: 8040276394687535913
+      sample-atlas_74: 4735700863181389805
+      sample-atlas_8: 462414929035847385
+      sample-atlas_9: 2997550400169551357
+      xp: 297337893524743424
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
