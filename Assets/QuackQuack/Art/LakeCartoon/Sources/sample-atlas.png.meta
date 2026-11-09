@@ -245,6 +245,9 @@ TextureImporter:
   - first:
       213: 8776494232438028763
     second: quack
+  - first:
+      213: -6927587094745301190
+    second: quack-frontal
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -476,7 +479,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: quack
+      name: quack-frontal
       rect:
         serializedVersion: 2
         x: 1024
@@ -491,8 +494,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd9bbb9210f5cc970800000000000000
-      internalID: 8776494232438028763
+      spriteID: a3f3023cd344cdf90800000000000000
+      internalID: -6927587094745301190
       vertices: []
       indices: 
       edges: []
@@ -515,6 +518,7 @@ TextureImporter:
       heal: 3553399709606440032
       pato: -1002487256758144420
       quack: 8776494232438028763
+      quack-frontal: -6927587094745301190
       rock: 5401209469563074041
       sample-atlas_0: -8163972525651717818
       sample-atlas_1: 4756345453249329454

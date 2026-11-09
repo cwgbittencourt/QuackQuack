@@ -49,10 +49,9 @@ namespace QuackQuack.Editor
             Place("art.obstacle.rocks", "rock", new Vector2(-5.6f,1.2f), 2.1f, 1);
             Place("art.pickup.xp", "xp", new Vector2(1.5f,2.25f), .48f, 12);
             Place("art.pickup.heal", "heal", new Vector2(-.25f,-2.25f), .6f, 12);
-            // Decorative wave remains inside the authored Quack range. The line is the exact range boundary.
+            // Active Quack is radial. Forward arcs belong to the separate frontal weapon.
             var quack = AssetDatabase.LoadAssetAtPath<QuackDefinition>("Assets/QuackQuack/Content/Characters/PatoQuack.asset");
             float range = quack.Range;
-            Place("fx.quack-active", "quack", new Vector2(-.5f,-.3f), 2.4f, 14);
             var boundary = new GameObject("Quack authored range — static exhibit", typeof(LineRenderer));
             var line = boundary.GetComponent<LineRenderer>(); line.useWorldSpace = true;
             line.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/QuackQuack/Art/Prototype/QuackRing.mat");
@@ -81,7 +80,7 @@ namespace QuackQuack.Editor
             importer.textureCompression = TextureImporterCompression.Uncompressed; importer.maxTextureSize = 2048;
             var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
             int w=texture.width/3, h=texture.height/2;
-            string[] names={"pato","formiga","rock","xp","heal","quack"};
+            string[] names={"pato","formiga","rock","xp","heal","quack-frontal"};
             // Unity serializes slice IDs/metas; never manufacture GUIDs or scene YAML.
 #pragma warning disable 618
             var slices = new SpriteMetaData[6];
