@@ -1,6 +1,6 @@
 # T040 — revisão visual e jogável do HUD (US5)
 
-Data: 06/11/2026. Base: `99b517f`. Estado: **pausada a pedido do usuário**, sem aceite final ainda. Somente T040; T014 e validações globais continuam independentes. O usuário pediu salvar os resultados e retomar após o reset dos tokens semanais; não há retomada automática agendada.
+Início: 06/11/2026. Base: `99b517f`. Retomada e conclusão: 09/11/2026, a partir de `23413ea`, por solicitação do usuário. Estado: **T040 concluída** após os aceites físicos de Xbox Series e DualSense no S23. A pausa anterior preservou os aceites já recebidos; não houve alteração de código nem repetição desses roteiros nesta retomada. Somente T040; T014 e validações globais continuam independentes.
 
 ## Ambiente e revisão solicitada
 
@@ -31,13 +31,13 @@ Os botões do laboratório não são navegação do produto; ele se oculta em ca
 | Normal: movimento, Quack, pausa, XP e escolha | Usuário confirmou funcionamento esperado inicialmente e “funcionando corretamente” no reteste R1 | Usuário confirmou “Está funcionando corretamente” no roteiro normal R1 |
 | XP inferior central, sem tarja/status redundantes | Aprovado pelo usuário no reteste R1 | Aprovado no roteiro R1, ambas as paisagens |
 | Vida/fôlego, estados de Quack além da cor | Usuário: “funciona corretamente” no roteiro teclado/mouse | Usuário: “funciona corretamente” no comparativo CHEIO/PARCIAL/FÔLEGO 0 |
-| Dicas: início, pausa, 10s, não repetição e fonte | Janela/pausa/não repetição e rótulos dos dois controles aprovados pelo usuário | Janela/pausa/não repetição aprovadas pelo usuário; rótulos de controles ainda pendentes |
+| Dicas: início, pausa, 10s, não repetição e fonte | Janela/pausa/não repetição e rótulos dos dois controles aprovados pelo usuário | Janela/pausa/não repetição e rótulos de Xbox/DualSense aprovados pelo usuário |
 | XP parcial/múltiplas subidas/retomada | XP +100, escolhas e retomada aprovados pelo usuário | XP +100, escolhas e retomada aprovados pelo usuário |
 | Dois minibosses: barras próximas/dano/pausa/morte/reuso | Roteiro completo aprovado pelo usuário | Roteiro completo aprovado pelo usuário |
 | Chefe: barra/dano/remoção/resultados | Barra/dano/derrota/vitória aprovados pelo usuário | Barra/dano/derrota/vitória aprovados pelo usuário |
-| Xbox Series: rótulos, HUD/menus e troca de fonte | Roteiro Xbox + DualSense aprovado pelo usuário, sem exceção informada | Pendente R1; pedido de pausa substituiu a resposta de aceite |
-| DualSense: rótulos, HUD/menus e troca de fonte | Roteiro Xbox + DualSense aprovado pelo usuário, sem exceção informada | Pendente R1; pedido de pausa substituiu a resposta de aceite |
-| Toque condicional e ambas as paisagens | Não aplicável como aparelho físico | Toque normal e ambas as paisagens aprovados; transição com controle ainda pendente |
+| Xbox Series: rótulos, HUD/menus e troca de fonte | Roteiro Xbox + DualSense aprovado pelo usuário, sem exceção informada | Bluetooth: usuário confirmou “Funciona corretamente” em 09/11, sem exceção informada |
+| DualSense: rótulos, HUD/menus e troca de fonte | Roteiro Xbox + DualSense aprovado pelo usuário, sem exceção informada | Bluetooth: usuário confirmou “funcionando corretamente” em 09/11, sem exceção informada |
+| Toque condicional e ambas as paisagens | Não aplicável como aparelho físico | Toque/duas paisagens aprovados anteriormente; restauração e ocultação após desconexão/reconexão aprovadas para ambos os controles em 09/11 |
 
 ## Artefatos e pendências
 
@@ -45,13 +45,15 @@ Logs/capturas locais em `Logs/Polimento002/T040`; XMLs em `TestResults/Polimento
 
 Foram inspecionadas oito capturas R1 da matriz, cobrindo cada proporção e lado do recorte: 1920×1080 recursos vazio/esquerda e parcial/direita; 2160×1080 perfil Xbox/esquerda e especiais+toque/direita; 2340×1080 cartas com prévia/esquerda e recursos cheios/direita; 1440×1080 especiais sem toque/esquerda e perfil PlayStation/direita. XP permanece no rodapé, sem Messages, textos e painéis essenciais legíveis sem sobreposição nessas amostras. Os 96 PNGs estão em `MatrixR1/`. Isso é evidência sintética complementar, não extrapolação para aparelhos físicos.
 
-Windows R1 normal e laboratório foram abertos; imagem `r1-windows-normal.png` registra o layout em execução. S23 recebeu o normal R1 e o laboratório R1. A primeira captura `android-r1-normal.png` foi feita durante a transição de abertura e não é evidência do HUD; `android-r1-lab.png` já mostra o HUD real/controles de laboratório, iniciado pausado. O usuário confirmou o roteiro normal R1 no S23. Capturas/asseverações não substituem as respostas físicas pendentes acima.
+Windows R1 normal e laboratório foram abertos; imagem `r1-windows-normal.png` registra o layout em execução. S23 recebeu o normal R1 e o laboratório R1. A primeira captura `android-r1-normal.png` foi feita durante a transição de abertura e não é evidência do HUD; `android-r1-lab.png` já mostra o HUD real/controles de laboratório, iniciado pausado. O usuário confirmou o roteiro normal R1 no S23. Os aceites físicos da tabela foram recebidos separadamente das capturas/asseverações.
 
-T040 permanece desmarcada até concluir os casos obrigatórios ou registrar explicitamente o que ficou pendente. Não encerra T075 da feature 001, T014/8BitDo Android, classes de desempenho Android intermediário/entrada, aceite artístico final ou rodada com cinco participantes.
+T040 concluída para os roteiros registrados de HUD, Windows e S23 com teclado/toque/Xbox/DualSense. Não encerra T075 da feature 001, T014/8BitDo Android, classes de desempenho Android intermediário/entrada, aceite artístico final ou rodada com cinco participantes. Os casos genéricos da matriz permanecem evidência sintética; não representam aceite físico do 8BitDo Android, adiado expressamente pelo usuário.
 
-## Retomada
+## Retomada concluída em 09/11/2026
 
-Não repetir os roteiros já aprovados sem mudança/falha nova. Próximo passo: reconectar o S23 autorizado e retomar somente o último roteiro físico de controles no S23, com Xbox Series e DualSense um por vez por Bluetooth, no laboratório R1. Reiniciar LAB antes de cada controle; conferir dicas/rótulos antes de 00:10, movimento/Quack/pausa/Relíquias, menus de melhoria/CONTROLES e HUD legível; após 00:10 dicas não reaparecem. Ao desligar o controle na partida, joystick/Quack touch devem reaparecer e funcionar; ao reconectar, ocultar novamente preservando contexto. Nenhum desses dois aceites Android foi recebido ainda.
+Em 09/11/2026 o S23 SM-S918B/Android 17 foi reconhecido, o APK de laboratório foi conferido pelo mesmo SHA-256 R1 e o app instalado foi aberto no perfil principal do aparelho. O workspace estava limpo em `23413ea`; o harness continua fora de Assets. Checklist de requisitos: 11/11 aprovados. O roteiro pendente foi reapresentado separadamente para Xbox e DualSense, e ambos foram aprovados pelo usuário.
+
+O roteiro físico executado solicitou Xbox Series e DualSense um por vez por Bluetooth, no laboratório R1, com reinício antes de cada controle. Cobriu dicas/rótulos antes de 00:10, movimento/Quack/pausa/Relíquias, menus de melhoria/CONTROLES e HUD legível; após 00:10 dicas não reaparecem. Desligar o controle na partida restaura joystick/Quack touch; reconectar os oculta novamente preservando contexto. Respostas recebidas, respectivamente: “Funciona corretamente” e “funcionando corretamente”, sem falhas ou etapas não cobertas informadas. Não houve novo build nem reexecução de EditMode/PlayMode em 09/11: os resultados anteriores permanecem aplicáveis porque nenhum código/asset foi alterado.
 
 Builds já prontas em `Builds/Polimento002Validation/Builds/`: `T040Windows`, `T040Android`, `T040LabWindows` e `T040LabAndroid` (executável/APK QuackQuack). APKs instalados no S23: pacotes `com.cemggames.quackquack.validation002.t040` e `com.cemggames.quackquack.validation002.t040lab`, rótulos R1. O script privado do laboratório foi retirado de Assets ao terminar as builds e está guardado em `Logs/Polimento002/T040/Validation040Lab.cs`/`.held.cs`; não restaurá-lo para testes ou builds normais. Não confundir com os artefatos iniciais pré-R1.
 
