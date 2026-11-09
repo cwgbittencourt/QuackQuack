@@ -1,0 +1,665 @@
+fileFormatVersion: 2
+guid: 218dac1f6ad4b364d878df870eefd4b0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5925392360841405690
+    second: weapons-atlas_0
+  - first:
+      213: 7828039271779268794
+    second: weapons-atlas_1
+  - first:
+      213: -6063642321755667927
+    second: weapons-atlas_2
+  - first:
+      213: 4171481797628160658
+    second: weapons-atlas_3
+  - first:
+      213: 8643320353543850410
+    second: weapons-atlas_4
+  - first:
+      213: 1036547629010266097
+    second: weapons-atlas_5
+  - first:
+      213: -4610302513385913462
+    second: weapons-atlas_6
+  - first:
+      213: -9147584498763156909
+    second: weapons-atlas_7
+  - first:
+      213: 2318429103980293916
+    second: weapons-atlas_8
+  - first:
+      213: 8387155691411310440
+    second: weapons-atlas_9
+  - first:
+      213: 4016279245452557136
+    second: weapons-atlas_10
+  - first:
+      213: -2883845170748290934
+    second: weapons-atlas_11
+  - first:
+      213: -341731475366195022
+    second: weapons-atlas_12
+  - first:
+      213: -6024207563443667232
+    second: weapons-atlas_13
+  - first:
+      213: -1594225360985310328
+    second: weapons-atlas_14
+  - first:
+      213: -4705380581133910105
+    second: weapons-atlas_15
+  - first:
+      213: -3030823016275401943
+    second: weapons-atlas_16
+  - first:
+      213: 2425842551296510174
+    second: weapons-atlas_17
+  - first:
+      213: -6098606809974531096
+    second: weapons-atlas_18
+  - first:
+      213: -5113895144484227151
+    second: weapons-atlas_19
+  - first:
+      213: -455981237136216610
+    second: weapons-atlas_20
+  - first:
+      213: -8760651042806281933
+    second: weapons-atlas_21
+  - first:
+      213: 3825146740347282999
+    second: weapons-atlas_22
+  - first:
+      213: -9046724141513882301
+    second: weapons-atlas_23
+  - first:
+      213: 5976125872122087447
+    second: weapons-atlas_24
+  - first:
+      213: -7662883951258861839
+    second: weapons-atlas_25
+  - first:
+      213: -5726701622668414069
+    second: weapons-atlas_26
+  - first:
+      213: 545202636091727129
+    second: weapons-atlas_27
+  - first:
+      213: -6416616561533028747
+    second: weapons-atlas_28
+  - first:
+      213: -1276512752483601195
+    second: weapons-atlas_29
+  - first:
+      213: -6671920660335313815
+    second: weapons-atlas_30
+  - first:
+      213: -8801678229810386538
+    second: weapons-atlas_31
+  - first:
+      213: -8066544555460040116
+    second: weapons-atlas_32
+  - first:
+      213: 2116239083144088006
+    second: weapons-atlas_33
+  - first:
+      213: -7733288236538425559
+    second: weapons-atlas_34
+  - first:
+      213: 3190000910340610882
+    second: weapons-atlas_35
+  - first:
+      213: 4254813024035055177
+    second: weapons-atlas_36
+  - first:
+      213: -788026389106129488
+    second: weapons-atlas_37
+  - first:
+      213: 4651996892735365753
+    second: weapons-atlas_38
+  - first:
+      213: -5398879042101526368
+    second: weapons-atlas_39
+  - first:
+      213: 2775637896718432718
+    second: weapons-atlas_40
+  - first:
+      213: -7568385510526424309
+    second: weapons-atlas_41
+  - first:
+      213: 2257434525616293718
+    second: weapons-atlas_42
+  - first:
+      213: -1469124010684205553
+    second: weapons-atlas_43
+  - first:
+      213: 5605124616556813649
+    second: weapons-atlas_44
+  - first:
+      213: 5397936394488786691
+    second: weapons-atlas_45
+  - first:
+      213: -1721000407028749499
+    second: weapons-atlas_46
+  - first:
+      213: -8389201402096297807
+    second: weapons-atlas_47
+  - first:
+      213: -1590248506058612842
+    second: weapons-atlas_48
+  - first:
+      213: 5387909695513312122
+    second: weapons-atlas_49
+  - first:
+      213: -2009533314845270524
+    second: weapons-atlas_50
+  - first:
+      213: -2381280453570801633
+    second: weapons-atlas_51
+  - first:
+      213: -5324418619880475578
+    second: weapons-atlas_52
+  - first:
+      213: -8902064659672850263
+    second: weapons-atlas_53
+  - first:
+      213: 7056977807209915134
+    second: weapons-atlas_54
+  - first:
+      213: -4071583028752246594
+    second: weapons-atlas_55
+  - first:
+      213: 8172368504405430576
+    second: weapons-atlas_56
+  - first:
+      213: -4771638567098866522
+    second: weapons-atlas_57
+  - first:
+      213: -7157822820338585701
+    second: weapons-atlas_58
+  - first:
+      213: -5741114040555054707
+    second: weapons-atlas_59
+  - first:
+      213: 2172312422208418791
+    second: weapons-atlas_60
+  - first:
+      213: 5487666392270612039
+    second: weapons-atlas_61
+  - first:
+      213: -6149725251941076281
+    second: weapons-atlas_62
+  - first:
+      213: -8731229337569037836
+    second: weapons-atlas_63
+  - first:
+      213: -3137795056679113628
+    second: weapons-atlas_64
+  - first:
+      213: -7748705792422188024
+    second: weapons-atlas_65
+  - first:
+      213: -925326108736726733
+    second: weapons-atlas_66
+  - first:
+      213: -8196317892499574987
+    second: weapons-atlas_67
+  - first:
+      213: 6661668908740250073
+    second: weapons-atlas_68
+  - first:
+      213: 7442799797987145635
+    second: weapons-atlas_69
+  - first:
+      213: -2776196885052476982
+    second: weapons-atlas_70
+  - first:
+      213: 1830109865204137989
+    second: weapons-atlas_71
+  - first:
+      213: 9035966862577362074
+    second: bumerangue
+  - first:
+      213: -3464120250007989002
+    second: ovos
+  - first:
+      213: -6927587094745301190
+    second: quack-frontal
+  - first:
+      213: 8604377512339376915
+    second: aura-energia
+  - first:
+      213: -2095602626507630314
+    second: foguetes
+  - first:
+      213: 7640448175088318124
+    second: bolhas
+  - first:
+      213: -7595257758401398408
+    second: tornado-penas
+  - first:
+      213: 1868766487819184991
+    second: incubadora-combate
+  - first:
+      213: 4485805596789488883
+    second: quack-supersonico
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: bumerangue
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 865
+        width: 345
+        height: 326
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a94ef16acf3366d70800000000000000
+      internalID: 9035966862577362074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ovos
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 855
+        width: 283
+        height: 339
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f4590f7cf8fcefc0800000000000000
+      internalID: -3464120250007989002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: quack-frontal
+      rect:
+        serializedVersion: 2
+        x: 902
+        y: 852
+        width: 303
+        height: 362
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3f3023cd344cdf90800000000000000
+      internalID: -6927587094745301190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: aura-energia
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 433
+        width: 388
+        height: 388
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31b095072c3e86770800000000000000
+      internalID: 8604377512339376915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: foguetes
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 491
+        width: 409
+        height: 268
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61913a0a38ceae2e0800000000000000
+      internalID: -2095602626507630314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bolhas
+      rect:
+        serializedVersion: 2
+        x: 862
+        y: 450
+        width: 357
+        height: 357
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca6bbe86223580a60800000000000000
+      internalID: 7640448175088318124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tornado-penas
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 37
+        width: 316
+        height: 355
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87974f46f49389690800000000000000
+      internalID: -7595257758401398408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: incubadora-combate
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 42
+        width: 331
+        height: 349
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5bed9238313fe910800000000000000
+      internalID: 1868766487819184991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: quack-supersonico
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 27
+        width: 317
+        height: 372
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fcb8186c68c04e30800000000000000
+      internalID: 4485805596789488883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      aura-energia: 8604377512339376915
+      bolhas: 7640448175088318124
+      bumerangue: 9035966862577362074
+      foguetes: -2095602626507630314
+      incubadora-combate: 1868766487819184991
+      ovos: -3464120250007989002
+      quack-frontal: -6927587094745301190
+      quack-supersonico: 4485805596789488883
+      tornado-penas: -7595257758401398408
+      weapons-atlas_0: 5925392360841405690
+      weapons-atlas_1: 7828039271779268794
+      weapons-atlas_10: 4016279245452557136
+      weapons-atlas_11: -2883845170748290934
+      weapons-atlas_12: -341731475366195022
+      weapons-atlas_13: -6024207563443667232
+      weapons-atlas_14: -1594225360985310328
+      weapons-atlas_15: -4705380581133910105
+      weapons-atlas_16: -3030823016275401943
+      weapons-atlas_17: 2425842551296510174
+      weapons-atlas_18: -6098606809974531096
+      weapons-atlas_19: -5113895144484227151
+      weapons-atlas_2: -6063642321755667927
+      weapons-atlas_20: -455981237136216610
+      weapons-atlas_21: -8760651042806281933
+      weapons-atlas_22: 3825146740347282999
+      weapons-atlas_23: -9046724141513882301
+      weapons-atlas_24: 5976125872122087447
+      weapons-atlas_25: -7662883951258861839
+      weapons-atlas_26: -5726701622668414069
+      weapons-atlas_27: 545202636091727129
+      weapons-atlas_28: -6416616561533028747
+      weapons-atlas_29: -1276512752483601195
+      weapons-atlas_3: 4171481797628160658
+      weapons-atlas_30: -6671920660335313815
+      weapons-atlas_31: -8801678229810386538
+      weapons-atlas_32: -8066544555460040116
+      weapons-atlas_33: 2116239083144088006
+      weapons-atlas_34: -7733288236538425559
+      weapons-atlas_35: 3190000910340610882
+      weapons-atlas_36: 4254813024035055177
+      weapons-atlas_37: -788026389106129488
+      weapons-atlas_38: 4651996892735365753
+      weapons-atlas_39: -5398879042101526368
+      weapons-atlas_4: 8643320353543850410
+      weapons-atlas_40: 2775637896718432718
+      weapons-atlas_41: -7568385510526424309
+      weapons-atlas_42: 2257434525616293718
+      weapons-atlas_43: -1469124010684205553
+      weapons-atlas_44: 5605124616556813649
+      weapons-atlas_45: 5397936394488786691
+      weapons-atlas_46: -1721000407028749499
+      weapons-atlas_47: -8389201402096297807
+      weapons-atlas_48: -1590248506058612842
+      weapons-atlas_49: 5387909695513312122
+      weapons-atlas_5: 1036547629010266097
+      weapons-atlas_50: -2009533314845270524
+      weapons-atlas_51: -2381280453570801633
+      weapons-atlas_52: -5324418619880475578
+      weapons-atlas_53: -8902064659672850263
+      weapons-atlas_54: 7056977807209915134
+      weapons-atlas_55: -4071583028752246594
+      weapons-atlas_56: 8172368504405430576
+      weapons-atlas_57: -4771638567098866522
+      weapons-atlas_58: -7157822820338585701
+      weapons-atlas_59: -5741114040555054707
+      weapons-atlas_6: -4610302513385913462
+      weapons-atlas_60: 2172312422208418791
+      weapons-atlas_61: 5487666392270612039
+      weapons-atlas_62: -6149725251941076281
+      weapons-atlas_63: -8731229337569037836
+      weapons-atlas_64: -3137795056679113628
+      weapons-atlas_65: -7748705792422188024
+      weapons-atlas_66: -925326108736726733
+      weapons-atlas_67: -8196317892499574987
+      weapons-atlas_68: 6661668908740250073
+      weapons-atlas_69: 7442799797987145635
+      weapons-atlas_7: -9147584498763156909
+      weapons-atlas_70: -2776196885052476982
+      weapons-atlas_71: 1830109865204137989
+      weapons-atlas_8: 2318429103980293916
+      weapons-atlas_9: 8387155691411310440
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

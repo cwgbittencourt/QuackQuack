@@ -83,7 +83,10 @@ namespace QuackQuack.Tests.EditMode
             Assert.That(settings.IsValid, Is.True); Assert.That(settings.PickupPolicy, Is.SameAs(policy));
             Assert.That(settings.HealingPrefab, Is.Not.Null);
             Assert.That(settings.HealingPrefab.GetComponent<CircleCollider2D>().isTrigger, Is.True);
-            Assert.That(settings.HealingPrefab.GetComponentsInChildren<SpriteRenderer>().Length, Is.EqualTo(3));
+            var healingImages=settings.HealingPrefab.GetComponentsInChildren<SpriteRenderer>().Where(r=>r.enabled).ToArray();
+            Assert.That(healingImages.Length, Is.EqualTo(1), "Only the selected C2 potion should be visible.");
+            Assert.That(healingImages[0].sprite,Is.Not.Null);Assert.That(healingImages[0].sprite.name,Is.EqualTo("heal"));
+            Assert.That(healingImages[0].sharedMaterial.mainTexture,Is.SameAs(healingImages[0].sprite.texture));
             Assert.That(settings.HealingCapacity, Is.EqualTo(16)); Assert.That(settings.MiniBossReservedHealingSlots, Is.EqualTo(2));
             Assert.That(settings.Catalog.GetAllEnemies().All(e => e.ExperienceReward > 0), Is.True);
         }

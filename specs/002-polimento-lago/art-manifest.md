@@ -262,3 +262,60 @@ Validação em cópia completa isolada `Temp/T043Validation`, sem copiar Library
 Galeria e captura editor da LakeRun são evidências estáticas, não playtest nativo. Identidade artística e leitura de alcance em combate serão revisadas em T047; builds, aparelhos, profiling e rodada de participantes seguem T048–T051. Não extrapolar os testes para aceite físico/Android ou desempenho. Nenhuma task T044+ executada.
 
 Geração final aprovada com código 0: `T043_CHARACTERS_OK actors=9 threats=8 geometry=unchanged` e `T073_CONTENT_VALIDATION_OK assets=66 warnings=2`, log `Logs/Polimento002/T043/final-generate.log`. Galeria final `sample-cast.png` e render editor `sample-lake-scene.png` nesse diretório inspecionados: sprites corretos por atlas, sem halos/quadrados contaminados ou invasão entre células; Pato visível na composição real. O render da LakeRun não inclui HUD ScreenSpaceOverlay e não representa uma partida em execução. T043 concluída como entrega de lote/integracão; o aceite global continua separado.
+
+## Lote T044 — combate e recompensas
+
+09/11/2026, base `643dbb9`. Somente T044. Gerador `Editor/PolishArtCombat.cs`, parcial de PolishArtSetup, menu **QuackQuack → Art → Integrate T044 combat and pickups**. Executar após geradores de conteúdo base; estes produzem a representação provisória anterior. O comando atualiza somente sprite/material das nove WeaponDefinition e apresentação dos quatro prefabs de recompensa; abre a galeria `Art/LakeCartoon/Sample/LakeCartoonCombat.unity`, sem adicioná-la ao pipeline de produto. Salvar qualquer cena aberta antes de usar o menu.
+
+### Origem e escolha da bolha
+
+[Prompts/fontes](art-t044-prompts.md): geração assistida por IA com image_gen integrado, referência da amostra aceita, PNGs achatados sem camadas. Sem pacote externo ou licença pública/CC0 atribuída. Durante a implementação, o usuário escolheu a bolha iridescente do rascunho, preservado em [references/t044-bubble-preferred.png](references/t044-bubble-preferred.png). A fonte final mantém aro ciano com trechos perolados rosa/lavanda e reflexos brancos, distinta do XP sólido. Não usar a alternativa plana como bolha final. O centro transparente deixa ver os atores/terreno; irregularidades finas do reflexo permanecem na textura, não alteram o raio de colisão.
+
+Arquivos sob `Assets/QuackQuack/Art/LakeCartoon/Combat/`:
+
+| Fonte PNG | Dimensão / SHA-256 | Uso efetivo |
+|---|---|---|
+| weapons-atlas.png | 1254×1254; `53F9B395B3D29CDC5710097F9EBB5F7C1F980379A90B899045B05003DDC0AAF1` | Sete armas/evoluções. Células antigas de aura/bolha não são atribuídas, substituídas pelas fontes abaixo. |
+| circles-atlas.png | 1774×887; `D65291BBAE231C6B4872E60B6787986533843229343085889B7024B85132A3D8` | Somente aura. A bolha plana desse estudo não é atribuída. |
+| bubble-iridescent.png | 1254×1254; `6116FFC709D195E6C9BD95C35D73C42515368FB84E42CD11054B7C8112699EA4` | Bolha escolhida pelo usuário, fonte independente. |
+| pickups-atlas.png | 1774×887; mesmos bytes/SHA `63910AA78A852BBBB3070FDEC6FF7310FE1268B735B6FB4BA82A11AFACA1CC8E` da fonte C2/X3 | Cura/XP provisórios; GUID/recortes próprios, sem modificar a amostra T042. |
+
+Importação: Sprite Multiple, PPU 128, pivô central, alpha transparency, Bilinear/Clamp, sem mipmaps/ReadWrite/compressão, máximo 2048. O gerador calcula retângulos dos pixels visíveis dentro das células, preservando o PNG original; círculos recebem retângulo quadrado. Importação única por atlas evita que uma reimportação de células inteiras anule o recorte. Quatro materiais Sprite-Unlit, um por textura, nome-base do respectivo PNG. Não usar um material de atlas para sprites de outra textura. `.meta` e serializados produzidos pelo Unity 6000.4.3f1.
+
+| ID | Recorte final / forma | Estado e animação entregues |
+|---|---|---|
+| bumerangue | 345×326; pena curva dourada | Giro por idade de simulação, ida/volta e histórico por passagem preservados. |
+| ovos | 283×339; casca creme salpicada | Armadilha estática; detonação com círculo laranja no raio real, sem expansão enganosa. |
+| quack-frontal | 303×362; três arcos cianos | Decoração dentro do setor real; borda geométrica mantém alcance/ângulo exatos. |
+| aura-energia | 802×802; anel recortado de interior ondulado | Escala = diâmetro do raio efetivo; opacidade pulsa sem mudar borda, segue jogador, permanece translúcida. |
+| foguetes | 409×268; corpo com ponta/aletas/exaustão | Orientado pela direção homing; explosão com contorno serrilhado dentro do raio real. |
+| bolhas | 985×985; aro iridescente | Diâmetro visual = 2×HitRadius efetivo, compensando sprite/hierarquia, inclusive Sabão N0/N1/N5. Centro transparente. |
+| tornado-penas | 316×355; espiral de penas | Projéteis de ida/volta com giro; sem introduzir dano contínuo de aura. |
+| incubadora-combate | 331×349; ovo em suporte mecânico | Armadilha distinta; detonação indica o raio efetivo maior da evolução. |
+| quack-supersonico | 317×372; arcos serrilhados | Pulso frontal mais intenso por forma, mantendo setor real e duração da arma. |
+| art.pickup.heal | 526×705; poção rosa C2 | Prefab HealingPickup; representação estática no chão/atração, removida pelo ciclo lógico existente. |
+| art.pickup.xp | 538×552; esfera azul X3 sem estrela | Prefab ExperiencePickup; estados lógicos/coleta/atração inalterados. |
+| art.pickup.xp-rare | Esfera X3 + esfera satélite por composição | Prefab RareExperiencePickup: diferença de silhueta, não apenas cor; satélite sem collider/recompensa próprios. |
+| art.fixture.breath | Pena dourada do bumerangue | Prefab BreathReward de treino, estática; distinta de poção/esfera, sem alterar recompensa. |
+
+Sprites do mundo na ordem 14 para projéteis; aura continua -1; arte frontal 13 atrás da borda 14; recompensas 12. Nomes dos arquivos de dados, seis armas, três receitas e três resultados evolutivos preservados. C2/X3 continuam provisórios; esta integração não os declara definitivos.
+
+### Materiais, raio e ciclo de vida
+
+WeaponDefinition ganhou apenas referência opcional `projectileMaterial`, sem parâmetro de dano/balanceamento novo. Fixtures legadas sem material continuam com fallback. Comparação das nove definições antes/depois, excluindo sprite/material, confirmou texto de dados idêntico. Não alterar Sabão para a proposta futura de tuning; vigente 16%/nível, teto 80%.
+
+WeaponProjectile usa o material autorado, tamanho de combate e orientação/giro pelo relógio do runner. Reset devolve sprite/material/cor/escala/rotação iniciais, sem criar material por emissão. A bolha mantém diâmetro mundial nos dois eixos; outros projéteis usam silhueta proporcional dentro do tamanho nominal, sem alterar CircleCast, velocidade, alvo, duração, dano ou histórico de acertos.
+
+WeaponVisuals mantém views/arrays limitados criados no Initialize. Arcos decorativos são encaixados dentro do setor, sem parecer uma onda radial do Quack ativo. A borda do setor permanece geométrica e exata. A explosão de foguete, antes sem apresentação de área, usa a mesma resolução de raio já usada pelo dano, com recortes para dentro do contorno; ovos preservam o círculo. Aura não muda raio durante pulso. Advance só é chamado pelo relógio de simulação do runner; pausa congela e HideAll/fim desativa também a arte frontal. Sem Instantiate/Destroy, leitura de arquivos ou carregamento de textura/material no loop de combate.
+
+Quack ativo conserva o anel radial aceito; impacto/reflexão/crítico e feedback pooled de evolução/raridade conservam suas geometrias vetoriais já distintas (anel, contorno/estrela/acento) e ciclo de áudio. Não substituir Quack ativo pelos arcos. Os prefabs de recompensa conservam transforms físicos, colliders, scripts, GUIDs e valores: apenas renderers antigos desabilitados e filhos visuais sem física adicionados. O gerador compara assinaturas físicas antes/depois e falha em diferença.
+
+### Evidências e limites
+
+Geração final `Logs/Polimento002/T044/generate-trim.log`, código 0: `T044_COMBAT_OK weapons=9 pickups=4 geometry=unchanged` e `T073_CONTENT_VALIDATION_OK assets=66 warnings=2` (avisos existentes). Galeria `sample-combat.png` desse diretório na cópia isolada inspecionada com a bolha iridescente e recortes finais; não é captura de gameplay. Logs/XML/capturas regeneráveis ficam fora do commit.
+
+EditMode inicial: 713 aprovados/uma falha na asserção de três renderers da cruz provisória. Asserção atualizada para uma poção visível, sprite e material corretos; invariantes de chance/cura/collider/capacidade preservadas. Reteste completo 714/714. Primeiro PlayMode: 599/600, por exigir escala unitária no bumerangue apesar do novo tamanho autorado. Teste ajustado para conferir o raio/tamanho não ampliados por Sabão em N0/N1/N5, preservando alvo fora do alcance. Quatro testes novos verificam arte frontal dentro do setor/tempo de simulação, raio/material de aura em hierarquia não unitária, explosão distinta sem ultrapassar raio, reset/material/diâmetro de Bolhas.
+
+Reteste final PlayMode: **602/602 aprovados**, zero falhas/ignorados, incluindo os três níveis do caso de não ampliação do bumerangue por Sabão. Artefatos locais em `TestResults/Polimento002/T044`: `editmode-final.xml` SHA-256 `443075622A7DA7749BAB147EEC0BC8FA27598A2DDD21A8490FE1301F550D8516`; `playmode-final.xml` SHA-256 `3246F4F432770181A93CADEA00E0730F168A36355713361F441465E3A074445A`. EditMode completo precedeu somente a finalização dos recortes/bolha; PlayMode final usou os assets finais. A importação inicial teve erros transitórios de assemblies de pacotes; a geração final e os retestes concluíram sem esses erros. `--burst-disable-compilation` foi usado apenas nos processos de validação, sem alterar configurações/pacotes do produto.
+
+T044 concluída como entrega do lote integrado. Nenhum aceite físico Windows/Android, desempenho 200/400, identificação por participantes ou aceite artístico global é inferido; seguem T047–T051. Skin do HUD/menus e cenário/água continuam T045/T046.

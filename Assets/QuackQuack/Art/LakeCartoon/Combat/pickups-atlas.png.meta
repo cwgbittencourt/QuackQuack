@@ -1,0 +1,343 @@
+fileFormatVersion: 2
+guid: 5e022fbe8ef6c0842bae3c2dcfaced1d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2726511079419013220
+    second: pickups-atlas_0
+  - first:
+      213: 159229864498093374
+    second: pickups-atlas_1
+  - first:
+      213: 1474545553839414864
+    second: pickups-atlas_2
+  - first:
+      213: 1151425843424236624
+    second: pickups-atlas_3
+  - first:
+      213: -5215740527258012841
+    second: pickups-atlas_4
+  - first:
+      213: 1572261841253768799
+    second: pickups-atlas_5
+  - first:
+      213: 4333970616350344755
+    second: pickups-atlas_6
+  - first:
+      213: 704660086694593379
+    second: pickups-atlas_7
+  - first:
+      213: -7564940566101245224
+    second: pickups-atlas_8
+  - first:
+      213: -570793887980408039
+    second: pickups-atlas_9
+  - first:
+      213: 2210206929006692010
+    second: pickups-atlas_10
+  - first:
+      213: -3286285307304606131
+    second: pickups-atlas_11
+  - first:
+      213: 2224783034426637635
+    second: pickups-atlas_12
+  - first:
+      213: -2971366005301124391
+    second: pickups-atlas_13
+  - first:
+      213: 7232048765559997108
+    second: pickups-atlas_14
+  - first:
+      213: -1033427704367945098
+    second: pickups-atlas_15
+  - first:
+      213: -2174635839988888325
+    second: pickups-atlas_16
+  - first:
+      213: 54626074872479272
+    second: pickups-atlas_17
+  - first:
+      213: 8824842926848451131
+    second: pickups-atlas_18
+  - first:
+      213: -473232530715163568
+    second: pickups-atlas_19
+  - first:
+      213: 1806861117443147749
+    second: pickups-atlas_20
+  - first:
+      213: 5949499638314761090
+    second: pickups-atlas_21
+  - first:
+      213: 1398069723146855744
+    second: pickups-atlas_22
+  - first:
+      213: -1588984763047893933
+    second: pickups-atlas_23
+  - first:
+      213: 3823419726261299307
+    second: pickups-atlas_24
+  - first:
+      213: 7962520358315055020
+    second: pickups-atlas_25
+  - first:
+      213: -7955760511108773512
+    second: pickups-atlas_26
+  - first:
+      213: 7298925309081485995
+    second: pickups-atlas_27
+  - first:
+      213: -7153299169930973315
+    second: pickups-atlas_28
+  - first:
+      213: 5184537752683624398
+    second: pickups-atlas_29
+  - first:
+      213: -3945560970426966966
+    second: pickups-atlas_30
+  - first:
+      213: 775967444003980216
+    second: pickups-atlas_31
+  - first:
+      213: -9147366653078448216
+    second: pickups-atlas_32
+  - first:
+      213: -3483932649207892484
+    second: pickups-atlas_33
+  - first:
+      213: -2250746500642571961
+    second: pickups-atlas_34
+  - first:
+      213: -2289860175020500797
+    second: pickups-atlas_35
+  - first:
+      213: 8790376717856945418
+    second: pickups-atlas_36
+  - first:
+      213: 3553399709606440032
+    second: heal
+  - first:
+      213: 297337893524743424
+    second: xp
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: heal
+      rect:
+        serializedVersion: 2
+        x: 188
+        y: 96
+        width: 526
+        height: 705
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06c611c8536305130800000000000000
+      internalID: 3553399709606440032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: xp
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 160
+        width: 538
+        height: 552
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0052ec12d3b502400800000000000000
+      internalID: 297337893524743424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      heal: 3553399709606440032
+      pickups-atlas_0: -2726511079419013220
+      pickups-atlas_1: 159229864498093374
+      pickups-atlas_10: 2210206929006692010
+      pickups-atlas_11: -3286285307304606131
+      pickups-atlas_12: 2224783034426637635
+      pickups-atlas_13: -2971366005301124391
+      pickups-atlas_14: 7232048765559997108
+      pickups-atlas_15: -1033427704367945098
+      pickups-atlas_16: -2174635839988888325
+      pickups-atlas_17: 54626074872479272
+      pickups-atlas_18: 8824842926848451131
+      pickups-atlas_19: -473232530715163568
+      pickups-atlas_2: 1474545553839414864
+      pickups-atlas_20: 1806861117443147749
+      pickups-atlas_21: 5949499638314761090
+      pickups-atlas_22: 1398069723146855744
+      pickups-atlas_23: -1588984763047893933
+      pickups-atlas_24: 3823419726261299307
+      pickups-atlas_25: 7962520358315055020
+      pickups-atlas_26: -7955760511108773512
+      pickups-atlas_27: 7298925309081485995
+      pickups-atlas_28: -7153299169930973315
+      pickups-atlas_29: 5184537752683624398
+      pickups-atlas_3: 1151425843424236624
+      pickups-atlas_30: -3945560970426966966
+      pickups-atlas_31: 775967444003980216
+      pickups-atlas_32: -9147366653078448216
+      pickups-atlas_33: -3483932649207892484
+      pickups-atlas_34: -2250746500642571961
+      pickups-atlas_35: -2289860175020500797
+      pickups-atlas_36: 8790376717856945418
+      pickups-atlas_4: -5215740527258012841
+      pickups-atlas_5: 1572261841253768799
+      pickups-atlas_6: 4333970616350344755
+      pickups-atlas_7: 704660086694593379
+      pickups-atlas_8: -7564940566101245224
+      pickups-atlas_9: -570793887980408039
+      xp: 297337893524743424
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

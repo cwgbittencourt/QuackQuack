@@ -37,6 +37,7 @@ namespace QuackQuack.Content.Weapons
         [SerializeField] private WeaponBehavior behavior;
         [SerializeField] private float projectileSpeed = 6, projectileLifetime = 2, hitRadius = 0.2f, turnSpeed = 180, coneAngle = 60;
         [SerializeField] private Sprite projectileSprite;
+        [SerializeField] private Material projectileMaterial;
         [SerializeField] private WeaponLevel[] levels = new WeaponLevel[RequiredLevelCount];
         [SerializeField] private string compatiblePassiveId, evolutionWeaponId;
         [SerializeField] private bool hasTerrainAffinity;
@@ -50,6 +51,7 @@ namespace QuackQuack.Content.Weapons
         public float TurnSpeed => turnSpeed;
         public float ConeAngle => coneAngle;
         public Sprite ProjectileSprite => projectileSprite;
+        public Material ProjectileMaterial => projectileMaterial;
         public int LevelCount => levels == null ? 0 : levels.Length;
         public string CompatiblePassiveId => compatiblePassiveId;
         public string EvolutionWeaponId => evolutionWeaponId;

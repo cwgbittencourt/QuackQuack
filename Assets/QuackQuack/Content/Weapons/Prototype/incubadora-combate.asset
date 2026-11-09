@@ -21,7 +21,8 @@ MonoBehaviour:
   hitRadius: 0.2
   turnSpeed: 180
   coneAngle: 60
-  projectileSprite: {fileID: 21300000, guid: 2820afe8c7cd7cd48a1e767f98710888, type: 3}
+  projectileSprite: {fileID: 1868766487819184991, guid: 218dac1f6ad4b364d878df870eefd4b0, type: 3}
+  projectileMaterial: {fileID: 2100000, guid: 7f9179e8c16eff24bbf860de8d7e70de, type: 2}
   levels:
   - damage: 12
     cooldown: 2

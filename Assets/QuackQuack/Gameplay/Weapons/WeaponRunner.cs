@@ -156,7 +156,7 @@ namespace QuackQuack.Gameplay.Weapons
                 }
                 if (slot.Definition.Behavior == WeaponBehavior.EnergyAura)
                     visuals.ShowAura(i, owner.position, Mathf.Max(stats.AreaRadius, slot.Definition.HitRadius),
-                        slot.Definition.ProjectileSprite, clock);
+                        slot.Definition.ProjectileSprite, clock, slot.Definition.ProjectileMaterial);
                 if (clock < slot.Next) continue;
                 var target = Nearest(owner.position, stats.Range);
                 Vector2 direction = Facing.sqrMagnitude > 0 && Finite(Facing) ? Facing.normalized : Vector2.right;
@@ -166,7 +166,8 @@ namespace QuackQuack.Gameplay.Weapons
                     direction = ((Vector2)target.transform.position - (Vector2)owner.position).normalized;
                 }
                 if (slot.Definition.Behavior == WeaponBehavior.FrontalQuack)
-                    visuals.PulseFrontal(i, owner.position, direction, stats.Range, slot.Definition.ConeAngle, clock);
+                    visuals.PulseFrontal(i, owner.position, direction, stats.Range, slot.Definition.ConeAngle, clock,
+                        slot.Definition.ProjectileSprite,slot.Definition.ProjectileMaterial);
                 patterns[(int)slot.Definition.Behavior].Fire(this, slot.Definition, stats, hitRadius, direction, target);
                 slot.Next = clock + stats.Cooldown; slots[i] = slot;
                 if (!isActiveAndEnabled || !run.IsSimulating)
@@ -243,6 +244,7 @@ namespace QuackQuack.Gameplay.Weapons
                 Vector2.MoveTowards(from, owner.position, p.Definition.ProjectileSpeed * step) :
                 from + p.Direction * (p.Definition.ProjectileSpeed * step);
             p.Age += step;
+            p.Present();
             if (p.Motion == ProjectileMotion.Trap)
             {
                 var target = Nearest(from, Mathf.Max(p.Stats.AreaRadius, p.Definition.HitRadius));
@@ -303,8 +305,8 @@ namespace QuackQuack.Gameplay.Weapons
         private void AreaHit(WeaponDefinition definition, WeaponLevel stats, Vector2 position, Vector2 direction, bool cone, WeaponProjectile projectile)
         {
             float radius = cone ? stats.Range : Mathf.Max(stats.AreaRadius, definition.HitRadius);
-            if (definition.Behavior == WeaponBehavior.Eggs && projectile != null)
-                visuals.PulseEggArea(position, radius, clock);
+            if ((definition.Behavior == WeaponBehavior.Eggs || definition.Behavior == WeaponBehavior.Rockets) && projectile != null)
+                visuals.PulseEggArea(position, radius, clock, definition.Behavior==WeaponBehavior.Rockets);
             int count = Physics2D.OverlapCircle(position, radius, TargetFilter, overlaps);
             areaHitCount = 0;
             for (int i = 0; i < count; i++)

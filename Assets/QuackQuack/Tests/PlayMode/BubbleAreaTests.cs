@@ -127,12 +127,14 @@ namespace QuackQuack.Tests.PlayMode
             runner.Advance(0.7f); Assert.That(runner.ActiveProjectileCount, Is.Zero);
         }
 
-        [Test]
-        public void SoapDoesNotIncreaseOtherProjectileRadiusOrVisualScale()
+        [TestCase(0)] [TestCase(1)] [TestCase(5)]
+        public void SoapDoesNotIncreaseOtherProjectileRadiusOrVisualScale(int level)
         {
             var target = Target(new Vector2(0.5f, 0.25f));
-            StartRunner(5, WeaponBehavior.Boomerang); runner.Advance(0);
-            Assert.That(Shot().transform.localScale, Is.EqualTo(Vector3.one));
+            StartRunner(level, WeaponBehavior.Boomerang); runner.Advance(0);
+            Assert.That(Shot().HitRadius,Is.EqualTo(BaseRadius));
+            var size=Shot().GetComponent<SpriteRenderer>().bounds.size;
+            Assert.That(Mathf.Max(size.x,size.y),Is.EqualTo(2*BaseRadius).Within(.0001f));
             runner.Advance(0.3f); Assert.That(target.Health, Is.EqualTo(20));
         }
 

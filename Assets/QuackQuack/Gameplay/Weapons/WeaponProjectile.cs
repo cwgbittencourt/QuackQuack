@@ -16,6 +16,9 @@ namespace QuackQuack.Gameplay.Weapons
         private readonly long[] hitLeases = new long[512];
         private int hitCount;
         private long emissionSequence;
+        private SpriteRenderer image;
+        private Material fallbackMaterial;
+        private void Awake(){image=GetComponent<SpriteRenderer>();fallbackMaterial=image.sharedMaterial;}
         public long LeaseId { get; private set; }
         public ProjectilePassage Passage { get; private set; }
         public WeaponDefinition Definition { get; private set; }
@@ -35,6 +38,9 @@ namespace QuackQuack.Gameplay.Weapons
             Direction = direction; transform.position = position; Age = 0; hitCount = 0;
             var renderer = GetComponent<SpriteRenderer>();
             renderer.sprite = definition.ProjectileSprite;
+            renderer.sharedMaterial=definition.ProjectileMaterial!=null?definition.ProjectileMaterial:fallbackMaterial;
+            renderer.color=Color.white;renderer.sortingOrder=14;
+            transform.rotation=Quaternion.identity;
             transform.localScale = Vector3.one;
             if (definition.Behavior == WeaponBehavior.Bubbles && renderer.sprite != null)
             {
@@ -44,6 +50,20 @@ namespace QuackQuack.Gameplay.Weapons
                 transform.localScale = new Vector3(2 * HitRadius / (size.x * Mathf.Abs(scale.x)),
                     2 * HitRadius / (size.y * Mathf.Abs(scale.y)), 1);
             }
+            else if(renderer.sprite!=null)
+            {
+                var size=renderer.sprite.bounds.size;var scale=transform.lossyScale;
+                float diameter=2*HitRadius;
+                float factor=diameter/Mathf.Max(size.x*Mathf.Abs(scale.x),size.y*Mathf.Abs(scale.y));
+                transform.localScale=Vector3.one*factor;
+            }
+            Present();
+        }
+        internal void Present()
+        {
+            float angle=Motion==ProjectileMotion.Returning?Age*720:
+                Motion==ProjectileMotion.Homing?Mathf.Atan2(Direction.y,Direction.x)*Mathf.Rad2Deg:0;
+            transform.rotation=Quaternion.Euler(0,0,angle);
         }
         internal void BeginInbound()
         {
@@ -67,7 +87,9 @@ namespace QuackQuack.Gameplay.Weapons
             Age = 0; hitCount = 0; HitRadius = 0;
             LeaseId = 0; Passage = ProjectilePassage.Outbound;
             transform.localScale = Vector3.one;
+            transform.rotation=Quaternion.identity;
             GetComponent<SpriteRenderer>().sprite = null;
+            if(image!=null){image.sharedMaterial=fallbackMaterial;image.color=Color.white;}
         }
     }
 }
