@@ -23,8 +23,13 @@ namespace QuackQuack.Editor
         {
             string atlas = Root + "/Sources/sample-atlas.png";
             if (!File.Exists(atlas)) throw new InvalidOperationException("Missing T042 source atlas.");
-            ImportAtlas(atlas);
-            sprites = AssetDatabase.LoadAllAssetsAtPath(atlas).OfType<Sprite>().ToArray();
+            ImportAtlas(atlas, new[]{"pato","formiga","rock","xp","heal","quack-frontal"}, 3, 2);
+            string pickups = Root + "/Sources/pickups-c2-x3.png";
+            if (!File.Exists(pickups)) throw new InvalidOperationException("Missing selected C2/X3 pickup atlas.");
+            ImportAtlas(pickups, new[]{"heal","xp"}, 2, 1);
+            sprites = AssetDatabase.LoadAllAssetsAtPath(atlas).OfType<Sprite>()
+                .Where(s=>s.name!="xp" && s.name!="heal")
+                .Concat(AssetDatabase.LoadAllAssetsAtPath(pickups).OfType<Sprite>()).ToArray();
             Folder(Root + "/Sample");
             string scenePath = Root + "/Sample/LakeCartoonSample.unity";
             var scene = File.Exists(scenePath) ? EditorSceneManager.OpenScene(scenePath) :
@@ -70,7 +75,7 @@ namespace QuackQuack.Editor
             Debug.Log("T042_ART_SAMPLE_OK sprites=" + sprites.Length + " range=" + range);
         }
 
-        private static void ImportAtlas(string path)
+        private static void ImportAtlas(string path, string[] names, int columns, int rows)
         {
             var importer = (TextureImporter)AssetImporter.GetAtPath(path);
             importer.textureType = TextureImporterType.Sprite; importer.spriteImportMode = SpriteImportMode.Multiple;
@@ -79,13 +84,12 @@ namespace QuackQuack.Editor
             importer.filterMode = FilterMode.Bilinear; importer.wrapMode = TextureWrapMode.Clamp;
             importer.textureCompression = TextureImporterCompression.Uncompressed; importer.maxTextureSize = 2048;
             var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            int w=texture.width/3, h=texture.height/2;
-            string[] names={"pato","formiga","rock","xp","heal","quack-frontal"};
+            int w=texture.width/columns, h=texture.height/rows;
             // Unity serializes slice IDs/metas; never manufacture GUIDs or scene YAML.
 #pragma warning disable 618
-            var slices = new SpriteMetaData[6];
-            for(int i=0;i<6;i++) slices[i]=new SpriteMetaData {name=names[i],
-                rect=new Rect(i%3*w,(1-i/3)*h,w,h), alignment=(int)SpriteAlignment.Center,pivot=new Vector2(.5f,.5f)};
+            var slices = new SpriteMetaData[names.Length];
+            for(int i=0;i<names.Length;i++) slices[i]=new SpriteMetaData {name=names[i],
+                rect=new Rect(i%columns*w,(rows-1-i/columns)*h,w,h), alignment=(int)SpriteAlignment.Center,pivot=new Vector2(.5f,.5f)};
             importer.spritesheet=slices;
 #pragma warning restore 618
             importer.SaveAndReimport();

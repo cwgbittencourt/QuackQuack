@@ -1,0 +1,343 @@
+fileFormatVersion: 2
+guid: ed3d9c727d122f14aa5537eb684bed8b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7081402107393240808
+    second: pickups-c2-x3_0
+  - first:
+      213: -3382550427401736820
+    second: pickups-c2-x3_1
+  - first:
+      213: 6792361407127575616
+    second: pickups-c2-x3_2
+  - first:
+      213: 2298842889997673825
+    second: pickups-c2-x3_3
+  - first:
+      213: 8034644360139379959
+    second: pickups-c2-x3_4
+  - first:
+      213: 4608265548469895068
+    second: pickups-c2-x3_5
+  - first:
+      213: 5173590285322555348
+    second: pickups-c2-x3_6
+  - first:
+      213: 3677006038596397206
+    second: pickups-c2-x3_7
+  - first:
+      213: -6226240722566573445
+    second: pickups-c2-x3_8
+  - first:
+      213: 3211366028454055253
+    second: pickups-c2-x3_9
+  - first:
+      213: 2263959401915147981
+    second: pickups-c2-x3_10
+  - first:
+      213: -8666030616242563996
+    second: pickups-c2-x3_11
+  - first:
+      213: 1244881794145344320
+    second: pickups-c2-x3_12
+  - first:
+      213: 2472256532457554734
+    second: pickups-c2-x3_13
+  - first:
+      213: 6284210127696760963
+    second: pickups-c2-x3_14
+  - first:
+      213: 3419522315335609564
+    second: pickups-c2-x3_15
+  - first:
+      213: 5777362791017357128
+    second: pickups-c2-x3_16
+  - first:
+      213: 3248240165934711091
+    second: pickups-c2-x3_17
+  - first:
+      213: -469774902554448057
+    second: pickups-c2-x3_18
+  - first:
+      213: -2364326175093852574
+    second: pickups-c2-x3_19
+  - first:
+      213: 4297570278513307988
+    second: pickups-c2-x3_20
+  - first:
+      213: 7274359499875774128
+    second: pickups-c2-x3_21
+  - first:
+      213: -3857181119494890423
+    second: pickups-c2-x3_22
+  - first:
+      213: 8955344634880043644
+    second: pickups-c2-x3_23
+  - first:
+      213: -5061300377201945762
+    second: pickups-c2-x3_24
+  - first:
+      213: -5552959860523754516
+    second: pickups-c2-x3_25
+  - first:
+      213: -6044961643460828429
+    second: pickups-c2-x3_26
+  - first:
+      213: 5131098734001293070
+    second: pickups-c2-x3_27
+  - first:
+      213: 2779297517026587380
+    second: pickups-c2-x3_28
+  - first:
+      213: -7577182097868538286
+    second: pickups-c2-x3_29
+  - first:
+      213: 5112599538488055713
+    second: pickups-c2-x3_30
+  - first:
+      213: 4891916246210767381
+    second: pickups-c2-x3_31
+  - first:
+      213: -7979915522536261539
+    second: pickups-c2-x3_32
+  - first:
+      213: -3068271279484882742
+    second: pickups-c2-x3_33
+  - first:
+      213: -6495632492786370120
+    second: pickups-c2-x3_34
+  - first:
+      213: -6517961627105066406
+    second: pickups-c2-x3_35
+  - first:
+      213: -3148864676548218830
+    second: pickups-c2-x3_36
+  - first:
+      213: 3553399709606440032
+    second: heal
+  - first:
+      213: 297337893524743424
+    second: xp
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: heal
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 887
+        height: 887
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06c611c8536305130800000000000000
+      internalID: 3553399709606440032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: xp
+      rect:
+        serializedVersion: 2
+        x: 887
+        y: 0
+        width: 887
+        height: 887
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0052ec12d3b502400800000000000000
+      internalID: 297337893524743424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      heal: 3553399709606440032
+      pickups-c2-x3_0: 7081402107393240808
+      pickups-c2-x3_1: -3382550427401736820
+      pickups-c2-x3_10: 2263959401915147981
+      pickups-c2-x3_11: -8666030616242563996
+      pickups-c2-x3_12: 1244881794145344320
+      pickups-c2-x3_13: 2472256532457554734
+      pickups-c2-x3_14: 6284210127696760963
+      pickups-c2-x3_15: 3419522315335609564
+      pickups-c2-x3_16: 5777362791017357128
+      pickups-c2-x3_17: 3248240165934711091
+      pickups-c2-x3_18: -469774902554448057
+      pickups-c2-x3_19: -2364326175093852574
+      pickups-c2-x3_2: 6792361407127575616
+      pickups-c2-x3_20: 4297570278513307988
+      pickups-c2-x3_21: 7274359499875774128
+      pickups-c2-x3_22: -3857181119494890423
+      pickups-c2-x3_23: 8955344634880043644
+      pickups-c2-x3_24: -5061300377201945762
+      pickups-c2-x3_25: -5552959860523754516
+      pickups-c2-x3_26: -6044961643460828429
+      pickups-c2-x3_27: 5131098734001293070
+      pickups-c2-x3_28: 2779297517026587380
+      pickups-c2-x3_29: -7577182097868538286
+      pickups-c2-x3_3: 2298842889997673825
+      pickups-c2-x3_30: 5112599538488055713
+      pickups-c2-x3_31: 4891916246210767381
+      pickups-c2-x3_32: -7979915522536261539
+      pickups-c2-x3_33: -3068271279484882742
+      pickups-c2-x3_34: -6495632492786370120
+      pickups-c2-x3_35: -6517961627105066406
+      pickups-c2-x3_36: -3148864676548218830
+      pickups-c2-x3_4: 8034644360139379959
+      pickups-c2-x3_5: 4608265548469895068
+      pickups-c2-x3_6: 5173590285322555348
+      pickups-c2-x3_7: 3677006038596397206
+      pickups-c2-x3_8: -6226240722566573445
+      pickups-c2-x3_9: 3211366028454055253
+      xp: 297337893524743424
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
