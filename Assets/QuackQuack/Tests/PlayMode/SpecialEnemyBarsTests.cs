@@ -172,8 +172,15 @@ namespace QuackQuack.Tests.PlayMode
                 registry.TryAdd(Snapshot(3, name: "Sapo-Rei", kind: SpecialEnemyCategory.Boss));
                 view.Refresh(); Assert.That(view.VisibleCount, Is.EqualTo(3)); Canvas.ForceUpdateCanvases();
                 camera.Render(); RenderTexture.active = target; pixels.ReadPixels(new Rect(0, 0, 1920, 1080), 0, 0); pixels.Apply();
+#if UNITY_EDITOR
                 string output = Path.GetFullPath(Path.Combine(Application.dataPath, "../../../Logs/Polimento002/T037"));
+#else
+                string output = Path.Combine(Application.temporaryCachePath, "Polimento002/T037");
+#endif
+                string captureOverride = Environment.GetEnvironmentVariable("QUACKQUACK_UI_CAPTURE_DIR");
+                if (!string.IsNullOrWhiteSpace(captureOverride)) output = Path.GetFullPath(captureOverride);
                 Directory.CreateDirectory(output); File.WriteAllBytes(Path.Combine(output, "overlapping-specials.png"), pixels.EncodeToPNG());
+                Assert.That(File.Exists(Path.Combine(output, "overlapping-specials.png")), Is.True);
             }
             finally { RenderTexture.active = previous; camera.targetTexture = null; target.Release(); Object.Destroy(target); Object.Destroy(pixels); }
         }

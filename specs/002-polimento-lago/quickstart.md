@@ -64,6 +64,10 @@ foreach ($target in @(
 
 O filtro contém classes novas planejadas, não disponíveis antes das tasks. Conferir descoberta por classe além do total positivo para não aprovar execução parcial silenciosa. Setup/fixtures de runtime não podem depender de UnityEditor. Para testes Android, conectar exatamente um aparelho ADB autorizado como no guia 001. Registrar modelo/OS/entrada, nunca serial.
 
+Na T048, a seleção ampliada também inclui CartoonActorVisualTests, CombatArtTests, LakeWaterAnimationTests, BubbleAreaTests, AuraOcclusionTests, PassiveIntegrationTests, QuackFeedbackTests e UpgradeFeedbackTests. As duas últimas usam as cenas legadas Bootstrap/Lake: preserve essas cenas habilitadas na lista do **test player**, junto de RunBootstrap/LakeRun. Não substitua a lista do test player apenas pelas cenas de produção. O PrototypeBuildPipeline continua selecionando explicitamente somente RunBootstrap/LakeRun para o produto real.
+
+Capturas das barras especiais e da matriz de interface usam a pasta temporária da aplicação nos players (gravável no Android). No Editor, o destino pode ser isolado por execução usando a variável de ambiente `QUACKQUACK_UI_CAPTURE_DIR`; não suponha que uma variável do host Windows será herdada pelo app Android. Os totais finais da T048 e a descoberta por classe estão em [validation-report](validation-report.md).
+
 Build de produto, separada do test player:
 
 ```powershell
