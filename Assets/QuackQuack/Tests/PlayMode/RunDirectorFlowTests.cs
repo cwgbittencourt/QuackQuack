@@ -436,6 +436,27 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(director.TryAbandon(), Is.False); director.Advance(1000, bounds); Assert.That(director.Result, Is.SameAs(first));
             Assert.That(director.BossRequests, Is.Zero); Assert.That(pools.ActiveCount, Is.Zero);
         }
+        [TestCase(false)] [TestCase(true)]
+        public void EndingAfterACombatComponentWasDestroyedStillClosesRewardsAndFreezesResult(bool destroyScheduler)
+        {
+            Object.DestroyImmediate(destroyScheduler ? (Object)director.Scheduler : weapons);
+            Assert.DoesNotThrow(() => director.TryAbandon());
+            Assert.That(director.Result.Outcome, Is.EqualTo(RunPhase.Abandoned));
+            Assert.That(director.Rewards.IsClosed, Is.True);
+            Assert.That(director.TryAbandon(), Is.False);
+        }
+        [Test]
+        public void DiagnosticSpawnProcessingSharesTheDirectorClockAndPauseDoesNotAdvanceIt()
+        {
+            director.Advance(0.02f, bounds);
+            long tick = director.SimulationTick;
+            Assert.That(tick, Is.Positive);
+            Assert.DoesNotThrow(() => director.Spawns.Process(tick, bounds));
+            Assert.DoesNotThrow(() => director.Advance(0.02f, bounds));
+            Assert.That(director.SimulationTick, Is.EqualTo(tick + 1));
+            director.TogglePause(); director.Advance(1, bounds);
+            Assert.That(director.SimulationTick, Is.EqualTo(tick + 1));
+        }
         [Test] public void SaveFailureDoesNotBlockEndingOrChangeFrozenResult()
         {
             string id = AssetDatabase.LoadAssetAtPath<PrototypeRelicCatalog>("Assets/QuackQuack/Content/Relics/PrototypeRelicCatalog.asset").Relics[0].Id;

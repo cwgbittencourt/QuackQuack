@@ -36,6 +36,7 @@ namespace QuackQuack.Systems.Run
         public static Func<string> SavePathProvider { get; set; } = () => Path.Combine(Application.persistentDataPath, "lake-relics.json");
         public bool AutomaticTick { get; set; } = true;
         public bool Ready { get; private set; }
+        public long SimulationTick => tick;
         public SpawnDirector Spawns { get; private set; }
         public EnemyUpdateScheduler Scheduler { get; private set; }
         public FrogKingController Boss { get; private set; }
@@ -384,7 +385,9 @@ namespace QuackQuack.Systems.Run
         {
             SpecialEnemies?.Clear();
             ending = true; Rewards.Close(); Result = results.FinalizeResult(); dirty = true;
-            Spawns.Dispose(); Scheduler.enabled = false; weapons.enabled = false;
+            Spawns.Dispose();
+            if (Scheduler != null) Scheduler.enabled = false;
+            if (weapons != null) weapons.enabled = false;
             if (Boss != null) Boss.enabled = false;
             foreach (var pickup in pickups) pools.Release(pickup);
             foreach (var pickup in healingPickups) pools.Release(pickup);
