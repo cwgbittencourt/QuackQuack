@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -139,6 +140,114 @@ namespace QuackQuack.Tests.PlayMode
         [Test]
         public void ControllerPresentBeforeCompositionHidesTouchWithoutAnyActivity()
         { AddPad(); Compose(); TouchVisibility(false); }
+
+        [Test]
+        public void AvailabilityCallbackDoesNotReenterActionMonitorChanges()
+        {
+            bool dispatching = false;
+            var nested = new List<InputActionChange>();
+            Action<InputDevice, InputDeviceChange> begin = (device, change) => { if (device is Gamepad) dispatching = true; };
+            Action<InputDevice, InputDeviceChange> end = (device, change) => { if (device is Gamepad) dispatching = false; };
+            Action<object, InputActionChange> observe = (value, change) => {
+                if (dispatching && (change == InputActionChange.ActionEnabled || change == InputActionChange.ActionDisabled)) nested.Add(change);
+            };
+            InputSystem.onDeviceChange += begin;
+            try {
+                Compose();
+                InputSystem.onDeviceChange += end;
+                InputSystem.onActionChange += observe;
+                var pad = AddPad();
+                Assert.That(input.ControllerAvailable, Is.True);
+                Pump(); TouchVisibility(false);
+                Lose(pad, "RuntimeRemoveEvent"); Pump(); TouchVisibility(true);
+                Assert.That(nested, Is.Empty, "Availability must not enable/disable virtual action monitors inside device dispatch.");
+            } finally {
+                InputSystem.onActionChange -= observe;
+                InputSystem.onDeviceChange -= end;
+                InputSystem.onDeviceChange -= begin;
+            }
+        }
+
+        [TestCase("Removed")] [TestCase("Disabled")] [TestCase("RuntimeRemoveEvent")]
+        public void HotplugWithPendingTouchNotificationsDoesNotCorruptMonitors(string loss)
+        {
+            Compose();
+            for (int i = 0; i < 8; i++)
+            {
+                // UI callbacks change virtual state between InputSystem updates.
+                input.Mobile.SetMove(Vector2.left); input.Mobile.SetQuack(true);
+                var pad = AddPad();
+                Neutral(Pump()); TouchVisibility(false);
+                Lose(pad, loss); Neutral(Pump()); TouchVisibility(true);
+                input.Mobile.SetMove(Vector2.right); input.Mobile.SetQuack(true);
+                var fresh = Pump();
+                Assert.That(fresh.Move, Is.EqualTo(Vector2.right));
+                Assert.That(fresh.QuackPressed, Is.True);
+                LogAssert.NoUnexpectedReceived();
+            }
+        }
+
+        [Test]
+        public void ConnectAndDisconnectBeforeReadStillCancelsTheOldTouchGesture()
+        {
+            Compose(); input.Mobile.SetMove(Vector2.left); input.Mobile.SetQuack(true); Pump();
+            var pad = AddPad(); Lose(pad, "Removed");
+            Neutral(Pump()); TouchVisibility(true);
+            input.Mobile.SetMove(Vector2.right); input.Mobile.SetQuack(true);
+            var fresh = Pump(); Assert.That(fresh.Move, Is.EqualTo(Vector2.right));
+            Assert.That(fresh.QuackPressed, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator DisposingWithPendingTouchNotificationsAllowsCleanRecomposition()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                Compose(); input.Mobile.SetMove(Vector2.left); input.Mobile.SetQuack(true);
+                input.Dispose(); input = null;
+                yield return null;
+                InputSystem.Update();
+                LogAssert.NoUnexpectedReceived();
+            }
+            Compose(); Neutral(Pump()); TouchVisibility(true);
+        }
+
+#if UNITY_EDITOR || UNITY_ANDROID
+        [TestCase("DualShock4GamepadAndroid")]
+        [TestCase("XboxOneGamepadAndroid")]
+        public void AndroidLayoutHotplugWithUiAndPendingStateChangesDoesNotCorruptMonitors(string layout)
+        {
+            ui.AddComponent<InputSystemUIInputModule>();
+            Compose();
+            for (int i = 0; i < 8; i++)
+            {
+                var pad = (Gamepad)InputSystem.AddDevice(layout); created.Add(pad); Pump();
+                InputState.Change(pad.leftStick, Vector2.left);
+                Lose(pad, "RuntimeRemoveEvent"); Neutral(Pump()); TouchVisibility(true);
+                LogAssert.NoUnexpectedReceived();
+            }
+        }
+#endif
+
+        [UnityTest]
+        public IEnumerator RecompositionBeforeDeferredDeviceDestructionKeepsUiMonitorsValid()
+        {
+            ui.AddComponent<InputSystemUIInputModule>();
+#if UNITY_EDITOR || UNITY_ANDROID
+            var pad = (Gamepad)InputSystem.AddDevice("DualShock4GamepadAndroid"); created.Add(pad);
+#else
+            var pad = AddPad(); // Android layouts are not registered in a Windows player.
+#endif
+            Compose();
+            for (int i = 0; i < 8; i++)
+            {
+                InputState.Change(pad.leftStick, Vector2.left);
+                input.Dispose(); input = new UnifiedPlayerInput();
+                yield return null; // Old mobile device is removed while new actions already exist.
+                InputSystem.Update(); input.Read();
+                LogAssert.NoUnexpectedReceived();
+            }
+        }
 
         [Test]
         public void AddedIdleControllerHidesTouchDespiteOlderTouchSource()

@@ -14,3 +14,5 @@
 *.jpeg binary
 *.wav binary
 *.ogg binary
+# Preserve upstream bytes/style (including serialized .meta whitespace).
+Packages/com.unity.inputsystem/** -text -whitespace

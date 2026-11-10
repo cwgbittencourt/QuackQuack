@@ -13,7 +13,7 @@ setup-plan.ps1 -Json executado para esta feature. O resolvedor reporta BRANCH 00
 ## Technical Context
 
 **Language/Version**: C# / Unity 6000.4.3f1 fixada.
-**Primary Dependencies**: URP 2D 17.4.0, Input System 1.19.0, uGUI 2.0.0, Physics2D e pools atuais.
+**Primary Dependencies**: URP 2D 17.4.0, Input System 1.19.0 (fontes UPM incorporadas com hotfix de ordenação de monitores na T050; ver `Packages/INPUTSYSTEM-HOTFIX.md`), uGUI 2.0.0, Physics2D e pools atuais.
 **Storage**: ScriptableObjects autorais; save existente preservado; dicas somente por partida, perfis de controle em arquivo local versionado separado.
 **Testing**: Unity Test Framework 1.6.0, EditMode/PlayMode, players IL2CPP e validação física/jogável separada.
 **Target Platform**: Windows x64 / Android ARM64, paisagem dos dois lados.

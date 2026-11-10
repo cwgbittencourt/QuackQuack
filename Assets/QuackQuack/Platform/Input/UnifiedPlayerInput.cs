@@ -18,6 +18,7 @@ namespace QuackQuack.Platform.Input
         private bool gameplay = true, allowPause = true, suspended, disposed;
         private bool unfocused, applicationPaused;
         private bool externalPauseButton;
+        private bool availabilityContextDirty;
         private bool IsSuspended => suspended || applicationPaused || (unfocused && InputSystem.settings.backgroundBehavior != InputSettings.BackgroundBehavior.IgnoreFocus);
         private long activity;
         public InputSource Source { get; private set; } = InputSource.Keyboard;
@@ -43,7 +44,10 @@ namespace QuackQuack.Platform.Input
             bool available = HasEnabledController();
             if (available == ControllerAvailable) return;
             ControllerAvailable = available;
-            ApplyContext(); // Preserve gameplay/modal/pause state; availability never changes Source history.
+            // Device dispatch can run while Input System traverses state monitors.
+            // Activating touch here enables/disables actions and writes virtual state reentrantly.
+            // Keep availability current, but apply presentation/actions on the consumer's next read.
+            availabilityContextDirty = true;
         }
         private void EnsureMobile()
         {
@@ -68,6 +72,7 @@ namespace QuackQuack.Platform.Input
         {
             if (disposed) throw new ObjectDisposedException(nameof(UnifiedPlayerInput));
             EnsureMobile();
+            if (availabilityContextDirty) ApplyContext();
             ApplyNavigationContext();
             var k = keyboard.Read(); var g = gamepad.Read();
             var t = mobile != null ? mobile.Read() : new PlayerCommand(Vector2.zero, source: InputSource.Touch);
@@ -95,6 +100,10 @@ namespace QuackQuack.Platform.Input
         public void SetApplicationPaused(bool value) { applicationPaused = value; ApplyContext(); }
         private void ApplyContext()
         {
+            // A connect+disconnect may be coalesced before Read. Cancel the prior
+            // gesture even if the final availability leaves touch visible.
+            if (availabilityContextDirty && mobileRoot != null) mobileRoot.SetActive(false);
+            availabilityContextDirty = false;
             ApplyNavigationContext();
             bool play = gameplay && !IsSuspended, pause = allowPause && !IsSuspended;
             keyboard.SetContext(play, pause); gamepad.SetContext(play, pause);
