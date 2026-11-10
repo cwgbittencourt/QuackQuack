@@ -21,17 +21,18 @@ namespace QuackQuack.Systems.Diagnostics
             public string Scenario, Unity, Platform, OS, CPU, GPU, GraphicsAPI, BuildGuid;
             public int Width, Height, TargetFps, Samples, Overwritten, FocusLosses, Defeats, Rewards, Pending, MaxPending;
             public int LedgerCapacity, GuardKills, Materialized, Unresolved, ClaimedExperience, AttractedSamples;
+            public int BatchedRewards, MaxBatchedRewards;
             public double SimulationSeconds, WallSeconds, MaxObservedWaitMs, MaxOutstandingWaitMs;
-            public bool Development, Il2Cpp, FrameTimingEnabled;
+            public bool Development, Il2Cpp, FrameTimingEnabled, VisualOnly;
         }
         private struct Extra
         {
             public double Simulation, CpuMs, GpuMs;
-            public int Frame, Target, Pending, Rewards, Defeats;
+            public int Frame, Target, Pending, Rewards, Defeats, Batched;
         }
         private string scenario, output;
-        private int fps, focusLosses, count, guardKills, maxPending, seen, waiting, materialized, attractedSamples;
-        private bool ready, done, stress;
+        private int fps, focusLosses, count, guardKills, maxPending, seen, waiting, materialized, attractedSamples, maxBatched;
+        private bool ready, done, stress, visualOnly;
         private double started, maxWait, nextQuack;
         private RunDirector director;
         private GameBootstrap bootstrap;
@@ -53,6 +54,7 @@ namespace QuackQuack.Systems.Diagnostics
             string config = Path.Combine(Application.persistentDataPath, "t049-mode.txt");
             if (File.Exists(config)) scenario = File.ReadAllText(config).Trim();
             var args = Environment.GetCommandLineArgs();
+            visualOnly = Array.IndexOf(args, "-overflowOnlyVisual") >= 0 || File.Exists(Path.Combine(Application.persistentDataPath, "t049-visual-only.txt"));
             for (int i = 0; i + 1 < args.Length; i++) if (args[i] == "-profileScenario") scenario = args[i + 1];
             if (scenario != "benchmark60" && scenario != "benchmark30" && scenario != "stress60" && scenario != "stress30" && scenario != "run60" && scenario != "run30")
                 throw new InvalidOperationException("Unknown profiling scenario: " + scenario);
@@ -101,6 +103,9 @@ namespace QuackQuack.Systems.Diagnostics
                 // only for this bounded diagnostic (8 spawns/frame at target 60).
                 var ledger = director.RunSettings.PickupPolicy.CreateLedger(original.RunId, random, 32768);
                 typeof(RunDirector).GetProperty("Rewards").SetValue(director, ledger);
+                var presentation = typeof(RunDirector).GetMethod("InitializeBatchedRewards", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                if (presentation == null) throw new InvalidOperationException("Diagnostic reward presentation binding is unavailable.");
+                presentation.Invoke(director, null);
             }
             var common = director.RunSettings.Catalog.CommonEnemies;
             stressDefinitions = new QuackQuack.Content.Enemies.EnemyDefinition[common.Count];
@@ -133,7 +138,11 @@ namespace QuackQuack.Systems.Diagnostics
             if (!ready || done) return;
             if (bootstrap.Run.Phase == RunPhase.Paused) bootstrap.Run.TryResume();
             if (progression.Upgrades.CurrentOffer != null && !progression.Upgrades.CurrentOffer.IsClosed)
-                progression.Upgrades.TrySkip(progression.Upgrades.CurrentOffer.OfferId);
+            {
+                var offer = progression.Upgrades.CurrentOffer;
+                if (!progression.Upgrades.TrySkip(offer.OfferId) && offer.Choices.Count > 0)
+                    progression.Upgrades.TryConfirm(offer.OfferId, offer.Choices[0]);
+            }
             if (!bootstrap.Run.IsSimulating) return;
             double elapsed = bootstrap.Run.ElapsedSeconds;
             // Long exposure leaves every kill outside pickup capture radius. Stress moves
@@ -181,6 +190,7 @@ namespace QuackQuack.Systems.Diagnostics
             telemetry.Capture(Time.unscaledDeltaTime * 1000);
             extras[count++] = new Extra { Simulation = sim, Frame = Time.frameCount, Target = target,
                 Pending = director.PendingRewards, Rewards = director.Rewards.Entries.Count, Defeats = director.Rewards.DefeatCount,
+                Batched = director.BatchedRewardCount,
                 CpuMs = hasTiming ? timing[0].cpuFrameTime : -1, GpuMs = hasTiming ? timing[0].gpuFrameTime : -1 };
         }
         private void ObserveRewards(double now)
@@ -202,6 +212,7 @@ namespace QuackQuack.Systems.Diagnostics
                 pending[i] = pending[--waiting]; firstSeen[i] = firstSeen[waiting];
             }
             maxPending = Math.Max(maxPending, director.PendingRewards);
+            maxBatched = Math.Max(maxBatched, director.BatchedRewardCount);
             if (Time.frameCount % fps == 0)
                 for (int i = 0; i < entries.Count; i++)
                     if (entries[i].State == RewardState.Attracted) { attractedSamples++; break; }
@@ -210,11 +221,13 @@ namespace QuackQuack.Systems.Diagnostics
         {
             ObserveRewards(Time.realtimeSinceStartupAsDouble);
             done = true;
-            Directory.CreateDirectory(Path.GetDirectoryName(output)); telemetry.ExportCsv(output);
+            Directory.CreateDirectory(Path.GetDirectoryName(output));
+            PerformanceMemoryCensus.Export(output);
+            telemetry.ExportCsv(output);
             using (var writer = new StreamWriter(output + ".run.csv"))
             {
-                writer.WriteLine("frame,simulation_seconds,enemy_target,pending,rewards,defeats,cpu_ms,gpu_ms");
-                for (int i = 0; i < count; i++) { var s = extras[i]; writer.WriteLine(string.Join(",", s.Frame.ToString(Culture), s.Simulation.ToString("R", Culture), s.Target.ToString(Culture), s.Pending.ToString(Culture), s.Rewards.ToString(Culture), s.Defeats.ToString(Culture), s.CpuMs.ToString("R", Culture), s.GpuMs.ToString("R", Culture))); }
+                writer.WriteLine("frame,simulation_seconds,enemy_target,pending,rewards,defeats,cpu_ms,gpu_ms,batched");
+                for (int i = 0; i < count; i++) { var s = extras[i]; writer.WriteLine(string.Join(",", s.Frame.ToString(Culture), s.Simulation.ToString("R", Culture), s.Target.ToString(Culture), s.Pending.ToString(Culture), s.Rewards.ToString(Culture), s.Defeats.ToString(Culture), s.CpuMs.ToString("R", Culture), s.GpuMs.ToString("R", Culture), s.Batched.ToString(Culture))); }
             }
             double outstanding = 0;
             for (int i = 0; i < waiting; i++) outstanding = Math.Max(outstanding, (Time.realtimeSinceStartupAsDouble - firstSeen[i]) * 1000);
@@ -225,7 +238,8 @@ namespace QuackQuack.Systems.Diagnostics
                 Defeats = director.Rewards.DefeatCount, Rewards = director.Rewards.Entries.Count, Pending = director.PendingRewards, MaxPending = maxPending,
                 LedgerCapacity = director.Rewards.DefeatCapacity, GuardKills = guardKills, Materialized = materialized, Unresolved = waiting,
                 ClaimedExperience = progression.Upgrades.Experience, AttractedSamples = attractedSamples, MaxObservedWaitMs = maxWait, MaxOutstandingWaitMs = outstanding,
-                Development = Debug.isDebugBuild, FrameTimingEnabled = FrameTimingManager.IsFeatureEnabled(),
+                BatchedRewards = director.BatchedRewardCount, MaxBatchedRewards = maxBatched,
+                Development = Debug.isDebugBuild, FrameTimingEnabled = FrameTimingManager.IsFeatureEnabled(), VisualOnly = visualOnly,
 #if ENABLE_IL2CPP
                 Il2Cpp = true
 #endif

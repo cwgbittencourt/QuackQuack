@@ -85,7 +85,7 @@ Os caminhos acima são relativos a Assets/QuackQuack exceto os iniciados por spe
 
 ## Fronteiras do design
 
-- RewardLedger é a verdade de recompensas; views são pooled e podem aguardar slot sem perda de valor/posição/ID. RNG de cura ocorre uma vez por derrota, separado da geração de ofertas. Dimensionamento completo e stress de saturação são obrigatórios; SuppressedPickups não atende o novo contrato.
+- RewardLedger é a verdade de recompensas; views individuais são pooled e o excedente usa meshes pré-aquecidas com identidade/posição/atração por registro (continuação T049). Falha do adaptador pode aguardar slot sem perda de valor/posição/ID; saturação normal não deve deixar os drops invisíveis. RNG de cura ocorre uma vez por derrota, separado da geração de ofertas. Dimensionamento completo e stress de saturação são obrigatórios; SuppressedPickups não atende o novo contrato.
 - Chefe final sem XP nem cura; mantém moedas, vitória e registros uma vez. Despawn não gera drop; fim cancela pickups pendentes sem coleta automática.
 - EffectiveAttributes resolve base/passivas/relíquias/terreno sem mutar definições e preserva ordem de relíquias. Player, arma e visual consomem a mesma resolução; só Bolhas recebe Sabão nesta entrega.
 - Bumerangue usa fases/leases, aura ignora oclusão somente para seu dano, UI lê snapshots, hotplug preserva contexto/pausa e perfis ficam separados do save de progressão.

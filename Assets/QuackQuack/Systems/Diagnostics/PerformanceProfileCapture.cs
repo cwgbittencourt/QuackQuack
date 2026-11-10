@@ -73,6 +73,7 @@ namespace QuackQuack.Systems.Diagnostics
         {
             finished = true; telemetry.AutomaticSampling = false;
             Directory.CreateDirectory(Path.GetDirectoryName(output));
+            PerformanceMemoryCensus.Export(output);
             telemetry.ExportCsv(output);
             using (var writer = new StreamWriter(output + ".gpu.csv"))
             {

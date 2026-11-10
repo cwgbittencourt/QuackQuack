@@ -35,6 +35,8 @@ XP de cada derrota comum/miniboss deve ser positivo em dados aprovados; despawn/
 
 ## 3. AttractionState (novo Core/Progression)
 
+**Continuação T049:** o pool físico continua em 256 XP e 16 curas, mas sua saturação passa a usar `BatchedRewardPresentation`, pré-aquecida para a capacidade do ledger. Cada recompensa excedente mantém registro, posição e `AttractionState` próprios; somente a geometria de apresentação é compartilhada em meshes limitadas a índices UInt16. A representação em lote também materializa Grounded, captura localmente e concede somente no contato. Pausa, cura cheia após captura, encerramento e devolução ao ledger seguem os mesmos contratos das views individuais. WaitingForView permanece como recuperação de indisponibilidade do adaptador, sem ser a apresentação normal após saturação. Não há redução de chance, fusão de valores ou coleta remota.
+
 Campos: RewardId, posição atual, estado Grounded/Following/Discarded, alvo, velocidade derivada. Captura usa distância entre centro do Pato e centro do pickup <= 3 × raio físico do Pato, inclusive igualdade. Base atual: 0,42 → 1,26. Escala física autorada uniforme positiva; mudanças invalidam cache do raio. Sprite/animação não alteram captura.
 
 Após Following, sair do raio não cancela. Movimento contínuo até contato de coleta, velocidade = 1,25 × velocidade efetiva do jogador na água, incluindo modificadores vigentes e sem penalidade transitória de terreno terra. Atualizar referência quando modificadores mudam. Observar obstáculos não bloqueia movimento do pickup; isso não muda colisão do Pato/inimigos.

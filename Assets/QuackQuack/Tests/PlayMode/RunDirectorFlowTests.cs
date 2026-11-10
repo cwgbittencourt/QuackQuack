@@ -21,6 +21,7 @@ using QuackQuack.Gameplay.Weapons;
 using QuackQuack.Platform.Input;
 using QuackQuack.Systems.Combat;
 using QuackQuack.Systems.Pooling;
+using QuackQuack.Systems.Pickups;
 using QuackQuack.Systems.Run;
 using QuackQuack.Systems.Save;
 using QuackQuack.Systems.Upgrades;
@@ -84,32 +85,94 @@ namespace QuackQuack.Tests.PlayMode
         private void StaticTimeline() { director.Scheduler.enabled = false; weapons.enabled = false; }
         private void BossPhase() { StaticTimeline(); director.Advance(300, bounds); director.Advance(300, bounds); director.Advance(300, bounds); }
 
-        private void DeliverReward(long lease, string id = "formiga", int xp = 2, int coins = 1)
+        private void DeliverReward(long lease, string id = "formiga", int xp = 2, int coins = 1, Vector2? position = null)
         {
             typeof(RunDirector).GetMethod("Reward", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(director,
-                new object[] { new EnemyReward(lease, id, xp, coins, new Vector2(8, 5)) });
+                new object[] { new EnemyReward(lease, id, xp, coins, position ?? new Vector2(8, 5)) });
         }
 
-        [Test] public void SaturatedExperiencePoolKeepsObligationsAndRetriesWithoutGrantingRemotely()
+        [Test] public void SaturatedExperiencePoolPresentsEveryObligationWithoutGrantingRemotely()
         {
             StaticTimeline();
             for (int i = 1; i <= settings.PickupCapacity + 3; i++) DeliverReward(100000 + i);
             var xp = director.Rewards.Entries.Where(e => e.Kind == RewardKind.Experience).ToArray();
             Assert.That(xp.Length, Is.EqualTo(settings.PickupCapacity + 3));
-            Assert.That(xp.Count(e => e.State == RewardState.Grounded), Is.EqualTo(settings.PickupCapacity));
-            var waiting = xp.First(e => e.State != RewardState.Grounded); var id = waiting.Id;
-            Assert.That(waiting.X, Is.EqualTo(8)); Assert.That(waiting.Y, Is.EqualTo(5));
+            Assert.That(xp.All(e => e.State == RewardState.Grounded), Is.True, "A full collider pool must not hide later rewards.");
+            Assert.That(director.PendingRewards, Is.Zero);
             Assert.That(upgrades.Experience, Is.Zero);
-            var view = root.GetComponentsInChildren<ExperiencePickup>().First(p => pools.IsActive(p, PoolFamily.Pickup));
-            pools.Release(view);
-            director.TogglePause(); director.Advance(0, bounds);
-            Assert.That(waiting.State, Is.Not.EqualTo(RewardState.Grounded));
-            director.TogglePause(); director.Advance(0, bounds);
-            Assert.That(waiting.State, Is.EqualTo(RewardState.Grounded)); Assert.That(waiting.Id, Is.EqualTo(id));
-            var replacement = root.GetComponentsInChildren<ExperiencePickup>().Single(p => pools.IsActive(p, PoolFamily.Pickup) && p.BoundRewardId.Equals(id));
-            Assert.That((Vector2)replacement.transform.position, Is.EqualTo(new Vector2(8, 5)));
-            Assert.That(upgrades.Experience, Is.Zero);
+            Assert.That(root.GetComponentsInChildren<ExperiencePickup>(true).Length, Is.EqualTo(settings.PickupCapacity), "No per-drop GameObjects may be grown during play.");
+            director.Advance(0, bounds);
+            var renderers = root.GetComponentsInChildren<MeshRenderer>().Where(r => r.enabled).ToArray();
+            Assert.That(renderers, Is.Not.Empty);
+            foreach (var renderer in renderers)
+            {
+                var mesh = renderer.GetComponent<MeshFilter>().sharedMesh;
+                Assert.That(mesh.vertices.Any(v => v != Vector3.zero), Is.True);
+                Assert.That(mesh.uv.All(uv => !float.IsNaN(uv.x) && !float.IsNaN(uv.y)), Is.True);
+                Assert.That(renderer.sharedMaterial.shader.name, Is.EqualTo("QuackQuack/RewardBatch"));
+            }
             Assert.That(director.Rewards.DefeatCount, Is.EqualTo(settings.PickupCapacity + 3));
+        }
+
+        [Test] public void OverflowExperienceStillRequiresLocalContactAndClaimsOnce()
+        {
+            StaticTimeline();
+            for (int i = 0; i < settings.PickupCapacity; i++) DeliverReward(1200000 + i);
+            DeliverReward(1300000, position: (Vector2)player.transform.position + Vector2.right);
+            var entry = director.Rewards.Entries.Last(e => e.Kind == RewardKind.Experience);
+            Assert.That(entry.State, Is.EqualTo(RewardState.Grounded)); Assert.That(upgrades.Experience, Is.Zero);
+            director.Advance(.02f, bounds); Assert.That(entry.State, Is.EqualTo(RewardState.Attracted));
+            director.TogglePause(); director.Advance(5, bounds); Assert.That(entry.State, Is.EqualTo(RewardState.Attracted));
+            player.transform.position += Vector3.left * 6;
+            director.TogglePause(); director.Advance(2, bounds);
+            Assert.That(entry.State, Is.EqualTo(RewardState.Claimed)); Assert.That(upgrades.Experience, Is.EqualTo(2));
+            director.Advance(0, bounds); Assert.That(upgrades.Experience, Is.EqualTo(2));
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void BatchedHealingPreservesFullHealthCaptureAndSingleClaimRules(bool discardAfterCapture)
+        {
+            StaticTimeline(); var ledger = new RewardLedger(777, () => 0, 1, .15f, .5f, 1);
+            Vector2 point = (Vector2)player.transform.position + Vector2.right;
+            ledger.ProcessDefeat(7, 1, RewardOrigin.MiniBoss, 50, point.x, point.y, true);
+            var entry = ledger.Entries.Single(e => e.Kind == RewardKind.HealMiniBoss);
+            using var batch = new BatchedRewardPresentation(ledger, run, player, _ => false,
+                settings.ExperiencePrefab.gameObject, settings.HealingPrefab.gameObject, root.transform);
+            Assert.That(batch.TryAdd(entry), Is.True); ledger.TryMaterialize(entry.Id, true);
+            batch.Advance(.02f, 1.26f, 7.5f); Assert.That(entry.State, Is.EqualTo(RewardState.Grounded));
+            player.State.TakeDamage(player.State.MaxHealth * .8f, 1, 0);
+            batch.Advance(.02f, 1.26f, 7.5f); Assert.That(entry.State, Is.EqualTo(RewardState.Attracted));
+            if (discardAfterCapture) player.State.Heal(1);
+            batch.Advance(1, 1.26f, 7.5f);
+            Assert.That(entry.State, Is.EqualTo(discardAfterCapture ? RewardState.Discarded : RewardState.Claimed));
+            Assert.That(player.State.Health, Is.EqualTo(player.State.MaxHealth * (discardAfterCapture ? 1 : .7f)).Within(.001));
+            Assert.That(batch.ActiveCount, Is.Zero); batch.Advance(1, 1.26f, 7.5f);
+            Assert.That(player.State.Health, Is.EqualTo(player.State.MaxHealth * (discardAfterCapture ? 1 : .7f)).Within(.001));
+        }
+
+        [Test] public void BatchedPresentationCoversWorstAuthoredRewardCountWithoutGrowingObjectsOrAllocatingSteadyFrames()
+        {
+            StaticTimeline(); int capacity = settings.CalculateRewardDefeatCapacity();
+            var ledger = new RewardLedger(778, () => 0, 1, .15f, .5f, capacity);
+            using var batch = new BatchedRewardPresentation(ledger, run, player, _ => false,
+                settings.ExperiencePrefab.gameObject, settings.HealingPrefab.gameObject, root.transform);
+            int objects = root.GetComponentsInChildren<Transform>(true).Length;
+            for (int i = 1; i <= capacity; i++)
+            {
+                ledger.ProcessDefeat(7, i, RewardOrigin.Common, 2, 8, 5, true);
+                while (ledger.TryGetPending(RewardKind.Experience, out var xp)) { Assert.That(batch.TryAdd(xp), Is.True); ledger.TryMaterialize(xp.Id, true); }
+                while (ledger.TryGetPending(RewardKind.HealCommon, out var heal)) { Assert.That(batch.TryAdd(heal), Is.True); ledger.TryMaterialize(heal.Id, true); }
+            }
+            batch.Flush(); Assert.That(batch.ActiveCount, Is.EqualTo(capacity * 2)); Assert.That(ledger.PendingCount, Is.Zero);
+            Assert.That(root.GetComponentsInChildren<Transform>(true).Length, Is.EqualTo(objects));
+            foreach (var renderer in root.GetComponentsInChildren<MeshRenderer>())
+                Assert.That(renderer.GetComponent<MeshFilter>().sharedMesh.vertexCount, Is.LessThanOrEqualTo(60000));
+            for (int i = 0; i < 10; i++) batch.Advance(.016f, 1.26f, 7.5f);
+            GC.GetAllocatedBytesForCurrentThread(); long before = GC.GetAllocatedBytesForCurrentThread();
+            for (int i = 0; i < 20; i++) batch.Advance(.016f, 1.26f, 7.5f);
+            Assert.That(GC.GetAllocatedBytesForCurrentThread() - before, Is.Zero);
+            ledger.Close(); batch.Clear(); Assert.That(batch.ActiveCount, Is.Zero);
+            Assert.That(ledger.Closure.CancelledExperience, Is.EqualTo(capacity * 2));
         }
 
         [Test] public void RealExperienceViewClaimsLedgerAndProgressionOnce()
@@ -262,7 +325,8 @@ namespace QuackQuack.Tests.PlayMode
             StaticTimeline(); int target = settings.HealingCapacity - settings.MiniBossReservedHealingSlots;
             for (int i = 1; i <= 500 && director.Rewards.Entries.Count(e => e.Kind == RewardKind.HealCommon) <= target; i++) DeliverReward(900000 + i);
             Assert.That(root.GetComponentsInChildren<HealingPickup>().Length, Is.EqualTo(target));
-            Assert.That(director.Rewards.TryGetPending(RewardKind.HealCommon, out _), Is.True);
+            Assert.That(director.Rewards.TryGetPending(RewardKind.HealCommon, out _), Is.False);
+            Assert.That(director.Rewards.Entries.Where(e => e.Kind == RewardKind.HealCommon).All(e => e.State == RewardState.Grounded), Is.True);
             DeliverReward(950001, "libelula-alfa", 50, 15); DeliverReward(950002, "sapo-cururu", 50, 15);
             Assert.That(root.GetComponentsInChildren<HealingPickup>().Length, Is.EqualTo(settings.HealingCapacity));
             Assert.That(director.Rewards.Entries.Count(e => e.Kind == RewardKind.HealMiniBoss && e.State == RewardState.Grounded), Is.EqualTo(2));

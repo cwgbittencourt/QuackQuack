@@ -32,6 +32,8 @@ ProcessDefeat(origem, lease, dados, posição): valida uma vez por derrota real.
 
 Ledger registra obrigação antes de alugar view. Sem slot: manter posição/ID/valor e tentar materializar, sem descartar nem conceder à distância. Reservar/priorizar miniboss e medir capacidade. Teto técnico nunca reduz chance; incapacidade de suportar carga autoral bloqueia aceite. No teardown registrar destino de pendências; não carregar drops para nova partida.
 
+Na saturação das views individuais, a apresentação em lote pré-alocada conserva uma representação e estado de atração por RewardId. Compartilhar mesh não agrega recompensas nem altera raio, velocidade ou contato de claim. Validar geometria/UVs, ausência de duplicação, pausa, descarte de cura capturada com vida cheia e encerramento, além de latência e memória nos players reais. Indisponibilidade do adaptador continua preservando a obrigação pendente.
+
 Heal(fração): jogador vivo, valor aplicado min(falta, MaxHealth × fração). Claim somente após aplicação positiva; não desperdiçar cura cheia nem reanimar morto. Cada coleta aceita uma vez. XP usa valor positivo e TryCollectExperience/fluxo existente de níveis; não duplica cartas por replay.
 
 ## C5 — Atração compartilhada (FR-011)

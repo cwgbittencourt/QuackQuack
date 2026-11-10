@@ -153,11 +153,15 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(Ledger.PendingCount, Is.EqualTo(pending));
             var bound = XpViews.Select(p => p.BoundRewardId).Concat(HealViews.Select(p => p.BoundRewardId)).ToArray();
             Assert.That(bound.Distinct().Count(), Is.EqualTo(bound.Length));
+            int batchedCount = 0;
             foreach (var entry in Ledger.Entries)
             {
                 bool presented = entry.State == RewardState.Grounded || entry.State == RewardState.Attracted;
-                Assert.That(bound.Count(id => id.Equals(entry.Id)), Is.EqualTo(presented ? 1 : 0), Receipt(entry));
+                bool batched = director.TryGetBatchedRewardPosition(entry.Id, out _);
+                if (batched) batchedCount++;
+                Assert.That(bound.Count(id => id.Equals(entry.Id)) + (batched ? 1 : 0), Is.EqualTo(presented ? 1 : 0), Receipt(entry));
             }
+            Assert.That(batchedCount, Is.EqualTo(director.BatchedRewardCount));
         }
 
         private static string Receipt(RewardEntry entry) =>
@@ -287,8 +291,9 @@ namespace QuackQuack.Tests.PlayMode
             Kill("libelula-alfa"); Kill("sapo-cururu");
             var original = Ledger.Entries.ToDictionary(e => e.Id, e => new Vector2(e.X, e.Y));
             int xpTotal = Ledger.Entries.Sum(e => e.Experience);
-            Assert.That(Ledger.Entries.Count(e => e.Kind == RewardKind.Experience && e.State == RewardState.WaitingForView), Is.GreaterThan(0));
-            Assert.That(Ledger.TryGetPending(RewardKind.HealCommon, out _), Is.True);
+            Assert.That(Ledger.PendingCount, Is.Zero);
+            Assert.That(Ledger.Entries.All(e => e.State == RewardState.Grounded), Is.True);
+            Assert.That(director.BatchedRewardCount, Is.GreaterThan(0));
             Assert.That(HealViews.Count(p => p.BoundRewardId.Kind == RewardKind.HealMiniBoss), Is.EqualTo(2));
             Assert.That(XpViews.Length, Is.EqualTo(settings.PickupCapacity)); Assert.That(HealViews.Length, Is.EqualTo(settings.HealingCapacity));
             Assert.That(upgrades.Experience, Is.Zero); AssertConserved(); Record("saturated");
@@ -422,7 +427,9 @@ namespace QuackQuack.Tests.PlayMode
         [TestCase(RunPhase.Lost)] [TestCase(RunPhase.Abandoned)] [TestCase(RunPhase.Won)]
         public void TerminalFlowCancelsGroundAttractedAndPendingRewardsWithoutSweeping(RunPhase outcome)
         {
-            CreateRun(smallPools: true); Kill(); Kill(); Kill(); Kill("libelula-alfa");
+            CreateRun(smallPools: true);
+            director.HealingMaterializer = null; // Explicit adapter outage still exercises terminal pending obligations.
+            Kill(); Kill(); Kill(); Kill("libelula-alfa");
             var claimed = XpViews.First(); Collect(claimed); MovePlayer(new Vector2(-6, -2));
             director.Advance(0, camera); player.State.TakeDamage(80, 1, 0);
             Assert.That(XpViews.First().TryMarkAttracted(player.transform), Is.True);

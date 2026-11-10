@@ -74,6 +74,10 @@ namespace QuackQuack.Systems.Run
         private readonly bool[] requested = new bool[2], delivered = new bool[2];
         private readonly long[] retry = new long[2];
         private ExperiencePickup[] pickups;
+        private BatchedRewardPresentation batchedRewards;
+        public int BatchedRewardCount => batchedRewards?.ActiveCount ?? 0;
+        public bool TryGetBatchedRewardPosition(RewardId id, out Vector2 position)
+        { position = default; return batchedRewards != null && batchedRewards.TryGetPosition(id, out position); }
         private HealingPickup[] healingPickups;
         private string healingKey;
         public PickupAttractionSystem Attraction { get; private set; }
@@ -174,6 +178,7 @@ namespace QuackQuack.Systems.Run
             healingPickups = new HealingPickup[settings.HealingCapacity];
             HealingMaterializer = MaterializeHealingView;
             Attraction = new PickupAttractionSystem(run, player, settings.PickupPolicy, upgrades, relics);
+            InitializeBatchedRewards();
             pools.Register(bossKey, PoolFamily.Enemy, () => Instantiate(settings.BossPrefab, transform).GetComponent<FrogKingController>(), 1);
             // Warm the boss's own hazard pools before gameplay, then return the actor.
             var warm = pools.Acquire<FrogKingController>(bossKey);
@@ -261,6 +266,7 @@ namespace QuackQuack.Systems.Run
             if (run.IsSimulating && Boss != null) { Boss.Advance(seconds); Boss.TryFinalizeDefeat(); }
             if (run.IsSimulating) MaterializeRewards();
             if (run.IsSimulating) Attraction.Advance(seconds, pickups, healingPickups);
+            if (run.IsSimulating) batchedRewards.Advance((float)seconds, Attraction.CaptureRadius, Attraction.Speed);
             if (run.IsSimulating && player.State.Health <= 0) run.TryTransition(RunPhase.Lost);
             if (ending) Finish();
         }
@@ -300,7 +306,8 @@ namespace QuackQuack.Systems.Run
                 if (healingPickups[i] == null) { if (free < 0) free = i; }
                 else if (healingPickups[i].BoundRewardId.Kind == RewardKind.HealCommon) commonActive++;
             }
-            if (free < 0 || (entry.Kind == RewardKind.HealCommon && commonActive >= settings.HealingCapacity - settings.MiniBossReservedHealingSlots)) return false;
+            if (free < 0 || (entry.Kind == RewardKind.HealCommon && commonActive >= settings.HealingCapacity - settings.MiniBossReservedHealingSlots))
+                return batchedRewards.TryAdd(entry);
             var pickup = pools.Acquire<HealingPickup>(healingKey);
             if (pickup == null) return false;
             try
@@ -341,7 +348,18 @@ namespace QuackQuack.Systems.Run
                 Rewards.TryMaterialize(entry.Id, true);
                 pickups[slot] = pickup; free--;
             }
-            if (Rewards.TryGetPending(RewardKind.Experience, out var waiting)) Rewards.TryMaterialize(waiting.Id, false);
+            while (Rewards.TryGetPending(RewardKind.Experience, out var waiting))
+            {
+                bool visible = batchedRewards.TryAdd(waiting);
+                Rewards.TryMaterialize(waiting.Id, visible);
+                if (!visible) break;
+            }
+        }
+        private void InitializeBatchedRewards()
+        {
+            batchedRewards?.Dispose();
+            batchedRewards = new BatchedRewardPresentation(Rewards, run, player, collectExperience,
+                settings.ExperiencePrefab.gameObject, settings.HealingPrefab.gameObject, transform);
         }
         private void OnCombat(CombatEvent value)
         {
@@ -385,6 +403,7 @@ namespace QuackQuack.Systems.Run
         {
             SpecialEnemies?.Clear();
             ending = true; Rewards.Close(); Result = results.FinalizeResult(); dirty = true;
+            batchedRewards.Clear();
             Spawns.Dispose();
             if (Scheduler != null) Scheduler.enabled = false;
             if (weapons != null) weapons.enabled = false;
@@ -418,6 +437,7 @@ namespace QuackQuack.Systems.Run
         private void LateUpdate()
         {
             if (!Ready || disposed) return;
+            batchedRewards?.Flush();
             RefreshSpecialEnemies();
             if (view != null && player != null)
             {
@@ -446,6 +466,7 @@ namespace QuackQuack.Systems.Run
         private void OnApplicationPause(bool paused) { if (Ready && paused) { if (run.IsSimulating) TogglePause(); Persist(); } }
         private void OnDestroy()
         {
+            batchedRewards?.Dispose();
             if (!Ready || disposed) return;
             if (!run.Outcome.HasValue) TryAbandon();
             if (dirty || relics.Version != savedVersion || LastSave?.Status == SaveStatus.Failed) Persist();
