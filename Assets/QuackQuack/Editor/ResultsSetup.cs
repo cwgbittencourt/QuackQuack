@@ -51,6 +51,15 @@ namespace QuackQuack.Editor
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath); Object.DestroyImmediate(root);
             var scene = EditorSceneManager.OpenScene("Assets/QuackQuack/Scenes/LakeRun.unity"); Attach(); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
         }
+        public static void UpdateIllustratedLayout()
+        {
+            var root = PrefabUtility.LoadPrefabContents(PrefabPath);
+            try {
+                PolishUiSetup.RefreshExistingTheme(root);
+                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+            } finally { PrefabUtility.UnloadPrefabContents(root); }
+            AssetDatabase.SaveAssets(); Debug.Log("T050_RESULTS_LAYOUT_SAVED");
+        }
         public static void UpdateNavigation()
         {
             var root = PrefabUtility.LoadPrefabContents(PrefabPath);

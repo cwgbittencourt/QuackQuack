@@ -50,6 +50,14 @@ namespace QuackQuack.Editor
         private static void ApplyIllustratedLayout(GameObject root,CartoonUiTheme theme)
         {
             if(!theme.Illustrated)return;
+            if(root.GetComponent<ResultsView>()!=null)
+                foreach(var scroll in root.GetComponentsInChildren<ScrollRect>(true))
+                {
+                    scroll.viewport.offsetMin=new Vector2(44,40);
+                    scroll.viewport.offsetMax=new Vector2(-62,-40);
+                    var bar=scroll.verticalScrollbar.GetComponent<RectTransform>();
+                    bar.anchoredPosition=new Vector2(-36,0);bar.sizeDelta=new Vector2(14,-80);
+                }
             if(root.GetComponent<UpgradeSelectionView>()!=null)
             foreach(var card in root.GetComponentsInChildren<RectTransform>(true))
             {

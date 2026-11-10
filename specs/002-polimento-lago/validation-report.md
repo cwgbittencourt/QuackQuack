@@ -1,4 +1,4 @@
-# Validação transversal — T048
+# Validação transversal — Polimento 002
 
 Data: 10/11/2026. Escopo exclusivo: T048 da feature 002, concluída. Suítes completas, conteúdo, players IL2CPP e inicialização dos dois produtos reais aprovados nos limites abaixo.
 
@@ -175,3 +175,90 @@ Capturas finais locais `android-product-visible.png`, `android-product-running.p
 | QuackFeedbackTests | 6 | 6 | 6 | 0 |
 | SpecialEnemyBarsTests | 16 | 16 | 16 | 0 |
 | UpgradeFeedbackTests | 7 | 7 | 7 | 0 |
+
+## T050 — matriz física e visual (10/11/2026)
+
+**Parcial: matriz disponível executada; encerramento técnico pendente.** Base `0ee1ac9` (T049). Avanço para T050 solicitado explicitamente pelo usuário; T049 permanece aberta e não fornece aceite de entrada, memória ou plataforma por inferência.
+
+### Preparação e limites
+
+Cópia nova `Builds/T050/ValidationProject`, somente Assets/Packages/ProjectSettings, sem copiar Library. Runtime/regras/UI de produção preservados. Laboratório privado apenas na cópia: save/identidade separados, alvo protegido contra morte e dez relíquias liberadas para navegar; inicia pausado. F8 gera exatamente o XP até o próximo nível pelo fluxo real; F3 reinicia a cena; F6 prepara recursos; F7 antecipa especiais. Esses recursos não aprovam regras de combate nem progressão, somente preparam os contextos de entrada/UI. Nenhuma navegação/confirmar/retornar física é injetada pelo laboratório.
+
+Windows F2 alterna 1280×720, 1440×720, 1560×720 e 960×720 (16:9, 18:9, 19,5:9, 4:3); registrar tamanho efetivo, não apenas solicitado. F4 alterna Safe Area nativa/recorte esquerdo/direito sintético. A matriz automatizada complementar usa as quatro dimensões padrão do quickstart. No Android, manter Screen/Safe Area nativos e girar fisicamente para as duas paisagens; não simular rotação via ADB nem alegar quatro aparelhos a partir do S23.
+
+Os helpers não entram no código/cenas do produto nem no Git. `QUACKQUACK_T050_SKIP_LAB=1` desativa sua criação na execução automatizada do Editor para não pausar/alterar fixtures. Logs de disponibilidade de controles registram layout/nome comercial/contexto, sem serial, endereço Bluetooth ou identificador de instância.
+
+Usuário confirmou disponibilidade atual: Windows, S23, Xbox Series e DualSense; também 8BitDo no Windows/XInput. 8BitDo/S23 continua adiado por decisão anterior; não repetir diagnóstico de OTG sem novo pedido.
+
+### Critérios físicos
+
+- P01: movimento, Quack e pausa/retomada; uma ação por pressionamento, sem comandos presos.
+- P02: Relíquias por atalho e menu; fechar retoma apenas quando abriu durante simulação e conserva a pausa anterior.
+- P03: navegação/foco em cartas, BANIR, RERROLAR e PULAR; voltar de BANIR, Cancel não pula escolha obrigatória; confirmar uma vez sem Quack ao voltar.
+- P04: CONTROLES, família/rótulos, trocar/persistir/restaurar atalho; acesso por opção focalizável mesmo sem Select.
+- P05–P09: desconectar/reconectar em partida, pausa, Relíquias, melhoria e resultados, incluindo analógico/Quack pressionado; foco/contexto preservados, sem resolver escolha ou reiniciar sozinho.
+- P10: S23 oculta touch com controle disponível; restaura joystick/Quack funcional ao desligar e oculta ao reconectar. Desligar pelo controle sem sair do app evita confundir hotplug com pausa de sistema.
+- V01: quatro proporções no Windows com estados de recursos, XP/nível, dicas, especiais, cartas, Relíquias, CONTROLES e resultados legíveis e sem sobreposição; recortes sintéticos dos dois lados.
+- V02: toque e as duas paisagens reais no S23; recorte da câmera/barras do sistema respeitados nos mesmos elementos essenciais.
+
+### Matriz desta rodada
+
+| Combinação | Comandos/menus P01–P04 | Hotplug P05–P09 | Touch P10 | Evidência |
+|---|---|---|---|---|
+| Teclado físico / Windows (modelo não informado) | Aprovado; P04 navegação | Não se aplica ao roteiro de controles | Não se aplica | Relato atual dos dois roteiros |
+| Xbox Series / Windows Bluetooth | Aprovado | Aprovado nos cinco contextos | Não se aplica | Relato atual P01–P09 |
+| DualSense / Windows Bluetooth | Aprovado; família automática | Aprovado nos cinco contextos | Não se aplica | Relato atual P01–P09 |
+| 8BitDo Ultimate C / Windows 2,4 GHz/XInput | Aprovado; perfil Xbox/XInput adequado | Aprovado nos cinco contextos | Não se aplica | Relato atual P01–P09 |
+| Toque / S23 Ultra | Aprovado; P04 navegação | Não se aplica | Aprovado sem controle conectado | Relato atual R2; duas paisagens |
+| Xbox Series / S23 Bluetooth | Aprovado; família automática | Aprovado nos cinco contextos | Aprovado: restaura/oculta toque | Relato atual R2 P01–P10 |
+| DualSense / S23 Bluetooth | Aprovado pelo usuário; família automática | Funcional nos cinco contextos; exceções no log sob investigação | Aprovado: restaura/oculta toque | Relato atual R2 P01–P10; duas paisagens; ressalva técnica abaixo |
+| 8BitDo / S23 OTG | Pendente, adiado | Pendente, adiado | Pendente, adiado | Decisão anterior mantida |
+
+Pendente não equivale a falha do jogo. Evidências anteriores de T014/T040 são históricas e não preenchem automaticamente as células desta rodada. S23 não representa Android intermediário/de entrada. T051 não iniciada.
+
+### Evidência complementar T050
+
+PlayMode focado: **132/132, nove classes, zero falhas/ignorados**. ControllerAvailability 30, GamepadInputAdapter 9, InputParity 15, IntegratedUiLayout 16, KeyboardPlayerInput 4, MobileInputAdapter 9, RelicLoadoutFlow 16, ResultsView 6 e UpgradeSelection 27. XML `TestResults/T050/ui-input.xml`, log `Logs/Polimento002/T050/ui-input.log`, 96 capturas novas em `Logs/Polimento002/T050/Matrix`. Ausência de T050_READY no log confirma que o laboratório não foi criado nas fixtures. Essa execução não substitui entrada física.
+
+Windows: build IL2CPP pelo PrototypeBuildPipeline, saída 0/PROTOTYPE_BUILD_OK, produto `Builds/T050/ValidationProject/Builds/T050/Windows/QuackQuack T050.exe`. GameAssembly.dll SHA-256 `55F1F0707FAF9C96858D4ECB4F650F6077711D2E893FE627D3BA10CA13BEC928`. Janela observada em pausa, viewport 1280×720, laboratório visível apenas em pausa fora dos modais. Logs locais de build/player em `Logs/Polimento002/T050`.
+
+**Teclado/Windows:** usuário respondeu “Tudo funciona” ao roteiro WASD/setas, Espaço, Esc, R, propriedade da pausa e navegação em pausa/Relíquias/CONTROLES. Respondeu “Todos os passos funcionam” ao roteiro F8, foco em cartas/ações, Esc em BANIR sem resolver oferta, confirmação única sem Quack, resultados com barras/ação e reinício único. Modelo não informado; nenhuma inferência de hotplug de teclado.
+
+**Xbox Series/Windows Bluetooth:** “Todos os passos funcionam” para P01–P04, incluindo menus, ambos os casos de propriedade da pausa em Relíquias, foco/retorno/confirmar sem Quack e edição/reabertura/restauração do atalho em CONTROLES. “Todos os cinco contextos funcionam” para desconectar/reconectar em partida, pausa, Relíquias, melhoria e resultados, incluindo analógico/Quack pressionado e navegação/reinício único nos resultados. Não relatou caso não coberto.
+
+**DualSense/Windows Bluetooth:** “Tudo funciona; família automática” para P01–P04 e “Todos os cinco contextos funcionam” para P05–P09, no roteiro equivalente com Cross/Circle, Options/Create, remapeamento/restauração e resultados. Sem seleção manual de família ou caso não coberto relatado.
+
+**8BitDo/Windows, receptor 2,4 GHz em XInput:** “Tudo funciona; perfil Xbox/XInput adequado” para P01–P04. “Todos os cinco contextos funcionam” ao remover/recolocar o receptor nos cinco contextos P05–P09, incluindo analógico/Quack pressionado, foco, barras e reinício único. Não foi preciso selecionar Genérico manualmente. Evidência vale para esse dispositivo/modo, não para todo HID genérico nem para Android/OTG.
+
+**Visual Windows, rodada inicial:** “Os quatro formatos estão corretos” para HUD/recursos/dicas/relógio/XP, após F2/F3/F6. Barras dos três especiais aprovadas em 16:9 e 4:3. No roteiro de modais, usuário relatou sobreposição nos resultados, semelhante ao problema anterior das cartas; não aprovar esse roteiro integralmente. Falha reproduzida em 4:3: conteúdo das três colunas começa dentro da moldura ilustrada, que cobre letras e bordas do texto. Correção e reteste R2 descritos abaixo. Interrupção por Esc foi esclarecida como acidental e a retomada autorizada pelo usuário; aceites anteriores preservados.
+
+**Correção de resultados:** regressão nova compara os recuos reais do viewport com as bordas do sprite ilustrado (pixels por unidade/multiplicador), exige separação do scrollbar e altura completa do conteúdo. Antes da correção: 12 aprovados/4 falhas esperadas em 16 casos IntegratedUiLayout, um caso por proporção; zero ignorados. `Results text must clear the left illustrated frame`, esperado pelo menos 31, encontrado 20. XML `TestResults/T050/results-red.xml`.
+
+`PolishUiSetup.ApplyIllustratedLayout` agora aplica recuos (44/40 à esquerda/base, 62/40 à direita/topo) nas três colunas ResultsView; scrollbar recuado 36, largura 14 e intervalo vertical 80. `ResultsSetup.UpdateIllustratedLayout` atualiza o prefab existente via Unity. Somente seis RectTransforms foram reserializados, preservando IDs, referências, .meta, ações e grafo de navegação; nenhuma regra/input alterado. Reexecução **132/132, zero falhas/ignorados**, XML `TestResults/T050/ui-input-r2.xml`, 96 capturas em `Logs/Polimento002/T050/Matrix-r2`; captura 4:3 dos resultados inspecionada e texto afastado das molduras. Aceites físicos R2 registrados abaixo, com ressalva técnica no fechamento.
+
+**Reteste físico Windows R2 aprovado:** “Resultados corretos nos quatro formatos e recortes”, incluindo títulos/primeiras letras, rolagem até o fim, linhas acessíveis e botões. Com 8BitDo: “Tudo funciona”, confirmando barras/ações, rolagem, retorno às ações, desconectar/reconectar nos resultados sem ativação e reinício único. Usuário esclareceu “A falha estava somente nos resultados”: Relíquias, CONTROLES e cartas já estavam corretos nas quatro proporções/recortes da rodada anterior. Prévia fica limitada ao conteúdo que apareceu, com cobertura automatizada complementar; não inferir uma combinação de carta não observada. Logs registram os quatro tamanhos efetivos (1280×720, 1440×720, 1560×720, 960×720).
+
+Build Windows R2: `Builds/T050/ValidationProject/Builds/T050/R2/Windows/QuackQuack T050.exe`, pipeline/exit 0, GameAssembly SHA-256 `8148D7EA49B18D09494208A99403A6CAB8E8668B5E98993E6EB042F7A7B44B7F`. Janela antiga fechada, R2 aberta e observada pausada em 1280×720. Perfil/saves do laboratório preservados pela mesma identidade. Resultados funcionais R1 ficam delimitados acima; reteste R2 verifica a área alterada.
+
+Android: build ARM64 IL2CPP pelo mesmo pipeline, saída 0/PROTOTYPE_BUILD_OK, instalado com sucesso no S23 SM-S918B/Android 17; nome QuackQuack T050, pacote `com.cemggames.quackquack.validation002.t050`, separado das versões anteriores e do produto. APK `Builds/T050/ValidationProject/Builds/T050/Android/QuackQuack T050.apk`, SHA-256 `F49BDF7BC051E64DE52A64EA1396FA9991CB907AD8358EF9D691F9D4008D915F`. Instalação não é aceite de toque/controle; aceites da R2 registrados abaixo.
+
+APK R2 corrigido: `Builds/T050/ValidationProject/Builds/T050/R2/Android/QuackQuack T050.apk`, SHA-256 `3BC02AD3CD9FE3A902199949B56B95CD1D6CC901ED930FA0A7EDF941D813E3B9`, instalado por atualização sem apagar perfil e iniciado no S23 antes da retomada. Prefab de resultados na fonte e na cópia tem SHA-256 `F9F1F60DA46156DC8B355B4F8C7CDBA9524249951873408ACD7DCEAB6ED7E4E5`. Testes físicos Android R2 registrados abaixo.
+
+**Toque/S23 R2 aprovado:** “Todos os passos funcionam por toque” no roteiro de movimento/Quack simultâneos, pausa, propriedade da pausa em Relíquias, melhoria/ações/confirmação única e resultados corrigidos com rolagem/reinício. “Tudo correto nas duas paisagens” para giro físico com rotação automática, HUD/dicas/XP/nível, modais, recursos e especiais, legibilidade e respeito ao recorte/barras do sistema. Não relatou estado/tela não testado. Evidência restrita a esse modelo e APK; nenhuma rotação sintética usada no aparelho.
+
+**Xbox Series/S23 Bluetooth R2 aprovado:** “Tudo funciona; família automática” no roteiro P01–P04 (touch oculto, controles/rótulos, propriedade da pausa, melhoria/retorno/confirmação única, remapeamento/reabertura/restauração). “Todos os cinco contextos e a troca para toque funcionam” para P05–P10, incluindo analógico/Quack pressionado, ausência de ativação indevida, retorno funcional do toque ao desligar e ocultação ao reconectar, rolagem e reinício único nos resultados. Não relatou caso não coberto.
+
+Validador de conteúdo pós-correção: `T073_CONTENT_VALIDATION_OK assets=67 warnings=2`, saída 0, log `Logs/Polimento002/T050/content-r2.log`. Mesmos dois avisos URP UnsupportedType conhecidos; nenhuma dependência/pacote/arte/catálogo de gameplay alterado.
+
+
+**DualSense/S23 Bluetooth R2 — aceite funcional:** usuário respondeu “Tudo funciona; família automática” para P01–P04 e “Todos os casos funcionam nas duas paisagens” para P05–P10: cinco contextos, analógico/Quack pressionado, foco/contexto sem ativação indevida, retorno/ocultação do toque, rolagem e reinício único. Confirmou HUD/rótulos/menus nas duas paisagens físicas. Nenhum caso não coberto relatado. Esse aceite funcional não elimina as exceções encontradas na auditoria final.
+
+### Ressalva técnica e pendências para encerrar T050
+
+A auditoria final do log Android R2 encontrou duas `NullReferenceException` em `InputManager.FireStateChangeNotifications`, chamadas de `InputSystem.onBeforeUpdate`, imediatamente antes do evento Removed do DualSense durante Playing. O backend informa layout `DualShock4GamepadAndroid` e produto `DualSense Wireless Controller`; o controle físico é o DualSense informado pelo usuário. Outra exceção aparece em `T050Lab.Update`, no laboratório privado. Evidências locais: `Logs/Polimento002/T050/android-player-r2.log` e `android-exception-detail.log`. Não há linhas de código nos stacks IL2CPP; proximidade temporal não prova causalidade nem atribui a falha ao pacote.
+
+Inspeção do código instalado do Input System e da composição touch identificou alterações síncronas de contexto durante eventos de disponibilidade como hipótese a investigar. Não houve reprodução mínima nem prova suficiente para alterar pacote ou input de produção. O laboratório também precisa de isolamento de seu ciclo de recarga; a exceção nele não demonstra falha equivalente no produto. Os 132 testes aprovados não reproduzem estes registros nativos e não permitem declará-los corrigidos.
+
+**Próximo passo técnico:** reproduzir hotplug do DualSense em uma build sem laboratório, com log novo e símbolos/stack suficientes; separar a falha de instrumentação, criar regressão para a causa confirmada, corrigir e repetir os contextos afetados. Preservar todos os aceites humanos acima, sem reclassificar a sessão como livre de exceções. Nenhuma atualização de pacote foi realizada por suposição.
+
+T050 permanece desmarcada por essa investigação/reteste e pela combinação 8BitDo/S23 explicitamente adiada pelo usuário. As validações disponíveis foram registradas; não solicitar novamente diagnóstico de OTG. T051 não iniciada. Builds, helpers, logs e capturas permanecem locais/ignorados; somente correção de layout, regressão e evidências textuais são versionados.

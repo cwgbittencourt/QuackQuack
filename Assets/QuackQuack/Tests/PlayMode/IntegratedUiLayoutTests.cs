@@ -385,6 +385,22 @@ namespace QuackQuack.Tests.PlayMode
                 Assert.That(hits.Count, Is.GreaterThan(0)); Assert.That(hits[0].gameObject.transform == panel.transform || hits[0].gameObject.transform.IsChildOf(panel.transform), Is.True,"Modal must block underlying gameplay");
             }
             foreach (var button in panel.GetComponentsInChildren<Button>()) { AssertInside(button.GetComponent<RectTransform>()); if (button.interactable) AssertClickable(button.transform); }
+            if (panel.GetComponentInParent<ResultsView>() != null)
+                foreach (var scroll in panel.GetComponentsInChildren<ScrollRect>())
+                {
+                    var frame = scroll.GetComponent<Image>();
+                    if (frame == null || frame.sprite == null) continue;
+                    var border = frame.sprite.border / (frame.pixelsPerUnit * frame.pixelsPerUnitMultiplier);
+                    var text = scroll.content.GetComponent<Text>();
+                    float gap = text.fontSize * .25f;
+                    Assert.That(scroll.viewport.offsetMin.x, Is.GreaterThanOrEqualTo(border.x + gap), "Results text must clear the left illustrated frame.");
+                    Assert.That(-scroll.viewport.offsetMax.y, Is.GreaterThanOrEqualTo(border.w + gap), "Results headings must clear the top illustrated frame.");
+                    Assert.That(scroll.viewport.offsetMin.y, Is.GreaterThanOrEqualTo(border.y + gap), "Results text must clear the bottom illustrated frame.");
+                    var bar = scroll.verticalScrollbar.GetComponent<RectTransform>();
+                    Assert.That(-bar.anchoredPosition.x, Is.GreaterThanOrEqualTo(border.z), "Results scrollbar must clear the right illustrated frame.");
+                    Assert.That(scroll.viewport.offsetMax.x, Is.LessThanOrEqualTo(bar.anchoredPosition.x - bar.rect.width - gap), "Results text must not overlap its scrollbar.");
+                    Assert.That(scroll.content.rect.height + 1, Is.GreaterThanOrEqualTo(text.preferredHeight), "Scroll content must retain every wrapped line.");
+                }
             foreach(var card in panel.GetComponentsInChildren<RectTransform>())
                 if(card.name.StartsWith("Card ")&&card.GetComponent<Image>()!=null)
                     foreach(var label in card.GetComponentsInChildren<Text>())
