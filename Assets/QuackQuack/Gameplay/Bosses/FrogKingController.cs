@@ -23,12 +23,14 @@ namespace QuackQuack.Gameplay.Bosses
         public bool VisualSimulationActive => run != null && run.IsSimulating && Health > 0;
         private static long nextLease;
         public long LeaseId { get; private set; }
+        private CartoonActorVisual actorVisual;
         public bool TryGetSpecialSnapshot(string encounterId, out SpecialEnemySnapshot snapshot)
         {
             snapshot = default;
             if (!configured || !isActiveAndEnabled || LeaseId <= 0 || Health <= 0 || run == null || run.Outcome.HasValue) return false;
             var shape = GetComponent<Collider2D>();
             Vector3 anchor = shape != null ? new Vector3(shape.bounds.center.x, shape.bounds.max.y, transform.position.z) : transform.position;
+            if(actorVisual!=null)anchor=actorVisual.RaiseHudAnchor(anchor);
             snapshot = new SpecialEnemySnapshot(GetInstanceID(), LeaseId, encounterId, "Sapo-Rei",
                 SpecialEnemyCategory.Boss, anchor, Health, MaxHealth); return true;
         }
@@ -86,6 +88,7 @@ namespace QuackQuack.Gameplay.Bosses
             if (!Finite(healthMultiplier) || healthMultiplier <= 0 || !Finite(damageMultiplier) || damageMultiplier <= 0
                 || (double)definition.Health * healthMultiplier > float.MaxValue) throw new ArgumentException("Invalid boss encounter multipliers.");
             settings = definition; pools = poolService; player = target;
+            actorVisual=GetComponentInChildren<CartoonActorVisual>(true);
             safeAreas = (FrogKingSafeArea[])refuges.Clone(); hazards = new FrogKingHazard[definition.HazardCapacity];
             string key = "frog-king/" + GetInstanceID();
             waveKey = key + "/wave"; tadpoleKey = key + "/tadpole";

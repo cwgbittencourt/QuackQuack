@@ -22,10 +22,19 @@ namespace QuackQuack.Gameplay.Enemies
         private Action<EnemyReward> rewardSink;
         private Rigidbody2D body;
         private CircleCollider2D shape;
+        private QuackQuack.Gameplay.Player.CartoonActorVisual visual;
         private LayerMask originalExcludedLayers;
         private bool contactFilterOverridden;
         public Rigidbody2D Body=>body;
         public CircleCollider2D Shape=>shape;
+        public Vector3 SpecialBarAnchor
+        {
+            get
+            {
+                var bounds=shape.bounds;var anchor=new Vector3(bounds.center.x,bounds.max.y,transform.position.z);
+                return visual!=null?visual.RaiseHudAnchor(anchor):anchor;
+            }
+        }
         public EnemyState State { get; } = new EnemyState();
         public EnemyDefinition Definition { get; private set; }
         public Transform Target { get; private set; }
@@ -50,7 +59,7 @@ namespace QuackQuack.Gameplay.Enemies
             contactFilterOverridden = true;
         }
 
-        private void Awake() { body = GetComponent<Rigidbody2D>(); shape=GetComponent<CircleCollider2D>(); body.gravityScale = 0; body.freezeRotation=true; }
+        private void Awake() { body = GetComponent<Rigidbody2D>(); shape=GetComponent<CircleCollider2D>(); visual=GetComponentInChildren<QuackQuack.Gameplay.Player.CartoonActorVisual>(true); body.gravityScale = 0; body.freezeRotation=true; }
 
         public static void RegisterPool(PoolService pools, EnemyDefinition definition, Transform parent = null)
         {

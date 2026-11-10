@@ -50,6 +50,27 @@ namespace QuackQuack.Editor
         private static void ApplyIllustratedLayout(GameObject root,CartoonUiTheme theme)
         {
             if(!theme.Illustrated)return;
+            if(root.GetComponent<UpgradeSelectionView>()!=null)
+            foreach(var card in root.GetComponentsInChildren<RectTransform>(true))
+            {
+                if(!card.name.StartsWith("Card ")||card.GetComponent<Image>()==null)continue;
+                string[] names={"Type","Title","Current","Next","Active effects","Synergy","Requirement"};
+                float[] top={-34,-66,-120,-200,-382,-452,-510};
+                float[] height={26,48,72,72,64,52,68};
+                for(int i=0;i<names.Length;i++)
+                {
+                    var label=card.Find(names[i]) as RectTransform;if(label==null)continue;
+                    label.anchoredPosition=new Vector2(44,top[i]);label.sizeDelta=new Vector2(372,height[i]);
+                }
+                var preview=card.Find("Area preview") as RectTransform;
+                if(preview!=null)
+                {
+                    preview.anchoredPosition=new Vector2(44,-278);preview.sizeDelta=new Vector2(372,100);
+                    ((RectTransform)preview.Find("Current radius")).anchoredPosition=new Vector2(93,-36);
+                    ((RectTransform)preview.Find("Next radius")).anchoredPosition=new Vector2(279,-36);
+                    ((RectTransform)preview.Find("Radius comparison")).sizeDelta=new Vector2(372,24);
+                }
+            }
             var hud=root.GetComponent<GameplayHud>();
             if(hud!=null)
             {

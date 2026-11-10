@@ -63,6 +63,14 @@ namespace QuackQuack.Tests.PlayMode
             Assert.That(view.SaveText, Is.EqualTo("Progresso salvo")); Assert.That(view.CanRetry, Is.False); Assert.That(view.CanRestart, Is.True);
             Capture("t061-" + outcome.ToString().ToLowerInvariant() + ".png");
         }
+        [Test] public void TerminalNotificationAfterPanelTeardownDoesNotReopenDestroyedUi()
+        {
+            var result=Sample(RunPhase.Abandoned);
+            var receipt=RunProgression.Apply(new RunProgressProfile(),"teardown",result,definition.CreateRules());
+            var panel=(GameObject)typeof(ResultsView).GetField("panel",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(view);
+            Object.DestroyImmediate(panel);
+            Assert.DoesNotThrow(()=>view.Show(result,receipt,Name,true));Assert.That(view.IsVisible,Is.False);
+        }
         [Test] public void LongBuildAndProgressRemainScrollableInsteadOfTruncatingDetails()
         {
             var result = Sample(RunPhase.Won); view.Show(result, RunProgression.Apply(new RunProgressProfile(), "sample", result, definition.CreateRules()), Name, true);

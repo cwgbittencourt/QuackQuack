@@ -18,6 +18,12 @@ namespace QuackQuack.Gameplay.Player
         private long lease;
         private bool sampled;
         private bool restFlip;
+        public Vector3 RaiseHudAnchor(Vector3 physicalAnchor)
+        {
+            if(image!=null&&image.enabled&&image.sprite!=null)
+                physicalAnchor.y=Mathf.Max(physicalAnchor.y,image.bounds.max.y);
+            return physicalAnchor;
+        }
 
         private void Awake()
         {

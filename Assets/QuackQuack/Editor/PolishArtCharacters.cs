@@ -21,6 +21,7 @@ namespace QuackQuack.Editor
             ImportAtlas(approved,new[]{"pato","formiga","rock","xp","heal","quack-frontal"},3,2);
             sprites=AssetDatabase.LoadAllAssetsAtPath(atlas).OfType<Sprite>()
                 .Concat(AssetDatabase.LoadAllAssetsAtPath(approved).OfType<Sprite>().Where(s=>s.name=="pato"||s.name=="formiga")).ToArray();
+            LoadThreatRevisions();
             string[] ids={"formiga","aranha","vespa","besouro","caramujo-aquatico","libelula-alfa","sapo-cururu","sapo-rei"};
             foreach(string id in ids)
             {
@@ -81,6 +82,40 @@ namespace QuackQuack.Editor
         {
             return root.transform.localPosition.ToString("R")+root.transform.localRotation.ToString("R")+root.transform.localScale.ToString("R")+string.Join("|",root.GetComponentsInChildren<Collider2D>(true).Select(c=>EditorJsonUtility.ToJson(c)))+
                 string.Join("|",root.GetComponentsInChildren<Rigidbody2D>(true).Select(b=>EditorJsonUtility.ToJson(b)));
+        }
+        private static void LoadThreatRevisions()
+        {
+            string path=Root+"/Characters/minibosses-elite.png";
+            if(!System.IO.File.Exists(path))return;
+            ImportTrimmed(path,new[]{"libelula-alfa","sapo-cururu"},2,1);
+            sprites=(sprites??Array.Empty<Sprite>()).Where(s=>s.name!="libelula-alfa"&&s.name!="sapo-cururu")
+                .Concat(AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>()).ToArray();
+            string king=Root+"/Characters/sapo-rei-royal.png";
+            if(System.IO.File.Exists(king))
+            {
+                ImportTrimmed(king,new[]{"sapo-rei"},1,1);
+                sprites=sprites.Where(s=>s.name!="sapo-rei").Concat(AssetDatabase.LoadAllAssetsAtPath(king).OfType<Sprite>()).ToArray();
+            }
+        }
+        [MenuItem("QuackQuack/Art/Apply T047 threat hierarchy revision")]
+        public static void BuildThreatRevision()
+        {
+            if(!System.IO.File.Exists(Root+"/Characters/minibosses-elite.png"))throw new InvalidOperationException("Missing T047 miniboss revision atlas.");
+            LoadThreatRevisions();
+            var ids=System.IO.File.Exists(Root+"/Characters/sapo-rei-royal.png")?new[]{"libelula-alfa","sapo-cururu","sapo-rei"}:new[]{"libelula-alfa","sapo-cururu"};
+            foreach(string id in ids)
+            {
+                string path="Assets/QuackQuack/Prefabs/Prototype/Enemies/"+id+".prefab";
+                var root=PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    string before=PhysicsSignature(root);SetActorArt(root,id,id=="sapo-rei"?2.5f:1.7f,10);
+                    if(before!=PhysicsSignature(root))throw new InvalidOperationException("Threat physics changed: "+id);
+                    PrefabUtility.SaveAsPrefabAsset(root,path);
+                }
+                finally{PrefabUtility.UnloadPrefabContents(root);}
+            }
+            AssetDatabase.SaveAssets();Debug.Log("T047_THREATS_OK count="+ids.Length+" physics=unchanged");
         }
         private static void SetActorArt(GameObject root,string id,float height,int order)
         {

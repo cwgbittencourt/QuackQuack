@@ -379,3 +379,15 @@ O usuário identificou baixa resolução aparente em Abandonar, Relíquias e rel
 Comparação das capturas antes/depois mostrou os rótulos citados e também Quack, VIDA/FÔLEGO e nível nítidos com os mesmos tamanhos. A matriz direcionada `sharp-text.xml` aprovou16/16 casos e produziu96 capturas em `SharpText`; o EditMode completo após o ajuste aprovou725/725 em `editmode-sharp-final.xml`, SHA-256 `ACBA5B4538178FD65A149B96709AA6B7061B749D7884DF505AD358F107FC0738`. Evidência de renderização controlada, sem extrapolar para aceite físico.
 
 Reteste completo após a correção: **611/611 PlayMode**, zero falhas/ignorados, `playmode-sharp-final.xml`, SHA-256 `A697F797AB88C1A6D0276EF340A3D8195BA624D6C4267C3CE732CDE6415E59CA`. As96 capturas de `FinalMatrix` usam o cenário e a correção finais. XMLs/capturas são evidências locais ignoradas; a composição serializada continua idêntica à cópia validada.
+
+## T047 — revisão concluída em10/11/2026
+
+Relatório corrente: [validation-us6.md](validation-us6.md). Retomada após pausa solicitada em09/11/2026. Aceites artístico e jogável registrados separadamente, sem extrapolar para participantes, plataformas ou desempenho.
+
+Identificação numerada sem nomes: jogador, oito ameaças, cura e XP reconhecidos; rocha identificada como bloqueio e juncos/grama como decoração. Falha de hierarquia dos minibosses levou a nova dupla; após ressalva de o Cururu superar o Rei, o Sapo-Rei também foi reforçado. Usuário aprovou as modificações dos três. [Prompts, fontes e hashes](references/t047-miniboss-provenance.md).
+
+Novas fontes em Characters: `minibosses-elite.png` (duas células, recortes781×638 e819×637) e `sapo-rei-royal.png` (recorte1232×1124), materiais de mesmo nome. Sprite Multiple, PPU128, pivô central, alpha/Bilinear/Clamp, sem mipmaps/ReadWrite/compressão. Atlas T043 original preservado; os geradores respeitam as revisões e atualizam apenas os três prefabs ao aplicar `BuildThreatRevision`. Alturas nominais1,7/2,5 e raízes/colliders/dados preservados; assinatura física comparada antes/depois pelo Unity. Barras usam o topo visível quando maior que o físico, com cache e regressão, sem alterar alcance de ataques.
+
+**C2/X3 agora são definitivos**, por aprovação explícita do usuário nesta task; substitui a condição provisória nas seções históricas T042–T046. Nenhum parâmetro de recompensa foi alterado.
+
+Cartas inicialmente reprovadas por letras sobrepostas à decoração. R3 amplia margem esquerda/direita e redistribui alturas, preservando ações/prévia e todas as linhas. Distribuição final validada por altura preferida dos campos,725/725 EditMode e160/160 PlayMode focados, zero falhas/ignorados, mais96 capturas em quatro proporções/dois recortes. UI de resultados protegida contra notificação após destruição do painel, com regressão de teardown. Usuário aprovou a interface/conjunto atual (“Ficou bom”) e o roteiro das ameaças/barras/avisos (“funciona corretamente”). Ver relatório para evidências, revisões intermediárias e limites do aceite; T048–T051 continuam pendentes.

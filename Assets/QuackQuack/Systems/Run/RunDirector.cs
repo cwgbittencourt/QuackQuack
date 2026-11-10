@@ -206,9 +206,8 @@ namespace QuackQuack.Systems.Run
                 for (int j = 0; j < miniIds.Length; j++)
                 {
                     if (enemy.Definition.Id != miniIds[j]) continue;
-                    var bounds = enemy.Shape.bounds;
                     if (enemy.State.TryGetSpecialSnapshot(lease, enemy.GetInstanceID(), minis[j].Id, enemy.Definition.DisplayName,
-                        new Vector3(bounds.center.x, bounds.max.y, enemy.transform.position.z), out var snapshot) && !SpecialEnemies.TryAdd(snapshot))
+                        enemy.SpecialBarAnchor, out var snapshot) && !SpecialEnemies.TryAdd(snapshot))
                         throw new InvalidOperationException("Special enemy registry capacity or identity conflict.");
                 }
             }

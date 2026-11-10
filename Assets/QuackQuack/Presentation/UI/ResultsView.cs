@@ -36,6 +36,8 @@ namespace QuackQuack.Presentation.UI
         public void Show(RunResult result, RunProgressReceipt progress, Func<string, string> resolve, bool saved)
         {
             if (result == null || progress == null) throw new ArgumentNullException("Result presentation");
+            // Scene teardown may destroy the panel before the director publishes abandonment.
+            if (panel == null) return;
             string Name(string id) => Escape(resolve == null ? id : resolve(id));
             closing = false; panel.SetActive(true);
             title.text = result.IsVictory ? "VITÓRIA" : result.Outcome == RunPhase.Abandoned ? "PARTIDA ABANDONADA" : "DERROTA";

@@ -33,6 +33,20 @@ namespace QuackQuack.Tests.PlayMode
             player.Initialize(character,new Input(),run,new GameplayEventBus());root.SetActive(true);
         }
         [TearDown] public void Cleanup(){Object.DestroyImmediate(root);Object.DestroyImmediate(character);Object.DestroyImmediate(quack);}
+        [Test] public void HudAnchorClearsVisibleCrestWithoutMovingThePhysicalShape()
+        {
+            var texture=new Texture2D(8,8);var sprite=Sprite.Create(texture,new Rect(0,0,8,8),Vector2.one*.5f,2);
+            try
+            {
+                image.sprite=sprite;child.transform.localScale=new Vector3(.3f,3,1);
+                var physical=new Vector3(2,.42f,3);var before=root.GetComponent<CircleCollider2D>().radius;
+                var anchor=child.GetComponent<CartoonActorVisual>().RaiseHudAnchor(physical);
+                Assert.That(anchor.y,Is.EqualTo(image.bounds.max.y));Assert.That(anchor.x,Is.EqualTo(physical.x));Assert.That(anchor.z,Is.EqualTo(physical.z));
+                Assert.That(root.GetComponent<CircleCollider2D>().radius,Is.EqualTo(before));
+                image.enabled=false;Assert.That(child.GetComponent<CartoonActorVisual>().RaiseHudAnchor(physical),Is.EqualTo(physical));
+            }
+            finally{Object.DestroyImmediate(sprite);Object.DestroyImmediate(texture);}
+        }
         [UnityTest] public IEnumerator IdleAnimationNeverChangesPhysicalBodyAndFreezesInPause()
         {
             var position=root.transform.position;var scale=root.transform.localScale;float radius=root.GetComponent<CircleCollider2D>().radius;

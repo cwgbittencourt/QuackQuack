@@ -385,6 +385,12 @@ namespace QuackQuack.Tests.PlayMode
                 Assert.That(hits.Count, Is.GreaterThan(0)); Assert.That(hits[0].gameObject.transform == panel.transform || hits[0].gameObject.transform.IsChildOf(panel.transform), Is.True,"Modal must block underlying gameplay");
             }
             foreach (var button in panel.GetComponentsInChildren<Button>()) { AssertInside(button.GetComponent<RectTransform>()); if (button.interactable) AssertClickable(button.transform); }
+            foreach(var card in panel.GetComponentsInChildren<RectTransform>())
+                if(card.name.StartsWith("Card ")&&card.GetComponent<Image>()!=null)
+                    foreach(var label in card.GetComponentsInChildren<Text>())
+                        if(label.transform.parent==card&&!string.IsNullOrEmpty(label.text))
+                            Assert.That(label.preferredHeight,Is.LessThanOrEqualTo(label.rectTransform.rect.height+1),
+                                card.name+" / "+label.name+" must show every wrapped line.");
         }
         private void Capture(Vector2Int size,string state)
         {

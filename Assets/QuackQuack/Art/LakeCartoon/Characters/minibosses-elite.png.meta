@@ -1,0 +1,339 @@
+fileFormatVersion: 2
+guid: 67b5a19b3e22beb499b7fc80d5ec1c9d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8246821072535687258
+    second: minibosses-elite_0
+  - first:
+      213: -819766497391613606
+    second: minibosses-elite_1
+  - first:
+      213: 7199784329387594585
+    second: minibosses-elite_2
+  - first:
+      213: -7297837396318191437
+    second: minibosses-elite_3
+  - first:
+      213: 8105482301180863335
+    second: minibosses-elite_4
+  - first:
+      213: 1248558365911284553
+    second: minibosses-elite_5
+  - first:
+      213: 6168424350796295345
+    second: minibosses-elite_6
+  - first:
+      213: -3052401452364736717
+    second: minibosses-elite_7
+  - first:
+      213: -3077779526768163087
+    second: minibosses-elite_8
+  - first:
+      213: -5290075376060739690
+    second: minibosses-elite_9
+  - first:
+      213: 3000644742962267817
+    second: minibosses-elite_10
+  - first:
+      213: -1859831535628901200
+    second: minibosses-elite_11
+  - first:
+      213: 3902494484174716714
+    second: minibosses-elite_12
+  - first:
+      213: -7616876021536953910
+    second: minibosses-elite_13
+  - first:
+      213: -1190833847226350776
+    second: minibosses-elite_14
+  - first:
+      213: 9018174754798855100
+    second: minibosses-elite_15
+  - first:
+      213: 3050535040748671699
+    second: minibosses-elite_16
+  - first:
+      213: 3477106907218590830
+    second: minibosses-elite_17
+  - first:
+      213: -198491632617154525
+    second: minibosses-elite_18
+  - first:
+      213: 3600387604989256485
+    second: minibosses-elite_19
+  - first:
+      213: 8752427624596550378
+    second: minibosses-elite_20
+  - first:
+      213: -4809196925458673812
+    second: minibosses-elite_21
+  - first:
+      213: 2652121734067260899
+    second: minibosses-elite_22
+  - first:
+      213: -655275725764751929
+    second: minibosses-elite_23
+  - first:
+      213: -3981518320867906644
+    second: minibosses-elite_24
+  - first:
+      213: -7985103811836175109
+    second: minibosses-elite_25
+  - first:
+      213: -5942556617937676730
+    second: minibosses-elite_26
+  - first:
+      213: -7006933632912229134
+    second: minibosses-elite_27
+  - first:
+      213: 2393202113178448391
+    second: minibosses-elite_28
+  - first:
+      213: -8815254431156135097
+    second: minibosses-elite_29
+  - first:
+      213: -5891065217392092731
+    second: minibosses-elite_30
+  - first:
+      213: -3251172826087358519
+    second: minibosses-elite_31
+  - first:
+      213: -8116553383346937218
+    second: minibosses-elite_32
+  - first:
+      213: 7550684254528803209
+    second: minibosses-elite_33
+  - first:
+      213: -8913382604794919995
+    second: minibosses-elite_34
+  - first:
+      213: -2939827811872746671
+    second: minibosses-elite_35
+  - first:
+      213: -6318266907202809918
+    second: libelula-alfa
+  - first:
+      213: 2397021631635530220
+    second: sapo-cururu
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: libelula-alfa
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 128
+        width: 781
+        height: 638
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cf021839b10158a0800000000000000
+      internalID: -6318266907202809918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sapo-cururu
+      rect:
+        serializedVersion: 2
+        x: 918
+        y: 114
+        width: 819
+        height: 637
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce12098597ee34120800000000000000
+      internalID: 2397021631635530220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      libelula-alfa: -6318266907202809918
+      minibosses-elite_0: 8246821072535687258
+      minibosses-elite_1: -819766497391613606
+      minibosses-elite_10: 3000644742962267817
+      minibosses-elite_11: -1859831535628901200
+      minibosses-elite_12: 3902494484174716714
+      minibosses-elite_13: -7616876021536953910
+      minibosses-elite_14: -1190833847226350776
+      minibosses-elite_15: 9018174754798855100
+      minibosses-elite_16: 3050535040748671699
+      minibosses-elite_17: 3477106907218590830
+      minibosses-elite_18: -198491632617154525
+      minibosses-elite_19: 3600387604989256485
+      minibosses-elite_2: 7199784329387594585
+      minibosses-elite_20: 8752427624596550378
+      minibosses-elite_21: -4809196925458673812
+      minibosses-elite_22: 2652121734067260899
+      minibosses-elite_23: -655275725764751929
+      minibosses-elite_24: -3981518320867906644
+      minibosses-elite_25: -7985103811836175109
+      minibosses-elite_26: -5942556617937676730
+      minibosses-elite_27: -7006933632912229134
+      minibosses-elite_28: 2393202113178448391
+      minibosses-elite_29: -8815254431156135097
+      minibosses-elite_3: -7297837396318191437
+      minibosses-elite_30: -5891065217392092731
+      minibosses-elite_31: -3251172826087358519
+      minibosses-elite_32: -8116553383346937218
+      minibosses-elite_33: 7550684254528803209
+      minibosses-elite_34: -8913382604794919995
+      minibosses-elite_35: -2939827811872746671
+      minibosses-elite_4: 8105482301180863335
+      minibosses-elite_5: 1248558365911284553
+      minibosses-elite_6: 6168424350796295345
+      minibosses-elite_7: -3052401452364736717
+      minibosses-elite_8: -3077779526768163087
+      minibosses-elite_9: -5290075376060739690
+      sapo-cururu: 2397021631635530220
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
