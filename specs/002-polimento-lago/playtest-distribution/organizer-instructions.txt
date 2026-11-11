@@ -1,0 +1,49 @@
+QUACKQUACK — T051 / GUIA DO ORGANIZADOR — NÃO ENVIAR AOS PARTICIPANTES
+
+1. Distribua P02–P05 entre quatro pessoas distintas, idealmente sem contato prévio
+   com o jogo. A mesma pessoa no Windows e no Android continua sendo um participante.
+   P01 já foi registrado; estes pacotes não transformam a rodada em concluída.
+2. Envie somente o ZIP da plataforma da pessoa. No Windows é indispensável enviar
+   o jogo completo, nunca só o EXE. No Android o ZIP contém APK e documentos.
+   Solicite que confira a origem e informe impedimentos de instalação, sem orientar
+   a desligar proteções. Nenhum pacote instala drivers ou requer Unity/ADB.
+3. Antes da primeira sessão, registre plataforma, entrada, familiaridade e se já
+   usou "QuackQuack Playtest 002". Em primeira instalação sem progresso prévio,
+   o próprio jogo cria seu perfil; registre esse estado. Se já houver progresso,
+   não o apague silenciosamente: combine e documente uma condição comparável.
+   Não envie o save de P01 nem saves pessoais junto aos pacotes.
+4. Primeira experiência sem explicar personagem, itens, terrenos, armas ou receitas.
+   Não envie este guia, o relatório com resultados de P01 ou o gabarito antes.
+   A ficha pede que o bloco A seja respondido antes das comparações do bloco B.
+   Não convide a reiniciar antes de a pessoa decidir o que faria espontaneamente.
+5. Colete a ficha por escrito. Diferencie autorrelato de observação direta.
+   Em teste remoto sem moderador, não alegue cronometragem/observação contínua dos
+   primeiros 120 segundos nem primeira oportunidade observada de reinício.
+   Registre tempos aproximados e desconhecidos como tais.
+6. Resposta genérica favorável não comprova identificação individual. Verifique os
+   nomes/funções descritos antes de explicar: Pato; XP/progressão; cura/vida;
+   pedras/bloqueio versus decoração; ameaças apresentadas. Familiaridade prévia
+   não deve ser omitida. Falhas de identificação exigem registro e reteste.
+7. Depois do bloco natural, confira cobertura das seis armas, seis passivas e três
+   evoluções na rodada. Bolhas/Sabão precisa de relato e condições antes/depois.
+   Se algo não aparecer, mantenha pendente e combine sessão complementar; não
+   aprove por inferência nem force build na experiência natural para preencher tabela.
+8. Use playtest-report.md e playtest-session-template.md no repositório para
+   consolidar critérios 1–15 e SC-001–009 da feature 002. Os SC da feature 001
+   têm outro significado; usar seu formulário completo se quiser avaliá-los.
+9. Falha técnica não é derrota normal. Preserve a tentativa, circunstância e versão
+   e vincule o reteste. Se mudar jogo/conteúdo/condição inicial, identifique a nova
+   revisão; não misture evidências como se a versão não tivesse mudado.
+10. Não solicitar gravação obrigatória. Peça autorização antes de coletar voz/imagem
+    ou logs/saves específicos; dados brutos ficam locais/restritos, resumo anonimizado
+    no repositório. Não enviar ao participante os dados de outro participante.
+11. Os pacotes identificam versão, commit de runtime e SHA-256 dos arquivos. Não
+    troque executáveis/APK silenciosamente. Guarde CHECKSUMS-SHA256.txt junto aos ZIPs.
+12. Android intermediário/de entrada e 8BitDo/S23 continuam pendentes. Uma instalação
+    remota bem-sucedida não aprova desempenho, hotplug ou quatro proporções. Registre
+    hardware observado sem extrapolar S23 para outras classes.
+
+Os pacotes são de produto normal, sem laboratório/cheats. O progresso fica no
+produto de playtest, não no produto habitual. A build Windows é a mesma usada por
+P01; a Android usa o mesmo runtime/conteúdo, com empacotamento próprio da plataforma.
+Não há envio automático de respostas nem upload configurado nestes documentos.

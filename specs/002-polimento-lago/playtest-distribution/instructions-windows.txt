@@ -1,0 +1,42 @@
+QUACKQUACK — TESTE T051 / WINDOWS
+
+1. Receba do organizador seu código de participante (P02, P03, P04 ou P05).
+   Não inclua nome, telefone ou outros dados pessoais nas respostas.
+2. Extraia TODO o arquivo ZIP para uma pasta. Não abra o jogo de dentro do ZIP
+   e não separe o executável dos arquivos que o acompanham.
+3. Dentro da pasta Jogo, abra QuackQuack.exe. Não é necessário instalar o Unity.
+   Esta versão é para Windows x64. Caso o sistema bloqueie o aplicativo ou
+   algum arquivo esteja ausente, pare e informe o organizador; não desative
+   proteções do computador para fazer o teste.
+4. Use teclado ou um controle que você já saiba conectar. Informe qual usou.
+   Consulte as orientações do próprio jogo; se não conseguir operar, registre
+   a dificuldade em vez de procurar uma explicação sobre as mecânicas.
+
+PRIMEIRA PARTIDA
+
+Jogue como faria normalmente. Você pode parar quando quiser.
+Não leia a ficha antes dessa primeira experiência, não procure receitas ou
+guias e não assista à sessão de outro participante antes da sua.
+Ao terminar, decida por conta própria se quer continuar jogando.
+Só depois de encerrar sua primeira sessão, abra FICHA_APOS_JOGAR.txt.
+
+Relate honestamente o que viu. Não há obrigação de vencer, jogar um tempo
+mínimo ou dizer que está tudo bom. Se algo não aparecer, escreva "não vi".
+Se o jogo fechar inesperadamente ou algum comando parar, anote o que estava
+fazendo e informe isso. Não apague a tentativa para substituí-la por outra.
+
+VERSÃO E PROGRESSO
+
+O título desta build é "QuackQuack Playtest 002". Ela tem progresso separado
+do produto habitual. Use apenas o pacote recebido para esta rodada; não
+importe saves nem apague progresso entre tentativas sem combinar antes.
+Se já usou esta versão de playtest, avise antes de iniciar.
+O arquivo VERSAO.txt identifica os arquivos recebidos. Não atualize a build
+no meio da sessão sem registrar a troca com o organizador.
+
+DEVOLUÇÃO
+
+Preencha a ficha em um editor de texto ou copie os campos para uma mensagem
+ao organizador. Não existe envio automático nem formulário online neste pacote.
+Vídeos, voz e imagens pessoais são opcionais e só devem ser gravados e
+compartilhados se você concordar. Relato escrito é suficiente para começar.

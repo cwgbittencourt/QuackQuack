@@ -230,6 +230,16 @@ registrados abaixo, sem converter ausência de ocorrência em sucesso.
 
 ## Ocorrências e decisão
 
+### Pacotes para participantes remotos
+
+Em 11/11/2026 o usuário solicitou pacotes Windows/Android com instruções e ficha
+na Área de Trabalho. Entregues em `C:/Users/lucas/Desktop/QuackQuack_T051_Para_Enviar`;
+identidade, hashes e verificações em [distribuição](playtest-distribution/README.md).
+Windows preserva o artefato de P01; Android foi compilado pelo pipeline normal a
+partir do mesmo runtime/conteúdo. Os ZIPs não contêm saves/logs de P01 nem o gabarito
+do organizador. Coleta remota usa autorrelato identificado, sem alegar observação
+contínua. Nenhum participante novo foi avaliado por preparar esses pacotes.
+
 Nenhum defeito novo relatado na sessão P01; nenhuma reprodução/correção/reteste novo
 necessário a partir desse relato. Ausência de relato não demonstra cobertura completa.
 Aprovações históricas T007/T014/T023/T032/T040/

@@ -1,0 +1,90 @@
+QUACKQUACK — T051 / FICHA APÓS JOGAR
+
+Abra e responda somente depois de sua primeira sessão livre.
+Não há respostas certas a adivinhar. "Não vi", "não fiz" e "não sei" são
+respostas válidas. Evite responder só "tudo funciona": dê exemplos do que viu.
+
+IDENTIFICAÇÃO DA SESSÃO
+
+Código do participante:
+Data, horário aproximado e fuso:
+Já conhecia o jogo, tinha visto imagens/sessões ou recebeu dicas? Quais?
+Arquivo/pacote recebido (veja VERSAO.txt):
+Primeira instalação/primeiro uso desta versão, ou já tinha progresso?
+Windows ou Android; versão do sistema:
+Modelo do celular OU CPU/GPU/RAM do PC (se souber):
+Teclado, toque ou controle (marca/modelo e USB/Bluetooth/receptor):
+Resolução/tamanho da tela, orientação e modo janela/tela cheia (se souber):
+
+BLOCO A — SUA PRIMEIRA EXPERIÊNCIA
+
+1. Quanto tempo jogou aproximadamente? Como a primeira partida terminou?
+   Conte também se houve problema técnico, interrupção ou ajuda de outra pessoa.
+Resposta:
+
+2. Depois desse término, você começou outra partida por vontade própria?
+   O que fez em seguida e por quê? Alguém tinha pedido para jogar novamente?
+Resposta:
+
+3. O que reconheceu e que função esperava de cada elemento? Use suas palavras.
+   Personagem que controlava:
+   Objetos que recolhia e o que esperava obter com cada um:
+   Objetos que impediam passagem:
+   Elementos que pareciam apenas decoração:
+   Inimigos/ameaças que encontrou:
+   Algum item foi ambíguo, confundiu-se com outro ou não apareceu?
+Resposta:
+
+4. Conte uma situação em que decidiu usar uma ação ou esperar. Qual foi sua
+   decisão, que alternativa considerou e por quê?
+Resposta:
+
+5. Se morreu, o que acha que causou a morte? Que sinal percebeu antes?
+   Se não morreu, escreva "não houve morte". Não consulte explicações antes.
+Resposta (uma por morte, quando possível):
+
+6. O que foi difícil de enxergar, entender ou controlar? Dê situação/instante
+   aproximado. Há algo que mudaria? O que fez você querer continuar ou parar?
+Resposta:
+
+BLOCO B — DEPOIS DE RESPONDER O BLOCO A
+
+Não é necessário abrir outra partida só para preencher lacunas. O organizador
+poderá combinar uma sessão complementar. Responda apenas sobre casos vistos.
+
+7. Quais armas, passivas e evoluções chegaram a aparecer nas suas partidas?
+   Você distinguia seus ataques e alcance? Quais eram confusos?
+Resposta:
+
+8. Se comparou Bolhas antes/depois de escolher Sabão Mágico, o tamanho mudou
+   de forma perceptível? Informe níveis, outras melhorias/relíquias e terreno
+   se lembrar. Se não comparou, escreva "não avaliado".
+Resposta:
+
+9. Como percebeu vida, Fôlego, nível e progresso? Algum texto/botão/efeito
+   ficou cortado, sobreposto ou difícil de ler? Em qual tela e orientação?
+Resposta:
+
+10. Se viu objetos de cura/XP, como se aproximaram e o que mudou ao recolhê-los?
+    Se encontrou inimigos especiais, como reconheceu sua importância e vida?
+Resposta:
+
+11. Quais menus usou e quais comandos funcionaram ou falharam? Se trocou
+    controle/toque ou desconectou um controle, descreva o que aconteceu.
+Resposta:
+
+12. Ficou preso ou saiu da arena sob pressão? Onde? Conseguiu voltar a mover
+    quando surgiu espaço? Se não tentou, escreva "não avaliado".
+Resposta:
+
+13. Outras tentativas: duração/resultado, equipamento escolhido, diferenças,
+    falhas, travadas, fechamentos e quaisquer ajudas recebidas.
+Resposta:
+
+RETORNO AO ORGANIZADOR
+
+Envie suas respostas com seu código e a versão do pacote, sem dados pessoais.
+Se anexar uma captura por vontade própria, confira se não contém notificações
+ou outras informações que não deseja compartilhar. Não é obrigatório gravar.
+Não envie arquivos de save/logs pessoais sem combinar especificamente o que
+será coletado. Este pacote não envia suas respostas automaticamente.

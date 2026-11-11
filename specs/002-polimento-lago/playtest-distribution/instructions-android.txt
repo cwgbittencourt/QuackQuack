@@ -1,0 +1,45 @@
+QUACKQUACK — TESTE T051 / ANDROID
+
+1. Receba do organizador seu código de participante (P02, P03, P04 ou P05).
+   Não inclua nome, telefone ou outros dados pessoais nas respostas.
+2. Extraia o ZIP no aparelho. Abra QuackQuack-T051-Android.apk pelo gerenciador
+   de arquivos. Não é necessário instalar o Unity.
+   Esta build exige Android API 25 ou superior e processador ARM64.
+3. O Android pode pedir sua autorização para instalar um APK recebido fora
+   da loja. Confira a origem com o organizador. Se o aparelho bloquear a
+   instalação, se não quiser autorizá-la ou se aparecer outro impedimento,
+   pare e informe o que apareceu; não desative proteções para contornar bloqueios.
+4. Abra "QuackQuack Playtest 002" e use o aparelho na horizontal.
+   Comece por toque ou por um controle que já consiga conectar ao Android.
+   Informe a entrada escolhida e o modelo do aparelho/controle.
+   Não é necessário conectar o celular a um computador.
+
+PRIMEIRA PARTIDA
+
+Jogue como faria normalmente. Você pode parar quando quiser.
+Não leia a ficha antes dessa primeira experiência, não procure receitas ou
+guias e não assista à sessão de outro participante antes da sua.
+Ao terminar, decida por conta própria se quer continuar jogando.
+Só depois de encerrar sua primeira sessão, abra FICHA_APOS_JOGAR.txt.
+
+Relate honestamente o que viu. Não há obrigação de vencer, jogar um tempo
+mínimo ou dizer que está tudo bom. Se algo não aparecer, escreva "não vi".
+Se o jogo fechar inesperadamente ou algum comando parar, anote o que estava
+fazendo e informe isso. Não apague a tentativa para substituí-la por outra.
+
+VERSÃO E PROGRESSO
+
+O título desta build é "QuackQuack Playtest 002"; o pacote Android é
+com.cemggames.quackquack.playtest002. Ele usa progresso separado do produto
+habitual. Não importe saves nem apague progresso entre tentativas sem combinar
+antes. Se esta versão já está instalada/usada, avise antes de atualizar;
+uma atualização pode conservar o progresso anterior.
+Não é preciso desinstalar seu jogo habitual. Confira VERSAO.txt para identificar
+a build e registre com o organizador qualquer troca de versão.
+
+DEVOLUÇÃO
+
+Preencha a ficha em um editor de texto ou copie os campos para uma mensagem
+ao organizador. Não existe envio automático nem formulário online neste pacote.
+Vídeos, voz e imagens pessoais são opcionais e só devem ser gravados e
+compartilhados se você concordar. Relato escrito é suficiente para começar.
